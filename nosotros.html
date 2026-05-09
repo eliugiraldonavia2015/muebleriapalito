@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nosotros — Muebleria Palito Outlet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#0c1f14;--bg2:#122a1c;--cream:#e8f5ec;--cream-dim:#9dc4aa;
+      --copper:#3a8c5c;--copper-lt:#5ab87c;--rule:rgba(160,220,180,.12);
+      --gold:#9e7e2a;--gold-dk:#6b4f18;--gold-lt:#7a6020;
+      --f-display:'Cormorant Garamond',Georgia,serif;--f-wide:'Bebas Neue',sans-serif;
+      --f-body:'DM Sans',sans-serif;
+      --ease-silk:cubic-bezier(.22,.88,.12,1);
+    }
+    body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-weight:300;overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    img{display:block;width:100%;height:100%;object-fit:cover}
+    button{border:none;background:none;font-family:var(--f-body);cursor:pointer}
+    body::after{content:'';position:fixed;inset:0;z-index:9990;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");opacity:.028}
+    ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--copper);border-radius:2px}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:0 clamp(24px,5vw,80px);height:72px;display:flex;align-items:center;justify-content:space-between;background:rgba(12,31,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--rule)}
+    .nav-logo img{height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,.5))}
+    .nav-links{display:flex;gap:40px;list-style:none;font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+    .nav-links li a{color:var(--cream-dim);transition:color .3s;position:relative}
+    .nav-links li a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:var(--copper);transition:width .4s var(--ease-silk)}
+    .nav-links li a:hover{color:var(--cream)}
+    .nav-links li a:hover::after{width:100%}
+    .nav-actions{display:flex;align-items:center;gap:20px}
+    .nav-icon{width:20px;height:20px;stroke:var(--cream-dim);transition:stroke .3s}
+    .nav-icon:hover{stroke:var(--cream)}
+
+    /* HERO */
+    .hero{position:relative;height:100vh;min-height:600px;overflow:hidden;display:flex;align-items:flex-end}
+    .hero-bg{position:absolute;inset:0}
+    .hero-bg img{width:100%;height:100%;object-fit:cover}
+    .hero-overlay{position:absolute;inset:0;background:linear-gradient(0deg,var(--bg) 0%,rgba(12,31,20,.6) 50%,rgba(12,31,20,.15) 100%)}
+    .hero-content{position:relative;z-index:2;padding:clamp(48px,8vw,100px) clamp(24px,5vw,80px);width:100%}
+    .hero-eyebrow{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:12px;margin-bottom:24px}
+    .hero-eyebrow::before{content:'';width:32px;height:1px;background:var(--gold)}
+    .hero-title{font-family:var(--f-display);font-size:clamp(56px,9vw,130px);font-weight:300;line-height:.9;max-width:800px}
+    .hero-title em{font-style:italic;color:var(--gold)}
+    .hero-sub{font-size:15px;color:var(--cream-dim);line-height:1.7;max-width:480px;margin-top:28px}
+
+    /* NUMBERS STRIP */
+    .numbers-strip{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);background:var(--bg2)}
+    .num-cell{padding:44px 40px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:6px}
+    .num-val{font-family:var(--f-display);font-size:clamp(44px,5vw,72px);font-weight:300;line-height:1}
+    .num-val em{color:var(--gold);font-style:italic}
+    .num-label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream-dim)}
+
+    /* STORY SPLIT */
+    .story{display:grid;grid-template-columns:1fr 1fr;min-height:600px}
+    .story-img{position:relative;overflow:hidden}
+    .story-img img{position:absolute;inset:0;transition:transform 1.2s var(--ease-silk)}
+    .story:hover .story-img img{transform:scale(1.04)}
+    .story-content{padding:clamp(60px,8vw,112px) clamp(40px,6vw,96px);display:flex;flex-direction:column;justify-content:center;gap:28px;background:var(--bg2)}
+    .sec-label{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--copper);display:flex;align-items:center;gap:10px}
+    .sec-label::before{content:'';width:24px;height:1px;background:var(--copper)}
+    .story-heading{font-family:var(--f-display);font-size:clamp(36px,4.5vw,64px);font-weight:300;line-height:1.0}
+    .story-heading em{font-style:italic;color:var(--gold)}
+    .story-body{font-size:15px;color:var(--cream-dim);line-height:1.8;max-width:420px}
+    .story-body p+p{margin-top:16px}
+
+    /* PULL QUOTE */
+    .quote-section{padding:clamp(80px,10vw,140px) clamp(24px,5vw,80px);display:flex;flex-direction:column;align-items:center;text-align:center;gap:24px;border-top:1px solid var(--rule)}
+    .quote-mark{font-family:var(--f-display);font-size:120px;color:var(--gold);line-height:.6;opacity:.3;user-select:none}
+    .quote-text{font-family:var(--f-display);font-size:clamp(26px,4vw,52px);font-weight:300;font-style:italic;line-height:1.25;max-width:760px;color:var(--cream)}
+    .quote-author{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--cream-dim)}
+    .quote-author span{color:var(--gold)}
+
+    /* VALUES */
+    .values-section{padding:clamp(80px,10vw,140px) clamp(24px,5vw,80px);border-top:1px solid var(--rule)}
+    .values-header{display:flex;flex-direction:column;gap:16px;margin-bottom:64px}
+    .values-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;border:1px solid var(--rule)}
+    .value-card{padding:48px 40px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:20px;transition:background .4s}
+    .value-card:hover{background:rgba(58,140,92,.06)}
+    .value-num{font-family:var(--f-wide);font-size:48px;color:rgba(160,220,180,.12);line-height:1}
+    .value-icon{width:40px;height:40px;stroke:var(--copper);margin-bottom:4px}
+    .value-name{font-family:var(--f-display);font-size:26px;font-weight:300}
+    .value-name em{font-style:italic;color:var(--gold)}
+    .value-desc{font-size:13px;color:var(--cream-dim);line-height:1.7}
+
+    /* TIMELINE */
+    .timeline-section{padding:clamp(80px,10vw,140px) clamp(24px,5vw,80px);border-top:1px solid var(--rule);background:var(--bg2)}
+    .timeline-header{display:flex;flex-direction:column;gap:16px;margin-bottom:72px}
+    .timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+    .timeline::before{content:'';position:absolute;top:24px;left:12.5%;right:12.5%;height:1px;background:linear-gradient(90deg,transparent,var(--copper),var(--copper),var(--copper),transparent)}
+    .tl-item{display:flex;flex-direction:column;align-items:center;text-align:center;gap:20px;padding:0 24px}
+    .tl-dot{width:12px;height:12px;border-radius:50%;background:var(--copper);border:3px solid var(--bg2);box-shadow:0 0 0 1px var(--copper);flex-shrink:0}
+    .tl-year{font-family:var(--f-wide);font-size:28px;color:var(--gold);letter-spacing:.06em}
+    .tl-title{font-family:var(--f-display);font-size:20px;font-weight:300}
+    .tl-desc{font-size:12px;color:var(--cream-dim);line-height:1.6}
+
+    /* CTA */
+    .cta-section{padding:clamp(80px,10vw,140px) clamp(24px,5vw,80px);display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;border-top:1px solid var(--rule)}
+    .cta-big-text{font-family:var(--f-wide);font-size:clamp(80px,14vw,180px);color:rgba(160,220,180,.04);line-height:.9;user-select:none}
+    .cta-content{display:flex;flex-direction:column;gap:24px}
+    .cta-heading{font-family:var(--f-display);font-size:clamp(36px,4vw,60px);font-weight:300;line-height:1}
+    .cta-heading em{font-style:italic;color:var(--gold)}
+    .cta-body{font-size:14px;color:var(--cream-dim);line-height:1.7;max-width:380px}
+    .cta-btns{display:flex;gap:16px;flex-wrap:wrap}
+
+    /* BUTTONS */
+    .btn-primary{display:inline-flex;align-items:center;gap:14px;padding:16px 32px;background:linear-gradient(105deg,#6b4f18 0%,#9e7e2a 45%,#7a6020 100%);background-size:200% 100%;background-position:100% 0;color:#f5e8c0;font-family:var(--f-body);font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;width:fit-content;position:relative;overflow:hidden;box-shadow:none;transition:background-position .55s var(--ease-silk),gap .4s var(--ease-silk),box-shadow .35s,transform .25s var(--ease-silk)}
+    .btn-primary::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,240,180,.28),transparent);transform:translateX(-110%);transition:transform .55s var(--ease-silk)}
+    .btn-primary:hover{background-position:0% 0;gap:22px;transform:translateY(-2px);box-shadow:0 8px 28px rgba(140,105,30,.5)}
+    .btn-primary:hover::before{transform:translateX(110%)}
+    .btn-primary svg{width:16px;height:16px;stroke:currentColor;transition:transform .35s}
+    .btn-primary:hover svg{transform:translateX(4px)}
+    .btn-ghost{display:inline-flex;align-items:center;gap:14px;padding:16px 32px;border:1px solid var(--rule);color:var(--cream-dim);font-size:11px;letter-spacing:.18em;text-transform:uppercase;transition:border-color .3s,color .3s,gap .4s var(--ease-silk);width:fit-content}
+    .btn-ghost:hover{border-color:var(--copper);color:var(--cream);gap:20px}
+    .btn-ghost svg{width:16px;height:16px;stroke:currentColor}
+
+    /* FOOTER */
+    footer{border-top:1px solid var(--rule);padding:clamp(60px,8vw,100px) clamp(24px,5vw,80px) 40px}
+    .footer-top{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:60px;margin-bottom:80px}
+    .footer-brand{display:flex;flex-direction:column;gap:20px}
+    .footer-tagline{font-size:14px;color:var(--cream-dim);line-height:1.6;max-width:280px}
+    .footer-socials{display:flex;gap:12px;margin-top:8px}
+    .social-link{width:38px;height:38px;border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;transition:border-color .3s,background .3s}
+    .social-link:hover{border-color:var(--copper)}
+    .social-link svg{width:16px;stroke:var(--cream-dim)}
+    .footer-col-title{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cream);margin-bottom:24px}
+    .footer-links{list-style:none;display:flex;flex-direction:column;gap:12px}
+    .footer-links li a{font-size:13px;color:var(--cream-dim);transition:color .3s}
+    .footer-links li a:hover{color:var(--cream)}
+    .footer-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:32px;border-top:1px solid var(--rule);flex-wrap:wrap;gap:16px}
+    .footer-copy{font-size:12px;color:var(--cream-dim)}
+    .footer-payments{display:flex;gap:12px}
+    .payment-badge{padding:6px 10px;border:1px solid var(--rule);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--cream-dim)}
+    .wa-float{position:fixed;bottom:32px;right:32px;z-index:800;width:52px;height:52px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.3);transition:transform .3s}
+    .wa-float:hover{transform:scale(1.1)}
+    .wa-float svg{width:26px;stroke:white}
+
+    @media(max-width:1024px){.story{grid-template-columns:1fr}.story-img{min-height:400px;position:relative}.story-img img{position:absolute}.timeline{grid-template-columns:1fr 1fr;gap:40px}.timeline::before{display:none}.cta-section{grid-template-columns:1fr}.cta-big-text{display:none}.values-grid{grid-template-columns:1fr 1fr}.numbers-strip{grid-template-columns:1fr 1fr}.footer-top{grid-template-columns:1fr 1fr}}
+    @media(max-width:640px){.nav-links{display:none}.values-grid{grid-template-columns:1fr}.timeline{grid-template-columns:1fr}.numbers-strip{grid-template-columns:1fr 1fr}.footer-top{grid-template-columns:1fr;gap:32px}}
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-logo"><img src="logo.png" alt="Mueblerias Palito"/></a>
+    <ul class="nav-links">
+      <li><a href="catalogo.html?cat=Salas">Salas</a></li>
+      <li><a href="catalogo.html?cat=Comedores">Comedores</a></li>
+      <li><a href="catalogo.html?cat=Dormitorios">Dormitorios</a></li>
+      <li><a href="catalogo.html?cat=Outdoors">Outdoors</a></li>
+      <li><a href="catalogo.html?cat=Decor">Decor</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="#" aria-label="Buscar"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg></a>
+      <a href="#" aria-label="Carrito"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"><img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1600&q=80" alt="Nosotros"/></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">Nuestra historia</div>
+      <h1 class="hero-title">Mas de <em>25 anos</em><br>creando hogares</h1>
+      <p class="hero-sub">Desde 1999, Muebleria Palito ha sido sinonimo de calidad, diseno y excelencia en muebles para el hogar en Ecuador, Panama y Peru.</p>
+    </div>
+  </section>
+
+  <!-- NUMBERS -->
+  <div class="numbers-strip">
+    <div class="num-cell"><div class="num-val"><span class="count-num" data-target="25">0</span><em>+</em></div><div class="num-label">Anos de trayectoria</div></div>
+    <div class="num-cell"><div class="num-val"><span class="count-num" data-target="120">0</span><em>k</em></div><div class="num-label">Hogares amueblados</div></div>
+    <div class="num-cell"><div class="num-val"><span class="count-num" data-target="3">0</span></div><div class="num-label">Paises presentes</div></div>
+    <div class="num-cell"><div class="num-val"><span class="count-num" data-target="98">0</span><em>%</em></div><div class="num-label">Clientes satisfechos</div></div>
+  </div>
+
+  <!-- STORY -->
+  <section class="story">
+    <div class="story-img"><img src="https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=900&q=80" alt="Historia"/></div>
+    <div class="story-content">
+      <div class="sec-label">Quienes somos</div>
+      <h2 class="story-heading">Calidad que se<br><em>siente y se ve</em></h2>
+      <div class="story-body">
+        <p>Nacimos en Guayaquil con un sueno simple: traer muebles de calidad real a precios justos. Lo que empezo como un pequeno local de barrio se convirtio en una de las cadenas de mueblerias mas reconocidas de Ecuador.</p>
+        <p>Hoy contamos con presencia en mas de 15 ciudades a traves de tres paises, con un equipo de mas de 300 personas comprometidas con entregar el mejor hogar posible a cada familia.</p>
+        <p>Cada pieza que llevamos a tu hogar pasa por controles de calidad rigurosos. Trabajamos con proveedores seleccionados y artesanos locales que comparten nuestra vision de excelencia.</p>
+      </div>
+      <a href="catalogo.html" class="btn-primary">
+        Ver catalogo
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- PULL QUOTE -->
+  <section class="quote-section">
+    <div class="quote-mark">"</div>
+    <blockquote class="quote-text">El diseno no es solo como se ve. Es como se <em style="color:var(--gold)">siente</em> cada manana al despertar en tu hogar.</blockquote>
+    <div class="quote-author">Fundador — <span>Muebleria Palito, 1999</span></div>
+  </section>
+
+  <!-- VALUES -->
+  <section class="values-section">
+    <div class="values-header">
+      <div class="sec-label">Nuestros valores</div>
+      <h2 style="font-family:var(--f-display);font-size:clamp(36px,5vw,72px);font-weight:300;line-height:1">Lo que nos <em style="font-style:italic;color:var(--gold)">define</em></h2>
+    </div>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-num">01</div>
+        <svg class="value-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <div class="value-name">Calidad <em>garantizada</em></div>
+        <div class="value-desc">Cada mueble pasa por 12 puntos de control antes de llegar a tu hogar. Garantia minima de 5 anos en estructura.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-num">02</div>
+        <svg class="value-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        <div class="value-name">Servicio <em>excepcional</em></div>
+        <div class="value-desc">Desde la compra hasta la instalacion, te acompanamos en cada paso. Armado incluido sin costo adicional.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-num">03</div>
+        <svg class="value-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <div class="value-name">Diseno <em>atemporal</em></div>
+        <div class="value-desc">Colecciones disenadas para durar decadas, no temporadas. Estetica que envejece con elegancia en cualquier hogar.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="timeline-section">
+    <div class="timeline-header">
+      <div class="sec-label">Nuestra trayectoria</div>
+      <h2 style="font-family:var(--f-display);font-size:clamp(36px,5vw,72px);font-weight:300;line-height:1">25 anos de <em style="font-style:italic;color:var(--gold)">historia</em></h2>
+    </div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-year">1999</div>
+        <div class="tl-title">El inicio</div>
+        <div class="tl-desc">Primer local en Guayaquil con 200m2 y un equipo de 5 personas con un sueno grande.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-year">2008</div>
+        <div class="tl-title">Expansion nacional</div>
+        <div class="tl-desc">Apertura de 8 sucursales en las principales ciudades del Ecuador. Mas de 50 empleados.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-year">2015</div>
+        <div class="tl-title">Internacionalizacion</div>
+        <div class="tl-desc">Llegada a Panama y Peru. Primera plataforma de ventas online con despacho a domicilio.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-year">2024</div>
+        <div class="tl-title">Palito Outlet</div>
+        <div class="tl-desc">Nuevo formato outlet con precios directos de fabrica y la misma calidad de siempre.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="cta-big-text">PALITO</div>
+    <div class="cta-content">
+      <div class="sec-label">Visitanos</div>
+      <h2 class="cta-heading">Encuentra tu<br><em>tienda mas cercana</em></h2>
+      <p class="cta-body">Mas de 15 tiendas en Ecuador, Panama y Peru. Nuestros asesores de diseno te acompanan a crear el hogar de tus suenos.</p>
+      <div class="cta-btns">
+        <a href="contacto.html" class="btn-primary">
+          Ver tiendas
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+        <a href="catalogo.html" class="btn-ghost">
+          Ver catalogo
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img src="logo.png" alt="Mueblerias Palito" style="height:52px;width:auto;filter:drop-shadow(0 1px 6px rgba(0,0,0,.4))"/>
+        <p class="footer-tagline">Muebleria de autor para quienes entienden que el diseno es una forma de vida.</p>
+        <div class="footer-socials">
+          <a href="#" class="social-link" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
+          <a href="#" class="social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/></svg></a>
+          <a href="#" class="social-link" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
+        </div>
+      </div>
+      <div><div class="footer-col-title">Empresa</div><ul class="footer-links"><li><a href="nosotros.html">Nosotros</a></li><li><a href="#">Privacidad</a></li><li><a href="#">Terminos</a></li><li><a href="#">Devoluciones</a></li></ul></div>
+      <div><div class="footer-col-title">Servicios</div><ul class="footer-links"><li><a href="#">Disenadores</a></li><li><a href="#">Hoteleros</a></li><li><a href="#">Garantia 60 noches</a></li></ul></div>
+      <div><div class="footer-col-title">Contacto</div><ul class="footer-links"><li><a href="contacto.html">Tiendas</a></li><li><a href="#">WhatsApp</a></li><li><a href="#">info@palito.com</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">2025 Muebleria Palito Outlet. Todos los derechos reservados.</span>
+      <div class="footer-payments"><span class="payment-badge">Visa</span><span class="payment-badge">Mastercard</span><span class="payment-badge">PayPal</span></div>
+    </div>
+  </footer>
+
+  <a href="#" class="wa-float" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    const reveals = ['.hero-eyebrow','.hero-title','.hero-sub','.num-cell','.story-content > *','.quote-mark','.quote-text','.quote-author','.value-card','.tl-item','.cta-content > *'];
+    reveals.forEach(sel => gsap.set(sel, { autoAlpha: 0 }));
+
+    gsap.from(['.hero-eyebrow','.hero-title','.hero-sub'], { y: 40, autoAlpha: 0, stagger: .14, duration: .85, ease: 'power3.out', delay: .2 });
+
+    gsap.to('.hero-bg img', { yPercent: 12, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 1.2 } });
+
+    ScrollTrigger.batch('.num-cell', { onEnter: els => gsap.to(els, { autoAlpha: 1, y: 0, stagger: .1, duration: .7, ease: 'power3.out' }), start: 'top 85%' });
+    gsap.utils.toArray('.num-cell').forEach(el => gsap.set(el, { y: 28 }));
+
+    ScrollTrigger.batch('.story-content > *', { onEnter: els => gsap.to(els, { autoAlpha: 1, x: 0, stagger: .1, duration: .75, ease: 'power3.out', clearProps: 'transform' }), start: 'top 80%' });
+    gsap.utils.toArray('.story-content > *').forEach(el => gsap.set(el, { x: 32 }));
+
+    gsap.from('.story-img img', { scale: 1.08, autoAlpha: 0, duration: 1.1, ease: 'power2.out', scrollTrigger: { trigger: '.story', start: 'top 82%' } });
+
+    gsap.from(['.quote-mark','.quote-text','.quote-author'], { y: 30, autoAlpha: 0, stagger: .15, duration: .85, ease: 'power3.out', scrollTrigger: { trigger: '.quote-section', start: 'top 80%' } });
+
+    ScrollTrigger.batch('.value-card', { onEnter: els => gsap.to(els, { autoAlpha: 1, y: 0, stagger: .12, duration: .75, ease: 'power3.out', clearProps: 'transform' }), start: 'top 84%' });
+    gsap.utils.toArray('.value-card').forEach(el => gsap.set(el, { y: 36 }));
+
+    ScrollTrigger.batch('.tl-item', { onEnter: els => gsap.to(els, { autoAlpha: 1, y: 0, stagger: .14, duration: .75, ease: 'power3.out', clearProps: 'transform' }), start: 'top 84%' });
+    gsap.utils.toArray('.tl-item').forEach(el => gsap.set(el, { y: 28 }));
+
+    ScrollTrigger.batch('.cta-content > *', { onEnter: els => gsap.to(els, { autoAlpha: 1, x: 0, stagger: .12, duration: .8, ease: 'power3.out', clearProps: 'transform' }), start: 'top 80%' });
+    gsap.utils.toArray('.cta-content > *').forEach(el => gsap.set(el, { x: 32 }));
+
+    document.querySelectorAll('.count-num').forEach(el => {
+      const target = +el.dataset.target, obj = { val: 0 };
+      gsap.to(obj, { val: target, duration: 1.8, ease: 'power2.out', snap: { val: 1 }, onUpdate() { el.textContent = String(Math.round(obj.val)); }, scrollTrigger: { trigger: el, start: 'top 86%', once: true } });
+    });
+  </script>
+</body>
+</html>

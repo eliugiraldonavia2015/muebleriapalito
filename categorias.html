@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Categorías — Muebleria Palito Outlet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js"></script>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#0c1f14;--bg2:#122a1c;--cream:#e8f5ec;--cream-dim:#9dc4aa;
+      --copper:#3a8c5c;--copper-lt:#5ab87c;--white:#f0faf3;--rule:rgba(160,220,180,.12);
+      --f-display:'Cormorant Garamond',Georgia,serif;--f-wide:'Bebas Neue',sans-serif;
+      --f-body:'DM Sans',sans-serif;
+      --ease-silk:cubic-bezier(.22,.88,.12,1);--ease-snappy:cubic-bezier(.76,0,.18,1);
+    }
+    body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-weight:300;overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    img{display:block;width:100%;height:100%;object-fit:cover}
+
+    /* NOISE */
+    body::after{content:'';position:fixed;inset:0;z-index:9990;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");opacity:.028}
+    ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--copper);border-radius:2px}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:0 clamp(24px,5vw,80px);height:72px;display:flex;align-items:center;justify-content:space-between;background:rgba(12,31,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--rule)}
+    .nav-logo{display:flex;align-items:center}
+    .nav-logo img{height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,.5))}
+    .nav-links{display:flex;gap:40px;list-style:none;font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+    .nav-links li a{color:var(--cream-dim);transition:color .3s;position:relative}
+    .nav-links li a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:var(--copper);transition:width .4s var(--ease-silk)}
+    .nav-links li a:hover{color:var(--cream)}
+    .nav-links li a:hover::after{width:100%}
+    .nav-actions{display:flex;align-items:center;gap:20px}
+    .nav-icon{width:20px;height:20px;stroke:var(--cream-dim);transition:stroke .3s}
+    .nav-icon:hover{stroke:var(--cream)}
+    .nav-cart-count{background:var(--copper);color:var(--bg);font-size:10px;font-weight:500;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-left:-12px;margin-top:-8px}
+
+    /* HERO */
+    #cats-hero{
+      padding:160px clamp(24px,5vw,80px) 72px;
+      position:relative;overflow:hidden;
+      border-bottom:1px solid var(--rule);
+    }
+    .cats-hero-watermark{
+      position:absolute;
+      font-family:var(--f-wide);
+      font-size:clamp(100px,18vw,240px);
+      color:rgba(160,220,180,.03);
+      top:50%;right:clamp(24px,5vw,80px);
+      transform:translateY(-50%);
+      pointer-events:none;
+      letter-spacing:.06em;
+      line-height:1;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .cats-hero-inner{
+      position:relative;z-index:1;
+      display:grid;
+      grid-template-columns:1fr auto;
+      align-items:end;
+      gap:40px;
+    }
+    .cats-hero-left{display:flex;flex-direction:column;gap:20px;max-width:640px}
+    .cats-eyebrow{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--copper);display:flex;align-items:center;gap:12px}
+    .cats-eyebrow::before{content:'';width:28px;height:1px;background:var(--copper)}
+    .cats-hero-title{
+      font-family:var(--f-display);
+      font-size:clamp(56px,8vw,108px);
+      font-weight:300;
+      line-height:.9;
+      letter-spacing:-.01em;
+    }
+    .cats-hero-title em{font-style:italic;color:var(--copper-lt)}
+    .cats-hero-sub{font-size:15px;color:var(--cream-dim);line-height:1.7;max-width:420px}
+    .cats-stats{
+      display:flex;align-items:center;gap:0;
+      border-top:1px solid var(--rule);
+      padding-top:24px;margin-top:4px;
+      width:fit-content;
+    }
+    .cats-stat{display:flex;flex-direction:column;gap:4px;padding-right:32px;margin-right:32px;border-right:1px solid var(--rule)}
+    .cats-stat:last-child{border-right:none;margin-right:0;padding-right:0}
+    .cats-stat-num{font-family:var(--f-display);font-size:clamp(28px,3vw,40px);font-weight:300;line-height:1;color:var(--cream)}
+    .cats-stat-label{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--cream-dim)}
+    .cats-hero-right{display:flex;flex-direction:column;align-items:flex-end;gap:12px;padding-bottom:4px;flex-shrink:0}
+    .cats-num-badge{font-family:var(--f-wide);font-size:clamp(80px,12vw,160px);color:rgba(232,245,236,.05);line-height:1;user-select:none}
+
+    /* SECTION DIVIDER */
+    .cats-section-label{
+      display:flex;align-items:center;gap:16px;
+      padding:0 clamp(24px,5vw,80px);
+      margin-bottom:16px;
+      font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--copper);
+    }
+    .cats-section-label::before{content:'';width:28px;height:1px;background:var(--copper)}
+    .cats-section-label::after{content:'';flex:1;height:1px;background:var(--rule)}
+
+    /* FEATURED (con subcategorías) */
+    #cats-featured{padding:56px clamp(24px,5vw,80px) 0}
+    .featured-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+    }
+    .feat-card{
+      position:relative;overflow:hidden;background:var(--bg2);
+      height:340px;
+      display:block;
+    }
+    .feat-card-img{position:absolute;inset:0;transition:transform 1.3s var(--ease-silk)}
+    .feat-card:hover .feat-card-img{transform:scale(1.07)}
+    .feat-card-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(12,31,20,.92) 0%,rgba(12,31,20,.08) 65%);transition:background .5s}
+    .feat-card:hover .feat-card-overlay{background:linear-gradient(0deg,rgba(12,31,20,.96) 0%,rgba(12,31,20,.2) 70%)}
+    .feat-card-info{position:absolute;bottom:0;left:0;right:0;padding:22px 22px 20px}
+    .feat-card-name{font-family:var(--f-display);font-size:clamp(22px,2.2vw,32px);font-weight:300;line-height:1;color:var(--cream);margin-bottom:10px}
+    .sub-pills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+    .sub-pill{
+      font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+      color:var(--cream-dim);border:1px solid rgba(160,220,180,.18);
+      padding:3px 8px;transition:border-color .3s,color .3s,background .3s;
+      cursor:pointer;
+    }
+    .feat-card:hover .sub-pill{border-color:rgba(58,140,92,.4);color:var(--cream-dim)}
+    .sub-pill:hover{background:rgba(58,140,92,.15);color:var(--cream)!important;border-color:var(--copper)!important}
+    .feat-card-foot{display:flex;align-items:center;justify-content:space-between}
+    .feat-card-count{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream-dim)}
+    .feat-card-arrow{
+      width:32px;height:32px;border:1px solid rgba(232,245,236,.2);
+      display:flex;align-items:center;justify-content:center;
+      transition:background .3s,border-color .3s,transform .45s var(--ease-silk);flex-shrink:0;
+    }
+    .feat-card:hover .feat-card-arrow{background:var(--copper);border-color:var(--copper);transform:rotate(-45deg)}
+    .feat-card-arrow svg{width:13px;stroke:var(--cream)}
+
+    /* REGULAR (sin subcategorías) */
+    #cats-all{padding:40px clamp(24px,5vw,80px) clamp(80px,10vw,140px)}
+    .regular-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+    }
+    .reg-card{
+      position:relative;overflow:hidden;background:var(--bg2);
+      height:220px;display:block;
+    }
+    .reg-card-img{position:absolute;inset:0;transition:transform 1.2s var(--ease-silk)}
+    .reg-card:hover .reg-card-img{transform:scale(1.07)}
+    .reg-card-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(12,31,20,.88) 0%,rgba(12,31,20,.08) 60%);transition:background .5s}
+    .reg-card:hover .reg-card-overlay{background:linear-gradient(0deg,rgba(12,31,20,.95) 0%,rgba(12,31,20,.2) 70%)}
+    .reg-card-info{position:absolute;bottom:0;left:0;right:0;padding:18px 18px 16px;display:flex;align-items:flex-end;justify-content:space-between}
+    .reg-card-name{font-family:var(--f-display);font-size:clamp(16px,1.8vw,24px);font-weight:300;line-height:1.1;color:var(--cream)}
+    .reg-card-count{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-dim);margin-top:4px}
+    .reg-card-arrow{
+      width:30px;height:30px;border:1px solid rgba(232,245,236,.2);
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;
+      transition:background .3s,border-color .3s,transform .45s var(--ease-silk);
+    }
+    .reg-card:hover .reg-card-arrow{background:var(--copper);border-color:var(--copper);transform:rotate(-45deg)}
+    .reg-card-arrow svg{width:12px;stroke:var(--cream)}
+
+    /* BACK BUTTON */
+    .back-btn{
+      display:inline-flex;align-items:center;gap:10px;
+      font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+      color:var(--cream-dim);border:1px solid var(--rule);
+      padding:14px 24px;
+      transition:border-color .3s,color .3s,gap .4s var(--ease-silk);
+    }
+    .back-btn:hover{border-color:var(--copper);color:var(--cream);gap:16px}
+    .back-btn svg{width:14px;stroke:currentColor}
+
+    /* FOOTER */
+    footer{border-top:1px solid var(--rule);padding:clamp(60px,8vw,100px) clamp(24px,5vw,80px) 40px}
+    .footer-top{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:60px;margin-bottom:80px}
+    .footer-brand{display:flex;flex-direction:column;gap:20px}
+    .footer-tagline{font-size:14px;color:var(--cream-dim);line-height:1.6;max-width:280px}
+    .footer-socials{display:flex;gap:12px;margin-top:8px}
+    .social-link{width:38px;height:38px;border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;transition:border-color .3s,background .3s}
+    .social-link:hover{border-color:var(--copper);background:rgba(58,140,92,.1)}
+    .social-link svg{width:16px;stroke:var(--cream-dim)}
+    .footer-col-title{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cream);margin-bottom:24px}
+    .footer-links{list-style:none;display:flex;flex-direction:column;gap:12px}
+    .footer-links li a{font-size:13px;color:var(--cream-dim);transition:color .3s}
+    .footer-links li a:hover{color:var(--cream)}
+    .footer-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:32px;border-top:1px solid var(--rule);flex-wrap:wrap;gap:16px}
+    .footer-copy{font-size:12px;color:var(--cream-dim)}
+    .footer-payments{display:flex;align-items:center;gap:12px}
+    .payment-badge{padding:6px 10px;border:1px solid var(--rule);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--cream-dim)}
+    .wa-float{position:fixed;bottom:32px;right:32px;z-index:800;width:52px;height:52px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.3);transition:transform .3s var(--ease-silk)}
+    .wa-float:hover{transform:scale(1.1)}
+    .wa-float svg{width:26px;stroke:white}
+
+    @media(max-width:1024px){
+      .featured-grid{grid-template-columns:repeat(2,1fr)}
+      .regular-grid{grid-template-columns:repeat(3,1fr)}
+      .cats-hero-inner{grid-template-columns:1fr}
+      .cats-hero-right{display:none}
+      .footer-top{grid-template-columns:1fr 1fr;gap:32px}
+    }
+    @media(max-width:640px){
+      .featured-grid{grid-template-columns:1fr 1fr}
+      .regular-grid{grid-template-columns:1fr 1fr}
+      .feat-card{height:260px}
+      .reg-card{height:180px}
+      .nav-links{display:none}
+      .footer-top{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo"><img src="logo.png" alt="Mueblerias Palito"/></a>
+    <ul class="nav-links">
+      <li><a href="catalogo.html?cat=Salas">Salas</a></li>
+      <li><a href="catalogo.html?cat=Comedores">Comedores</a></li>
+      <li><a href="catalogo.html?cat=Dormitorios">Dormitorios</a></li>
+      <li><a href="catalogo.html?cat=Entretenimiento">Entretenimiento</a></li>
+      <li><a href="catalogo.html?cat=Bar">Bar</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="#" aria-label="Buscar">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+      </a>
+      <a href="#" aria-label="Cuenta">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </a>
+      <a href="#" style="display:flex;align-items:flex-start" aria-label="Carrito">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="nav-cart-count">0</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section id="cats-hero">
+    <div class="cats-hero-watermark">16</div>
+    <div class="cats-hero-inner">
+      <div class="cats-hero-left">
+        <div class="cats-eyebrow">Muebleria Palito Outlet</div>
+        <h1 class="cats-hero-title">Todas las<br><em>Categorías</em></h1>
+        <p class="cats-hero-sub">Encuentra exactamente lo que buscas. Desde salas hasta bares, cada pieza diseñada para durar.</p>
+        <div class="cats-stats">
+          <div class="cats-stat">
+            <span class="cats-stat-num">16</span>
+            <span class="cats-stat-label">Categorías</span>
+          </div>
+          <div class="cats-stat">
+            <span class="cats-stat-num">425+</span>
+            <span class="cats-stat-label">Productos</span>
+          </div>
+          <div class="cats-stat">
+            <span class="cats-stat-num">3</span>
+            <span class="cats-stat-label">Países</span>
+          </div>
+        </div>
+      </div>
+      <div class="cats-hero-right">
+        <a href="index.html" class="back-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Volver al inicio
+        </a>
+        <div class="cats-num-badge">16</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FEATURED (con subcategorías) ── -->
+  <section id="cats-featured">
+    <div class="cats-section-label">Colecciones con tallas</div>
+    <div class="featured-grid" id="featuredGrid">
+
+      <a href="catalogo.html?cat=Salas" class="feat-card">
+        <div class="feat-card-img"><img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=700&q=75" alt="Salas"/></div>
+        <div class="feat-card-overlay"></div>
+        <div class="feat-card-info">
+          <div class="feat-card-name">Salas</div>
+          <div class="sub-pills">
+            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Salas&sub=Grandes'">Grandes</span>
+            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Salas&sub=Medianas'">Medianas</span>
+            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Salas&sub=Pequeñas'">Pequeñas</span>
+          </div>
+          <div class="feat-card-foot">
+            <span class="feat-card-count">48 productos</span>
+            <div class="feat-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+          </div>
+        </div>
+      </a>
+
+      <a href="catalogo.html?cat=Comedores" class="feat-card">
+        <div class="feat-card-img"><img src="https://images.unsplash.com/photo-1617806118233-18e1de247200?w=700&q=75" alt="Comedores"/></div>
+        <div class="feat-card-overlay"></div>
+        <div class="feat-card-info">
+          <div class="feat-card-name">Comedores</div>
+          <div class="sub-pills">
+            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Comedores&sub=4Ptos'">4 Puestos</span>
+            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Comedores&sub=6Ptos'">6 Puestos</span>
+            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Comedores&sub=8Ptos'">8 Puestos</span>
+          </div>
+          <div class="feat-card-foot">
+            <span class="feat-card-count">32 productos</span>
+            <div class="feat-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+          </div>
+        </div>
+      </a>
+
+      <a href="catalogo.html?cat=Dormitorios" class="feat-card">
+        <div class="feat-card-img"><img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=700&q=75" alt="Dormitorios"/></div>
+        <div class="feat-card-overlay"></div>
+        <div class="feat-card-info">
+          <div class="feat-card-name">Dormitorios</div>
+          <div class="sub-pills">
+            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Dormitorios&sub=1.5Plz'">1.5 Plz</span>
+            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Dormitorios&sub=2Plz'">2 Plz</span>
+            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Dormitorios&sub=2.5Plz'">2.5 Plz</span>
+            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Dormitorios&sub=3Plz'">3 Plz</span>
+          </div>
+          <div class="feat-card-foot">
+            <span class="feat-card-count">56 productos</span>
+            <div class="feat-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+          </div>
+        </div>
+      </a>
+
+      <a href="catalogo.html?cat=Camas" class="feat-card">
+        <div class="feat-card-img"><img src="https://images.unsplash.com/photo-1540518614846-7eded433c457?w=700&q=75" alt="Camas"/></div>
+        <div class="feat-card-overlay"></div>
+        <div class="feat-card-info">
+          <div class="feat-card-name">Camas</div>
+          <div class="sub-pills">
+            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Camas&sub=1.5Plz'">1.5 Plz</span>
+            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Camas&sub=2Plz'">2 Plz</span>
+            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Camas&sub=2.5Plz'">2.5 Plz</span>
+            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Camas&sub=3Plz'">3 Plz</span>
+          </div>
+          <div class="feat-card-foot">
+            <span class="feat-card-count">44 productos</span>
+            <div class="feat-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+          </div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ── TODAS LAS CATEGORÍAS ── -->
+  <section id="cats-all">
+    <div class="cats-section-label">Todas las categorías</div>
+    <div class="regular-grid" id="regularGrid">
+
+      <a href="catalogo.html?cat=Comodas" class="reg-card">
+        <div class="reg-card-img"><img src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=500&q=75" alt="Cómodas"/></div>
+        <div class="reg-card-overlay"></div>
+        <div class="reg-card-info">
+          <div><div class="reg-card-name">Cómodas</div><div class="reg-card-count">18 productos</div></div>
+          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </div>
+      </a>
+
+      <a href="catalogo.html?cat=Coquetas" class="reg-card">
+        <div class="reg-card-img"><img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=500&q=75" alt="Coquetas"/></div>
+        <div class="reg-card-overlay"></div>
+        <div class="reg-card-info">
+          <div><div class="reg-card-name">Coquetas /<br>Peinadoras</div><div class="reg-card-count">12 productos</div></div>
+          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </div>
+      </a>
+
+      <a href="catalogo.html?cat=CamaCuna" class="reg-card">
+        <div class="reg-card-img"><img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=500&q=75" alt="Cama Cuna"/></div>
+        <div class="reg-card-overlay"></div>
+        <div class="reg-card-info">
+          <div><div class="reg-card-name">Cama Cuna</div><div class="reg-card-count">8 productos</div></div>
+          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </div>
+      </a>
+
+      <a href="catalogo.html?cat=Roperos" class="reg-card">
+        <div class="reg-card-img"><img src="https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=500&q=75" alt="Roperos"/></div>
+        <div class="reg-card-overlay"></div>
+        <div class="reg-card-info">
+          <div><div class="reg-card-name">Roperos</div><div class="reg-card-count">24 productos</div></div>
+          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </div>
+      </a>
+
+      <a href="catalogo.html?cat=Entretenimiento" class="reg-card">
+        <div class="reg-card-img"><img src="https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=500&q=75" alt="Centro de Entretenimiento"/></div>
+        <div class="reg-card-overlay"></div>
+        <div class="reg-card-info">
+          <div><div class="reg-card-name">Centro de<br>Entretenimiento</div><div class="reg-card-count">28 productos</div></div>
+          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </div>
+      </a>
+
+      <a href="catalogo.html?cat=BasesTv" class="reg-card">
+        <div class="reg-card-img"><img src="https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=500&q=75" alt="Bases de TV"/></div>
+        <div class="reg-card-overlay"></div>
+        <div class="reg-card-info">
+          <div><div class="reg-card-name">Bases de TV</div><div class="reg-card-count">15 productos</div></div>
+          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </div>
+      </a>
+
+      <a href="catalogo.html?cat=Consolas" class="reg-card">
+        <div class="reg-card-img"><img src="https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=500&q=75" alt="Consolas"/></div>
+        <div class="reg-card-overlay"></div>
+        <div class="reg-card-info">
+          <div><div class="reg-card-name">Consolas /<br>Recibidor</div><div class="reg-card-count">11 productos</div></div>
+          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </div>
+      </a>
+
+      <a href="catalogo.html?cat=Bar" class="reg-card">
+        <div class="reg-card-img"><img src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=500&q=75" alt="Bar"/></div>
+        <div class="reg-card-overlay"></div>
+        <div class="reg-card-info">
+          <div><div class="reg-card-name">Bar</div><div class="reg-card-count">19 productos</div></div>
+          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </div>
+      </a>
+
+      <a href="catalogo.html?cat=Bufetera" class="reg-card">
+        <div class="reg-card-img"><img src="https://images.unsplash.com/photo-1617806118233-18e1de247200?w=500&q=75" alt="Bufetera"/></div>
+        <div class="reg-card-overlay"></div>
+        <div class="reg-card-info">
+          <div><div class="reg-card-name">Bufetera</div><div class="reg-card-count">9 productos</div></div>
+          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </div>
+      </a>
+
+      <a href="catalogo.html?cat=Aparador" class="reg-card">
+        <div class="reg-card-img"><img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&q=75" alt="Aparador"/></div>
+        <div class="reg-card-overlay"></div>
+        <div class="reg-card-info">
+          <div><div class="reg-card-name">Aparador</div><div class="reg-card-count">14 productos</div></div>
+          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </div>
+      </a>
+
+      <a href="catalogo.html?cat=Escritorios" class="reg-card">
+        <div class="reg-card-img"><img src="https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=500&q=75" alt="Escritorios"/></div>
+        <div class="reg-card-overlay"></div>
+        <div class="reg-card-info">
+          <div><div class="reg-card-name">Escritorios</div><div class="reg-card-count">22 productos</div></div>
+          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </div>
+      </a>
+
+      <a href="catalogo.html?cat=SofaCama" class="reg-card">
+        <div class="reg-card-img"><img src="https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=500&q=75" alt="Sofá Cama"/></div>
+        <div class="reg-card-overlay"></div>
+        <div class="reg-card-info">
+          <div><div class="reg-card-name">Sofá Cama</div><div class="reg-card-count">16 productos</div></div>
+          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img src="logo.png" alt="Mueblerias Palito" style="height:52px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 6px rgba(0,0,0,.4))"/>
+        <p class="footer-tagline">Muebleria de autor para quienes entienden que el diseño es una forma de vida.</p>
+        <div class="footer-socials">
+          <a href="#" class="social-link" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
+          <a href="#" class="social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor"/></svg></a>
+          <a href="#" class="social-link" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Empresa</div>
+        <ul class="footer-links">
+          <li><a href="nosotros.html">Nosotros</a></li>
+          <li><a href="#">Política de privacidad</a></li>
+          <li><a href="#">Términos y condiciones</a></li>
+          <li><a href="#">Devoluciones</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Servicios</div>
+        <ul class="footer-links">
+          <li><a href="#">Programa diseñadores</a></li>
+          <li><a href="#">Proyectos hoteleros</a></li>
+          <li><a href="#">Garantía 60 noches</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Contacto</div>
+        <ul class="footer-links">
+          <li><a href="contacto.html">Tiendas físicas</a></li>
+          <li><a href="#">WhatsApp: 095 862 7206</a></li>
+          <li><a href="#">info@palito.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">2025 Muebleria Palito Outlet. Todos los derechos reservados.</span>
+      <div class="footer-payments">
+        <span class="payment-badge">Visa</span>
+        <span class="payment-badge">Mastercard</span>
+        <span class="payment-badge">PayPal</span>
+        <span class="payment-badge">Amex</span>
+      </div>
+    </div>
+  </footer>
+
+  <a href="#" class="wa-float" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+    // Hero entrance
+    const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    heroTl
+      .from('.cats-eyebrow',    { x: -24, autoAlpha: 0, duration: .6 })
+      .from('.cats-hero-title', { y: 40,  autoAlpha: 0, duration: .85 }, '-=.3')
+      .from('.cats-hero-sub',   { y: 20,  autoAlpha: 0, duration: .65 }, '-=.5')
+      .from('.cats-stat',       { y: 16,  autoAlpha: 0, stagger: .1, duration: .55 }, '-=.4')
+      .from('.back-btn',        { x: 20,  autoAlpha: 0, duration: .55 }, '-=.6')
+      .from('.cats-num-badge',  { autoAlpha: 0, duration: 1.2 }, '-=.8');
+
+    // Featured cards entrance
+    gsap.set('.feat-card', { autoAlpha: 0, y: 44 });
+    ScrollTrigger.batch('.feat-card', {
+      onEnter: els => gsap.to(els, { autoAlpha: 1, y: 0, duration: .75, stagger: .1, ease: 'power3.out', clearProps: 'transform' }),
+      start: 'top 86%'
+    });
+
+    // Regular cards entrance
+    gsap.set('.reg-card', { autoAlpha: 0, y: 32 });
+    ScrollTrigger.batch('.reg-card', {
+      onEnter: els => gsap.to(els, { autoAlpha: 1, y: 0, duration: .65, stagger: .07, ease: 'power3.out', clearProps: 'transform' }),
+      start: 'top 88%'
+    });
+
+    // Section labels
+    gsap.set('.cats-section-label', { autoAlpha: 0, x: -16 });
+    ScrollTrigger.batch('.cats-section-label', {
+      onEnter: els => gsap.to(els, { autoAlpha: 1, x: 0, duration: .6, ease: 'power3.out', clearProps: 'transform' }),
+      start: 'top 90%'
+    });
+  </script>
+</body>
+</html>
