@@ -28,7 +28,7 @@ async function getCategories() {
 
 async function getProducts() {
   let q = collection(db, "products");
-  q = query(q, orderBy("createdAt", "desc"));
+  q = query(q, orderBy("displayOrder", "asc"));
   const snap = await getDocs(q);
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }

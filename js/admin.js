@@ -675,6 +675,25 @@ function renderDashboard() {
 
 // ─── SEED ───
 async function runSeed() {
+
+  // Clean: delete all existing products before re-seeding
+  var prodsSnap = await getDocs(collection(db, COL_PRODUCTS));
+  if (!prodsSnap.empty) {
+    var bsize = 400;
+    var pids = prodsSnap.docs.map(d => d.ref);
+    for (var i = 0; i < pids.length; i += bsize) {
+      var del = writeBatch(db);
+      pids.slice(i, i + bsize).forEach(r => del.delete(r));
+      await del.commit();
+    }
+  }
+  // Clean: delete all existing categories before re-seeding
+  var catsSnap = await getDocs(collection(db, COL_CATEGORIES));
+  if (!catsSnap.empty) {
+    var del = writeBatch(db);
+    catsSnap.docs.map(d => d.ref).forEach(r => del.delete(r));
+    await del.commit();
+  }
   const catNameMap = {};
 
   // Batch 1: categories (16) + settings (1) = 17 ops
@@ -698,15 +717,25 @@ async function runSeed() {
   b1.set(doc(db, COL_SETTINGS, "store"), { ...SETTINGS, catalogVersion: 2, updatedAt: serverTimestamp() });
   await b1.commit();
 
-  // Batch 2 + 3: 320 products with deterministic IDs — no delete needed, set() overwrites
-  for (let start = 0; start < PRODUCTS.length; start += 490) {
-    const b = writeBatch(db);
-    PRODUCTS.slice(start, start + 490).forEach((prod, j) => {
-      const catName = catNameMap[prod.categoryId] || prod.categoryId || "";
-      b.set(doc(db, COL_PRODUCTS, "p" + (start + j)), {
+  // Seed products with per-category displayOrder (Salas 0..19, Comedores 0..19, etc.)
+  var catOrd = {};
+  for (var pi = 0; pi < PRODUCTS.length; pi += 1) {
+    var pr = PRODUCTS[pi];
+    var cid = pr.categoryId;
+    catOrd[cid] = (catOrd[cid] || 0) + 1;
+  }
+  var catCur = {};
+  for (var si = 0; si < PRODUCTS.length; si += 490) {
+    var b = writeBatch(db);
+    PRODUCTS.slice(si, si + 490).forEach(function(prod) {
+      var do_ = (catCur[prod.categoryId] = (catCur[prod.categoryId] || 0) + 1);
+      var docId = "p-" + prod.categoryId + "-" + String(do_).padStart(3, "0");
+      var cn = catNameMap[prod.categoryId] || prod.categoryId || "";
+      b.set(doc(db, COL_PRODUCTS, docId), {
         ...prod,
         imageUrl: prod.primaryImage || prod.imageUrl,
-        category: catName,
+        category: cn,
+        displayOrder: do_,
         available: true,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
