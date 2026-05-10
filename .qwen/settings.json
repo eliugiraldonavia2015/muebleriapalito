@@ -50,7 +50,8 @@
       "Bash(block_end *)",
       "Bash(git checkout *)",
       "Bash(file *)",
-      "Bash(cp *)"
+      "Bash(cp *)",
+      "Bash(od *)"
     ]
   },
   "$version": 4

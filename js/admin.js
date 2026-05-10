@@ -152,15 +152,9 @@ async function runLoader() {
 
   await tl;
 
-  // Load settings first (single doc) to check if seed is needed
-  setLoaderStatus(statusEl, barEl, gsap, "Verificando catalogo...", "40%");
-  await loadSettings();
-
-  if (!settings.catalogVersion) {
-    setLoaderStatus(statusEl, barEl, gsap, "Inicializando catalogo...", "60%");
-    await runSeed();
-    await loadSettings();
-  }
+  // Always sync seed-data.js catalog to Firestore on every admin load
+  setLoaderStatus(statusEl, barEl, gsap, "Sincronizando catálogo...", "40%");
+  await runSeed();
 
   setLoaderStatus(statusEl, barEl, gsap, "Cargando categorias...", "75%");
   await loadCategories();
