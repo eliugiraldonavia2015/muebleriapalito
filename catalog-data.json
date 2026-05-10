@@ -1,0 +1,466 @@
+{
+  "catalog": "Muebleria Palito Outlet",
+  "collectionYear": 2025,
+  "copyYear": "2025 Muebleria Palito Outlet. Todos los derechos reservados.",
+  "categories": [
+    {
+      "id": "Salas",
+      "name": "Salas",
+      "productCount": 48,
+      "imageUrl": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc",
+      "featured": true,
+      "subcategories": ["Grandes", "Medianas", "Pequenas"]
+    },
+    {
+      "id": "Comedores",
+      "name": "Comedores",
+      "productCount": 32,
+      "imageUrl": "https://images.unsplash.com/photo-1617806118233-18e1de247200",
+      "featured": true,
+      "subcategories": ["4 Puestos", "6 Puestos", "8 Puestos"]
+    },
+    {
+      "id": "Dormitorios",
+      "name": "Dormitorios",
+      "productCount": 56,
+      "imageUrl": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85",
+      "featured": true,
+      "subcategories": ["1.5 Plz", "2 Plz", "2.5 Plz", "3 Plz"]
+    },
+    {
+      "id": "Camas",
+      "name": "Camas",
+      "productCount": 44,
+      "imageUrl": "https://images.unsplash.com/photo-1540518614846-7eded433c457",
+      "featured": true,
+      "subcategories": ["1.5 Plz", "2 Plz", "2.5 Plz", "3 Plz"]
+    },
+    {
+      "id": "Comodas",
+      "name": "Comodas",
+      "productCount": 18,
+      "imageUrl": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304",
+      "featured": false
+    },
+    {
+      "id": "Coquetas",
+      "name": "Coquetas / Peinadoras",
+      "productCount": 12,
+      "imageUrl": "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6",
+      "featured": false
+    },
+    {
+      "id": "CamaCuna",
+      "name": "Cama Cuna",
+      "productCount": 8,
+      "imageUrl": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85",
+      "featured": false
+    },
+    {
+      "id": "Roperos",
+      "name": "Roperos",
+      "productCount": 24,
+      "imageUrl": "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e",
+      "featured": false
+    },
+    {
+      "id": "Entretenimiento",
+      "name": "Centro de Entretenimiento",
+      "productCount": 28,
+      "imageUrl": "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89",
+      "featured": false
+    },
+    {
+      "id": "BasesTv",
+      "name": "Bases de TV",
+      "productCount": 15,
+      "imageUrl": "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89",
+      "featured": false
+    },
+    {
+      "id": "Consolas",
+      "name": "Consolas / Recibidor",
+      "productCount": 11,
+      "imageUrl": "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c",
+      "featured": false
+    },
+    {
+      "id": "Bar",
+      "name": "Bar",
+      "productCount": 19,
+      "imageUrl": "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b",
+      "featured": false
+    },
+    {
+      "id": "Bufetera",
+      "name": "Bufetera",
+      "productCount": 9,
+      "imageUrl": "https://images.unsplash.com/photo-1617806118233-18e1de247200",
+      "featured": false
+    },
+    {
+      "id": "Aparador",
+      "name": "Aparador",
+      "productCount": 14,
+      "imageUrl": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc",
+      "featured": false
+    },
+    {
+      "id": "Escritorios",
+      "name": "Escritorios",
+      "productCount": 22,
+      "imageUrl": "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89",
+      "featured": false
+    },
+    {
+      "id": "SofaCama",
+      "name": "Sofa Cama",
+      "productCount": 16,
+      "imageUrl": "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c",
+      "featured": false
+    }
+  ],
+  "homepage": {
+    "hero": {
+      "eyebrow": "Coleccion 2025",
+      "title": "Espacios que hablan de ti",
+      "subtitle": "Muebles de autor para quienes entienden que cada rincon del hogar es una declaracion de caracter.",
+      "imageUrl": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&q=80",
+      "imageAlt": "Sala de estar moderna",
+      "ctas": [
+        {"label": "Ver coleccion", "href": "categorias.html"},
+        {"label": "Explorar", "href": "#categories"}
+      ]
+    },
+    "marquee": ["SALAS", "COMEDORES", "DORMITORIOS", "OUTDOORS", "COLCHONES", "DECOR", "HOGAR"],
+    "homepageCategories": [
+      {"name": "Salas", "productCount": 48, "imageUrl": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=75"},
+      {"name": "Comedores", "productCount": 32, "imageUrl": "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600&q=75"},
+      {"name": "Dormitorios", "productCount": 56, "imageUrl": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&q=75"},
+      {"name": "Centro de Entretenimiento", "productCount": 28, "imageUrl": "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&q=75"},
+      {"name": "Bar", "productCount": 19, "imageUrl": "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&q=75"}
+    ],
+    "featuredProducts": [
+      {
+        "name": "Sofa Seccional Lineal",
+        "category": "Salas",
+        "priceCurrent": "$1,240",
+        "priceOriginal": "$1,550",
+        "discount": "-20%",
+        "imageUrl": "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=500&q=75",
+        "badge": null,
+        "colors": ["#8b7355", "#4a4a4a", "#c8bfa8"]
+      },
+      {
+        "name": "Reclinable Comfort Pro",
+        "category": "Salas",
+        "priceCurrent": "$890",
+        "priceOriginal": null,
+        "discount": null,
+        "imageUrl": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&q=75",
+        "badge": null,
+        "colors": ["#2c2c2c", "#8b4513"]
+      },
+      {
+        "name": "Mesa Nogal Extensible",
+        "category": "Comedores",
+        "priceCurrent": "$720",
+        "priceOriginal": null,
+        "discount": null,
+        "imageUrl": "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=500&q=75",
+        "badge": "Nuevo",
+        "colors": ["#5c3d1e", "#1a1a18"]
+      },
+      {
+        "name": "Cama Platform Oslo",
+        "category": "Dormitorios",
+        "priceCurrent": "$980",
+        "priceOriginal": "$1,420",
+        "discount": "-31%",
+        "imageUrl": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=500&q=75",
+        "badge": "-31%",
+        "colors": ["#c8bfa8", "#4a4a4a"]
+      },
+      {
+        "name": "Jarron Ceramico Artesanal",
+        "category": "Decor",
+        "priceCurrent": "$145",
+        "priceOriginal": null,
+        "discount": null,
+        "imageUrl": "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=500&q=75",
+        "badge": null,
+        "colors": []
+      }
+    ],
+    "banner": {
+      "title": "Reinventa tu descanso",
+      "subtitle": "Colchones, cabeceras y ropa de cama de primer nivel. Hasta 30% de descuento en toda la linea dormitorio.",
+      "cta": "Ver oferta",
+      "imageUrl": "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=1600&q=80",
+      "pillDiscount": "30%",
+      "label": "Campana Especial"
+    },
+    "brands": ["NINJA", "INDURAMA", "IGLACE", "KAMADO", "FLORIDIS"],
+    "lifestyle": {
+      "title": "60 noches para decidir",
+      "description": "Si tu colchon no supera tus expectativas, te lo cambiamos sin preguntas. Asi de seguro estamos de nuestra calidad.",
+      "imageUrl": "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=900&q=80",
+      "features": [
+        {"number": "01", "text": "Entrega express en 48h a todo Ecuador, Panama y Peru"},
+        {"number": "02", "text": "Armado incluido sin costo adicional en tu hogar"},
+        {"number": "03", "text": "Garantia de 5 anos en estructura de todos los muebles"}
+      ]
+    },
+    "stats": [
+      {"number": 25, "suffix": "+", "label": "Anos de experiencia"},
+      {"number": 120, "suffix": "k", "label": "Hogares amueblados"},
+      {"number": 3, "suffix": "", "label": "Paises: Ecuador, Panama, Peru"},
+      {"number": 98, "suffix": "%", "label": "Clientes satisfechos"}
+    ],
+    "newsletter": {
+      "label": "Newsletter",
+      "title": "Inspira tu hogar",
+      "subtitle": "Recibe primero las novedades, ofertas exclusivas y guias de decoracion de nuestros disenadores."
+    }
+  },
+  "catalogPage": {
+    "products": [
+      {
+        "name": "Cama Platform Oslo",
+        "category": "Camas",
+        "description": "Estructura en madera de nogal, cabecera tapizada",
+        "priceCurrent": "$980",
+        "priceOriginal": "$1,420",
+        "discount": "-31%",
+        "badge": null,
+        "imageUrl": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=500&q=75",
+        "colors": ["#c8bfa8", "#4a4a4a"]
+      },
+      {
+        "name": "Cama King Monarch",
+        "category": "Camas",
+        "description": "Diseno imperial, patas torneadas, cabecera alta",
+        "priceCurrent": "$1,450",
+        "priceOriginal": null,
+        "discount": null,
+        "badge": "Nuevo",
+        "imageUrl": "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=500&q=75",
+        "colors": ["#2c2c2c", "#8b7355", "#5c3d1e"]
+      },
+      {
+        "name": "Set Dormitorio Milano",
+        "category": "Sets",
+        "description": "Cama + 2 mesas de noche + comodas doble",
+        "priceCurrent": "$2,200",
+        "priceOriginal": "$2,680",
+        "discount": "-18%",
+        "badge": "-18%",
+        "imageUrl": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=500&q=75",
+        "colors": ["#8b7355", "#c8bfa8"]
+      },
+      {
+        "name": "Colchon Memory Plus",
+        "category": "Colchones",
+        "description": "Foam viscoelastico, 60 noches de garantia",
+        "priceCurrent": "$680",
+        "priceOriginal": "$850",
+        "discount": "-20%",
+        "badge": "-20%",
+        "imageUrl": "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=500&q=75",
+        "colors": []
+      },
+      {
+        "name": "Mesa de Noche Flux",
+        "category": "Mesas de noche",
+        "description": "Madera solida con cajones suaves al tacto",
+        "priceCurrent": "$245",
+        "priceOriginal": null,
+        "discount": null,
+        "badge": null,
+        "imageUrl": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&q=75",
+        "colors": ["#8b7355", "#2c2c2c"]
+      },
+      {
+        "name": "Armario 3 Puertas Espejo",
+        "category": "Armarios",
+        "description": "Espejo de cuerpo entero, organizacion interior",
+        "priceCurrent": "$890",
+        "priceOriginal": null,
+        "discount": null,
+        "badge": null,
+        "imageUrl": "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=500&q=75",
+        "colors": ["#c8bfa8", "#2c2c2c"]
+      },
+      {
+        "name": "Cabecera Terciopelo Vienna",
+        "category": "Cabeceras",
+        "description": "Terciopelo artesanal, marco en dorado mate",
+        "priceCurrent": "$380",
+        "priceOriginal": null,
+        "discount": null,
+        "badge": "Nuevo",
+        "imageUrl": "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=500&q=75",
+        "colors": ["#1a1a2e", "#4a6741", "#8b4513"]
+      },
+      {
+        "name": "Cama Tapizada Berlin",
+        "category": "Camas",
+        "description": "Estructura acolchada de lino natural, queen",
+        "priceCurrent": "$1,180",
+        "priceOriginal": "$1,390",
+        "discount": "-15%",
+        "badge": "-15%",
+        "imageUrl": "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=500&q=75",
+        "colors": ["#d4c5b0", "#4a4a4a"]
+      },
+      {
+        "name": "Comoda Doble Lund",
+        "category": "Comodas",
+        "description": "6 cajones con guias metalicas, manijas brutas",
+        "priceCurrent": "$520",
+        "priceOriginal": null,
+        "discount": null,
+        "badge": null,
+        "imageUrl": "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=500&q=75",
+        "colors": ["#8b7355", "#c8bfa8"]
+      }
+    ],
+    "filterChips": ["Todo", "Madera", "Tapizado", "En oferta", "Nuevo"],
+    "sortOptions": ["Destacados", "Menor precio", "Mayor precio", "Nuevo", "Oferta"],
+    "priceRange": {"min": 200, "max": 2500},
+    "materials": ["Madera natural", "Tapizado tela", "Tapizado cuero", "Metal y vidrio", "Rattan natural"],
+    "colorSwatches": [
+      {"hex": "#2c2c2c", "name": "Negro"},
+      {"hex": "#8b7355", "name": "Nogal"},
+      {"hex": "#c8bfa8", "name": "Crema"},
+      {"hex": "#5c3d1e", "name": "Cafe"},
+      {"hex": "#4a6741", "name": "Verde"},
+      {"hex": "#8b4513", "name": "Cuero"},
+      {"hex": "#d4c5b0", "name": "Arena"},
+      {"hex": "#1a1a2e", "name": "Azul noche"}
+    ],
+    "pagination": {"currentPage": 1, "totalPages": 7}
+  },
+  "contact": {
+    "phones": {
+      "tollFree": "1800 123 456",
+      "whatsapp": "095 862 7206",
+      "whatsappInternational": "+593 958 627 206"
+    },
+    "email": "info@palito.com",
+    "whatsappUrl": "https://wa.me/593958627206",
+    "generalHours": {
+      "mondayFriday": "8:00 — 20:00",
+      "saturday": "9:00 — 18:00",
+      "sunday": "10:00 — 15:00"
+    },
+    "directLineHours": "Lunes a Sabado, 8:00 — 20:00",
+    "responseTime": "Respondemos en menos de 24 horas habiles"
+  },
+  "storeLocations": {
+    "ecuador": [
+      {
+        "city": "Guayaquil",
+        "tag": "Flagship",
+        "address": "Av. Francisco de Orellana y Justino Cornejo, CC. Policentro, Local 142",
+        "hours": "Lun–Sab 9:00–21:00 · Dom 10:00–18:00",
+        "phone": "04 268 1234"
+      },
+      {
+        "city": "Quito Norte",
+        "tag": null,
+        "address": "Av. Naciones Unidas E3-71 y Shyris, CC. Quicentro Shopping, L2-34",
+        "hours": "Lun–Sab 10:00–20:00 · Dom 10:00–17:00",
+        "phone": "02 246 5678"
+      },
+      {
+        "city": "Quito Sur",
+        "tag": null,
+        "address": "Av. Morán Valverde N65-48 y Rodrigo de Chavez, CC. El Recreo",
+        "hours": "Lun–Sab 10:00–20:00 · Dom 11:00–16:00",
+        "phone": "02 334 9012"
+      },
+      {
+        "city": "Cuenca",
+        "tag": null,
+        "address": "Av. Ordoñez Lasso y Carlos Arizaga, CC. Milenium Plaza, L. 88",
+        "hours": "Lun–Sab 9:30–19:30 · Dom 10:00–15:00",
+        "phone": "07 285 3456"
+      },
+      {
+        "city": "Ambato",
+        "tag": null,
+        "address": "Av. Cevallos 1435 y Mera, CC. Caracol, Planta Baja",
+        "hours": "Lun–Sab 9:00–19:00",
+        "phone": "03 242 7890"
+      },
+      {
+        "city": "Manta",
+        "tag": null,
+        "address": "Av. 4 de Noviembre y Calle 24, CC. Paseo Shopping Manta",
+        "hours": "Lun–Sab 10:00–20:00 · Dom 10:00–16:00",
+        "phone": "05 292 1234"
+      }
+    ],
+    "panama": [
+      {
+        "city": "Panama City",
+        "tag": "Flagship",
+        "address": "Via Espana 99, CC. Multiplaza Pacific, Local 2-18",
+        "hours": "Lun–Sab 10:00–21:00 · Dom 11:00–19:00",
+        "phone": "+507 390 1234"
+      },
+      {
+        "city": "San Miguelito",
+        "tag": null,
+        "address": "Av. Ricardo J. Alfaro, CC. Metromall, Local B-24",
+        "hours": "Lun–Sab 10:00–20:00",
+        "phone": "+507 260 5678"
+      },
+      {
+        "city": "David",
+        "tag": null,
+        "address": "Av. Francisco Clark, CC. Chiriqui Mall, Piso 1",
+        "hours": "Lun–Sab 10:00–20:00 · Dom 11:00–18:00",
+        "phone": "+507 774 3456"
+      }
+    ],
+    "peru": [
+      {
+        "city": "Lima Miraflores",
+        "tag": "Flagship",
+        "address": "Av. Larco 1150, CC. Larcomar, Tienda 34",
+        "hours": "Lun–Dom 10:00–22:00",
+        "phone": "+51 1 445 7890"
+      },
+      {
+        "city": "Lima San Isidro",
+        "tag": null,
+        "address": "Calle Las Begonias 475, CC. El Polo, Tienda 18",
+        "hours": "Lun–Sab 10:00–21:00 · Dom 11:00–18:00",
+        "phone": "+51 1 222 3456"
+      },
+      {
+        "city": "Arequipa",
+        "tag": null,
+        "address": "Av. Ejercito 793, CC. Arequipa Center, L. 52",
+        "hours": "Lun–Sab 9:30–20:00 · Dom 10:00–16:00",
+        "phone": "+51 54 285 678"
+      }
+    ],
+    "totalStores": 12
+  },
+  "footer": {
+    "tagline": "Muebleria de autor para quienes entienden que el diseno es una forma de vida.",
+    "socialLinks": ["Facebook", "Instagram", "YouTube", "WhatsApp"],
+    "contact": {
+      "email": "info@palito.com",
+      "whatsapp": "095 862 7206",
+      "phone": "1800 123 456",
+      "countries": "Ecuador - Panama - Peru"
+    },
+    "companyLinks": ["Nosotros", "Politica de privacidad", "Terminos y condiciones", "Politica de devoluciones", "Envios"],
+    "servicesLinks": ["Programa de disenadores", "Proyectos hoteleros", "Construccion", "Salud", "Garantia 60 noches"],
+    "paymentMethods": ["Visa", "Mastercard", "PayPal", "Amex"]
+  }
+}

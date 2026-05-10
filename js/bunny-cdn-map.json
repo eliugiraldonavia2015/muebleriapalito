@@ -1,0 +1,29 @@
+{
+  "products": {
+    "cama-platform-oslo.jpg": "https://muebleria-palito-cdn.b-cdn.net/products/cama-platform-oslo.jpg",
+    "cama-king-monarch.jpg": "https://muebleria-palito-cdn.b-cdn.net/products/cama-king-monarch.jpg",
+    "set-dormitorio-milano.jpg": "https://muebleria-palito-cdn.b-cdn.net/products/set-dormitorio-milano.jpg",
+    "colchon-memory-plus.jpg": "https://muebleria-palito-cdn.b-cdn.net/products/colchon-memory-plus.jpg",
+    "mesa-noche-flux.jpg": "https://muebleria-palito-cdn.b-cdn.net/products/mesa-noche-flux.jpg",
+    "armario-3-puertas.jpg": "https://muebleria-palito-cdn.b-cdn.net/products/armario-3-puertas.jpg",
+    "cabecera-terciopelo-vienna.jpg": "https://muebleria-palito-cdn.b-cdn.net/products/cabecera-terciopelo-vienna.jpg",
+    "cama-tapizada-berlin.jpg": "https://muebleria-palito-cdn.b-cdn.net/products/cama-tapizada-berlin.jpg",
+    "comoda-doble-lund.jpg": "https://muebleria-palito-cdn.b-cdn.net/products/comoda-doble-lund.jpg"
+  },
+  "categories": {
+    "salas.jpg": "https://muebleria-palito-cdn.b-cdn.net/categorias/salas.jpg",
+    "comedores.jpg": "https://muebleria-palito-cdn.b-cdn.net/categorias/comedores.jpg",
+    "dormitorios.jpg": "https://muebleria-palito-cdn.b-cdn.net/categorias/dormitorios.jpg",
+    "camas.jpg": "https://muebleria-palito-cdn.b-cdn.net/categorias/camas.jpg",
+    "comodas.jpg": "https://muebleria-palito-cdn.b-cdn.net/categorias/comodas.jpg",
+    "coquetas.jpg": "https://muebleria-palito-cdn.b-cdn.net/categorias/coquetas.jpg",
+    "roperos.jpg": "https://muebleria-palito-cdn.b-cdn.net/categorias/roperos.jpg",
+    "entretenimiento.jpg": "https://muebleria-palito-cdn.b-cdn.net/categorias/entretenimiento.jpg",
+    "consolas.jpg": "https://muebleria-palito-cdn.b-cdn.net/categorias/consolas.jpg",
+    "bar.jpg": "https://muebleria-palito-cdn.b-cdn.net/categorias/bar.jpg"
+  },
+  "banners": {
+    "lifestyle.jpg": "https://muebleria-palito-cdn.b-cdn.net/banners/lifestyle.jpg",
+    "dormitorios-hero.jpg": "https://muebleria-palito-cdn.b-cdn.net/banners/dormitorios-hero.jpg"
+  }
+}

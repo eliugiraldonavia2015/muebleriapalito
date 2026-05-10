@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — Muebleria Palito Outlet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <style>
+    /* ── LOADER ── */
+    #adminLoader{
+      position:fixed;inset:0;z-index:9999;
+      background:var(--bg);
+      display:none;flex-direction:column;align-items:center;justify-content:center;gap:0;
+    }
+    .loader-logo{width:64px;height:64px;margin-bottom:24px;opacity:0}
+    .loader-logo img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 20px rgba(58,140,92,.4))}
+    .loader-brand{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:40px}
+    .loader-name{
+      font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:.32em;
+      color:var(--cream);line-height:1;overflow:hidden;
+    }
+    .loader-name-inner{display:flex;gap:0}
+    .loader-name-inner span{display:inline-block;opacity:0;transform:translateY(40px)}
+    .loader-sub{
+      font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.28em;
+      text-transform:uppercase;color:var(--copper-lt);opacity:0;
+    }
+    .loader-progress{width:200px;height:1px;background:rgba(160,220,180,.12);margin-bottom:20px;overflow:hidden}
+    .loader-bar{height:100%;width:0;background:linear-gradient(90deg,var(--copper),var(--copper-lt));transform-origin:left}
+    .loader-status{font-size:11px;letter-spacing:.12em;color:var(--gray);text-transform:uppercase;opacity:0}
+  </style>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#0c1f14;--bg2:#122a1c;--bg3:#0a180f;
+      --cream:#e8f5ec;--cream-dim:#9dc4aa;
+      --copper:#3a8c5c;--copper-lt:#5ab87c;
+      --gold:#9e7e2a;--gold-lt:#b8993a;
+      --red:#c0392b;--red-lt:#e74c3c;
+      --gray:#5a6b60;
+      --rule:rgba(160,220,180,.12);
+      --f-body:'Inter',sans-serif;--f-display:'DM Sans',sans-serif;
+      --radius:8px;
+    }
+    body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-weight:400;min-height:100vh;font-size:14px;line-height:1.5}
+    a{color:var(--copper-lt);text-decoration:none}
+    img{display:block;width:100%;height:100%;object-fit:cover}
+    input,select,textarea,button{font-family:var(--f-body);font-size:14px;color:var(--cream)}
+    button{cursor:pointer}
+    input[type="text"],input[type="url"],input[type="email"],input[type="password"],input[type="number"],input[type="tel"],select,textarea{
+      width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--rule);border-radius:var(--radius);
+      transition:border-color .3s;outline:none;
+    }
+    input:focus,select:focus,textarea:focus{border-color:var(--copper)}
+    input::placeholder,textarea::placeholder{color:var(--gray)}
+    label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream-dim);margin-bottom:6px;display:block;font-weight:500}
+    textarea{resize:vertical;min-height:80px;line-height:1.6}
+    select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239dc4aa' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+    select option{background:var(--bg2)}
+
+    /* BUTTONS */
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:var(--radius);font-size:13px;font-weight:500;letter-spacing:.05em;transition:all .3s;border:1px solid transparent}
+    .btn-primary{background:var(--copper);color:var(--bg);border-color:var(--copper)}
+    .btn-primary:hover{background:var(--copper-lt);transform:translateY(-1px)}
+    .btn-ghost{border-color:var(--rule);color:var(--cream-dim);background:transparent}
+    .btn-ghost:hover{border-color:var(--copper);color:var(--cream)}
+    .btn-danger{background:var(--red);color:#fff;border-color:var(--red)}
+    .btn-danger:hover{background:var(--red-lt)}
+    .btn-sm{padding:6px 14px;font-size:12px}
+    .btn svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none}
+
+    /* LAYOUT */
+    .admin-layout{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+
+    /* SIDEBAR */
+    .admin-sidebar{background:var(--bg3);border-right:1px solid var(--rule);padding:24px 0;display:flex;flex-direction:column}
+    .admin-logo{padding:0 24px 24px;border-bottom:1px solid var(--rule);margin-bottom:16px}
+    .admin-logo img{height:40px;width:auto;object-fit:contain;margin-bottom:8px}
+    .admin-logo h1{font-size:15px;font-weight:600;color:var(--cream)}
+    .admin-logo span{color:var(--copper)}
+    .admin-logo small{display:block;font-size:11px;color:var(--gray);margin-top:2px}
+    .admin-nav{display:flex;flex-direction:column;gap:2px;padding:0 12px}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:var(--radius);color:var(--cream-dim);font-size:13px;font-weight:400;transition:all .25s;cursor:pointer}
+    .nav-item:hover{color:var(--cream);background:rgba(160,220,180,.06)}
+    .nav-item.active{color:var(--cream);background:rgba(58,140,92,.15);font-weight:500}
+    .nav-item svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.8;fill:none;flex-shrink:0}
+    .nav-item.active svg{stroke:var(--copper-lt)}
+    .admin-footer{margin-top:auto;padding:16px 24px;border-top:1px solid var(--rule)}
+    .admin-footer a{font-size:12px;color:var(--gray);display:inline-flex;align-items:center;gap:6px;transition:color .25s}
+    .admin-footer a:hover{color:var(--cream)}
+    .admin-footer a svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.8;fill:none}
+
+    /* MAIN CONTENT */
+    .admin-main{padding:40px 48px;overflow-y:auto}
+    .admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px}
+    .admin-header h2{font-size:24px;font-weight:600}
+    .admin-header h2 em{font-style:normal;color:var(--copper-lt)}
+    .admin-actions{display:flex;gap:12px;align-items:center}
+
+    /* CARDS */
+    .admin-card{background:var(--bg2);border:1px solid var(--rule);border-radius:var(--radius)}
+
+    /* STAT CARDS ROW */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:36px}
+    .stat-card{background:var(--bg2);border:1px solid var(--rule);border-radius:var(--radius);padding:24px;display:flex;flex-direction:column;gap:4px}
+    .stat-value{font-size:28px;font-weight:700;color:var(--copper-lt);font-family:var(--f-display)}
+    .stat-label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gray)}
+
+    /* TABLE */
+    .data-table{width:100%;border-collapse:collapse}
+    .data-table th{text-align:left;padding:12px 16px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gray);border-bottom:1px solid var(--rule);font-weight:500}
+    .data-table td{padding:14px 16px;border-bottom:1px solid var(--rule);vertical-align:middle}
+    .data-table tr:last-child td{border-bottom:none}
+    .data-table tr:hover td{background:rgba(160,220,180,.03)}
+    .table-img{width:48px;height:48px;border-radius:4px;object-fit:cover;flex-shrink:0}
+    .table-name{display:flex;align-items:center;gap:12px}
+    .table-name-text{font-weight:500}
+    .table-badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+    .table-badge.active{background:rgba(58,140,92,.15);color:var(--copper-lt)}
+    .table-badge.inactive{background:rgba(90,107,96,.12);color:var(--gray)}
+    .table-badge.sale{background:rgba(158,126,42,.15);color:var(--gold-lt)}
+    .table-badge.new{background:rgba(58,140,92,.15);color:var(--copper-lt)}
+    .table-actions{display:flex;gap:6px}
+    .table-actions button{padding:6px 10px;border-radius:4px;font-size:12px;display:inline-flex;align-items:center;gap:4px}
+    .table-actions button svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.8;fill:none}
+
+    /* FORM GRID */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 24px}
+    .form-grid .full{grid-column:1/-1}
+    .form-group{display:flex;flex-direction:column;gap:6px}
+
+    /* SECTION */
+    .admin-section{display:none}
+    .admin-section.active{display:block}
+
+    /* TOGGLE SWITCH */
+    .toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+    .toggle input{opacity:0;width:0;height:0;position:absolute}
+    .toggle-slider{position:absolute;inset:0;background:var(--gray);border-radius:12px;cursor:pointer;transition:all .3s}
+    .toggle-slider::after{content:'';position:absolute;left:2px;top:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:all .3s}
+    .toggle input:checked+.toggle-slider{background:var(--copper)}
+    .toggle input:checked+.toggle-slider::after{transform:translateX(20px)}
+
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)}
+    .modal-overlay.active{display:flex}
+    .modal{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;width:100%;max-width:640px;max-height:85vh;overflow-y:auto;padding:32px}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+    .modal-header h3{font-size:18px;font-weight:600}
+    .modal-close{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:1px solid var(--rule);border-radius:4px;color:var(--cream-dim);transition:all .25s;background:none;cursor:pointer}
+    .modal-close:hover{border-color:var(--red);color:var(--red)}
+    .modal-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:24px;padding-top:24px;border-top:1px solid var(--rule)}
+
+    /* SUBCATEGORY TAGS */
+    .sub-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+    .sub-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(160,220,180,.08);border:1px solid var(--rule);border-radius:4px;font-size:12px;color:var(--cream-dim)}
+    .sub-tag button{background:none;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:0 2px;line-height:1}
+    .sub-tag button:hover{color:var(--red-lt)}
+
+    /* ALERT */
+    .alert{padding:12px 16px;border-radius:var(--radius);font-size:13px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .alert-success{background:rgba(58,140,92,.12);border:1px solid rgba(58,140,92,.3);color:var(--copper-lt)}
+    .alert-error{background:rgba(192,57,43,.12);border:1px solid rgba(192,57,43,.3);color:var(--red-lt)}
+
+    /* LOGIN */
+    .login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+    .login-card{background:var(--bg2);border:1px solid var(--rule);border-radius:12px;padding:40px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:24px}
+    .login-card h2{font-size:22px;font-weight:600;text-align:center}
+    .login-card h2 span{color:var(--copper)}
+    .login-card form{display:flex;flex-direction:column;gap:16px}
+
+    /* COLOR SWATCHES */
+    .color-inputs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .color-input-wrap{display:flex;align-items:center;gap:6px;padding:4px 8px;background:rgba(160,220,180,.06);border:1px solid var(--rule);border-radius:4px}
+    .color-input-wrap input[type="color"]{width:24px;height:24px;border:none;padding:0;background:none;cursor:pointer}
+    .color-input-wrap button{background:none;border:none;color:var(--red);cursor:pointer;font-size:14px}
+
+    /* RESPONSIVE */
+    @media(max-width:1024px){.admin-layout{grid-template-columns:1fr}.admin-sidebar{display:none}.admin-main{padding:24px}.stats-row{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:640px){.stats-row{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
+
+    /* LOADING SPINNER */
+    .spinner{width:20px;height:20px;border:2px solid var(--rule);border-top-color:var(--copper);border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* EMPTY STATE */
+    .empty-state{text-align:center;padding:64px 24px;color:var(--gray)}
+    .empty-state svg{width:48px;height:48px;stroke:var(--gray);margin-bottom:16px}
+    .empty-state h4{font-size:16px;color:var(--cream-dim);margin-bottom:8px}
+    .empty-state p{font-size:13px}
+
+    /* DRAG HANDLE */
+    .drag-handle{cursor:grab;color:var(--gray);font-size:16px;padding:4px}
+    .drag-handle:active{cursor:grabbing}
+
+    /* TAB NAV IN SECTIONS */
+    .tab-nav{display:flex;gap:0;border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;margin-bottom:24px;width:fit-content}
+    .tab-nav button{padding:10px 20px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;border:none;background:none;color:var(--cream-dim);transition:all .25s;font-weight:500}
+    .tab-nav button.active{background:var(--copper);color:var(--bg)}
+    .tab-nav button:hover:not(.active){background:rgba(160,220,180,.06);color:var(--cream)}
+
+    .hidden{display:none !important}
+  </style>
+  <style>
+    /* ─── CATEGORY CARDS ─── */
+    .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+    .cat-card{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:3/4;cursor:pointer;border:1px solid var(--rule);transition:transform .25s,box-shadow .25s;background:var(--bg2)}
+    .cat-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.45)}
+    .cat-card-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+    .cat-card:hover .cat-card-img{transform:scale(1.06)}
+    .cat-card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.88) 0%,rgba(0,0,0,.08) 55%,transparent 100%)}
+    .cat-card-body{position:absolute;bottom:0;left:0;right:0;padding:14px 16px}
+    .cat-card-name{font-size:15px;font-weight:700;color:#fff;margin-bottom:5px;line-height:1.2}
+    .cat-card-subs{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:7px}
+    .cat-sub-pill{padding:2px 7px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:20px;font-size:9px;color:rgba(255,255,255,.78);letter-spacing:.04em}
+    .cat-card-meta{font-size:11px;color:rgba(255,255,255,.5)}
+    .cat-card-actions{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:5px;opacity:0;transition:opacity .2s;transform:translateY(-4px);transition:opacity .2s,transform .2s}
+    .cat-card:hover .cat-card-actions{opacity:1;transform:translateY(0)}
+    .cat-action-btn{width:30px;height:30px;border-radius:7px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.55);backdrop-filter:blur(6px);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s,border-color .2s}
+    .cat-action-btn:hover{background:rgba(58,140,92,.55);border-color:var(--copper)}
+    .cat-action-btn.danger:hover{background:rgba(192,57,43,.55);border-color:var(--red)}
+    .cat-action-btn svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none}
+    .cat-home-toggle{position:absolute;top:10px;left:10px}
+    .home-btn{width:34px;height:34px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .25s;backdrop-filter:blur(6px)}
+    .home-btn.on-home{background:var(--copper);color:var(--bg);box-shadow:0 0 0 3px rgba(58,140,92,.35)}
+    .home-btn.off-home{background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.65)}
+    .home-btn:hover{transform:scale(1.12)}
+    .home-btn svg{width:15px;height:15px;stroke:currentColor;stroke-width:2;fill:none}
+
+    /* ─── CATEGORY DETAIL ─── */
+    .cat-detail-header{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+    .back-btn{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:var(--radius);border:1px solid var(--rule);background:none;color:var(--cream-dim);font-size:13px;cursor:pointer;transition:all .25s;flex-shrink:0}
+    .back-btn:hover{border-color:var(--copper);color:var(--cream)}
+    .back-btn svg{width:15px;height:15px;stroke:currentColor;stroke-width:2;fill:none}
+    .detail-cat-img{width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0}
+    .detail-cat-info h3{font-size:20px;font-weight:700}
+    .detail-cat-info p{font-size:12px;color:var(--gray);margin-top:2px}
+    .sub-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:22px}
+    .sub-tab-btn{padding:7px 16px;border-radius:20px;border:1px solid var(--rule);background:none;color:var(--cream-dim);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;letter-spacing:.03em}
+    .sub-tab-btn.active{background:var(--copper);border-color:var(--copper);color:var(--bg)}
+    .sub-tab-btn:hover:not(.active){border-color:var(--copper-lt);color:var(--cream)}
+
+    /* ─── PRODUCT MINI CARDS ─── */
+    .prod-mini-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+    .prod-mini-card{position:relative;border-radius:12px;overflow:hidden;cursor:pointer;aspect-ratio:3/4;border:1px solid var(--rule);transition:border-color .25s,box-shadow .25s}
+    .prod-mini-card:hover{border-color:var(--copper);box-shadow:0 8px 32px rgba(0,0,0,.55)}
+    .prod-mini-card:hover .prod-mini-img{transform:scale(1.05)}
+    .prod-mini-card:hover .prod-mini-edit-btn{opacity:1;transform:scale(1)}
+    .prod-mini-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s cubic-bezier(.25,.46,.45,.94);background:var(--bg3)}
+    /* edit button — top right */
+    .prod-mini-edit-btn{
+      position:absolute;top:9px;right:9px;z-index:3;
+      width:30px;height:30px;border-radius:50%;border:none;cursor:pointer;
+      background:rgba(10,18,12,.75);backdrop-filter:blur(8px);
+      display:flex;align-items:center;justify-content:center;
+      opacity:0;transform:scale(.8);
+      transition:opacity .2s,transform .2s,background .2s;
+    }
+    .prod-mini-edit-btn:hover{background:var(--copper)}
+    .prod-mini-edit-btn svg{width:13px;height:13px;stroke:#fff;stroke-width:2;fill:none;flex-shrink:0}
+    /* badges float top-left */
+    .prod-mini-badges{position:absolute;top:9px;left:9px;display:flex;gap:4px;flex-wrap:wrap;z-index:2}
+    .pmb{padding:2px 7px;border-radius:3px;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;backdrop-filter:blur(6px)}
+    .pmb.sale{background:rgba(158,126,42,.82);color:#f5e99a}
+    .pmb.new-prod{background:rgba(58,140,92,.82);color:#b8f0cc}
+    .pmb.feat{background:rgba(255,255,255,.18);color:#fff}
+    /* overlay — always fully visible */
+    .prod-mini-overlay{
+      position:absolute;bottom:0;left:0;right:0;
+      background:linear-gradient(to top,rgba(6,12,8,.98) 0%,rgba(6,12,8,.82) 55%,rgba(6,12,8,.3) 80%,transparent 100%);
+      padding:44px 13px 12px;
+      z-index:1;
+    }
+    .prod-mini-sub{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:5px}
+    .prod-mini-name{font-size:12.5px;font-weight:600;color:#fff;line-height:1.35;margin-bottom:7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+    .prod-mini-price-row{display:flex;align-items:baseline;gap:6px}
+    .prod-mini-price{font-size:14px;color:#7ee89a;font-weight:800;letter-spacing:.01em;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+    .prod-mini-orig{font-size:10px;color:rgba(255,255,255,.45);text-decoration:line-through}
+    .add-prod-card{background:rgba(58,140,92,.05);border:2px dashed rgba(58,140,92,.22);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;aspect-ratio:3/4;cursor:pointer;transition:all .2s;color:var(--copper-lt)}
+    .add-prod-card:hover{background:rgba(58,140,92,.1);border-color:var(--copper)}
+    .add-prod-card svg{width:26px;height:26px;stroke:currentColor;stroke-width:1.5;fill:none}
+    .add-prod-card span{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase}
+
+    /* ─── SKELETON CARDS ─── */
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .prod-skel{border-radius:12px;overflow:hidden;background:var(--bg2);border:1px solid var(--rule);aspect-ratio:3/4;position:relative}
+    .prod-skel-img{width:100%;height:100%;background:linear-gradient(90deg,var(--bg2) 25%,rgba(255,255,255,.04) 50%,var(--bg2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+    .prod-skel-body{position:absolute;bottom:0;left:0;right:0;padding:40px 13px 13px;display:flex;flex-direction:column;gap:6px;background:linear-gradient(to top,rgba(10,18,12,.9),transparent)}
+    .prod-skel-line{height:9px;border-radius:4px;background:linear-gradient(90deg,var(--bg2) 25%,rgba(255,255,255,.04) 50%,var(--bg2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+    .prod-skel-line.short{width:55%}
+    .prod-skel-line.price{width:40%;height:12px;background:linear-gradient(90deg,rgba(58,140,92,.08) 25%,rgba(58,140,92,.14) 50%,rgba(58,140,92,.08) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+
+    /* ─── LOAD MORE SENTINEL ─── */
+    .load-sentinel{grid-column:1/-1;height:48px;display:flex;align-items:center;justify-content:center}
+    .load-more-spinner{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--gray);opacity:0}
+    .load-more-spinner.visible{opacity:1}
+
+    /* ─── PRODUCT DRAWER ─── */
+    .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:none;backdrop-filter:blur(3px)}
+    .drawer{position:fixed;top:0;right:0;bottom:0;width:520px;max-width:100vw;background:var(--bg2);border-left:1px solid var(--rule);z-index:1001;display:flex;flex-direction:column;overflow:hidden}
+    .drawer-header{display:flex;align-items:center;justify-content:space-between;padding:22px 26px;border-bottom:1px solid var(--rule);flex-shrink:0}
+    .drawer-header h3{font-size:17px;font-weight:600}
+    .drawer-close{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:1px solid var(--rule);border-radius:6px;background:none;color:var(--cream-dim);cursor:pointer;font-size:17px;transition:all .2s;line-height:1}
+    .drawer-close:hover{border-color:var(--red);color:var(--red)}
+    .drawer-body{flex:1;overflow-y:auto;padding:24px 26px}
+    .drawer-footer{padding:18px 26px;border-top:1px solid var(--rule);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0;background:var(--bg2)}
+  </style>
+</head>
+<body>
+
+<!-- ══════════ LOADER ══════════ -->
+<div id="adminLoader">
+  <div class="loader-logo"><img src="../logo.png" alt="Palito"/></div>
+  <div class="loader-brand">
+    <div class="loader-name"><div class="loader-name-inner" id="loaderLetters"></div></div>
+    <div class="loader-sub">Panel de administracion</div>
+  </div>
+  <div class="loader-progress"><div class="loader-bar" id="loaderBar"></div></div>
+  <div class="loader-status" id="loaderStatus">Iniciando...</div>
+</div>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="loginPage" class="login-page">
+  <div class="login-card">
+    <h2>Palito <span>Admin</span></h2>
+    <p style="text-align:center;font-size:13px;color:var(--gray)">Panel de administracion del catalogo</p>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="loginEmail">Email</label>
+        <input type="email" id="loginEmail" placeholder="admin@palito.com" required/>
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Contraseña</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" required/>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center" id="loginBtn">
+        <span>Iniciar sesion</span>
+      </button>
+      <p id="loginError" class="alert alert-error hidden"></p>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN APP ══════════ -->
+<div id="adminApp" class="admin-layout hidden">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div class="admin-logo">
+      <a href="../index.html"><img src="../logo.png" alt="Logo"/></a>
+      <h1>Palito <span>Admin</span></h1>
+      <small>Panel de administracion</small>
+    </div>
+    <nav class="admin-nav" id="adminNav">
+      <button class="nav-item active" data-section="dashboard">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-item" data-section="categories">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="4"/></svg>
+        Categorias
+      </button>
+      <button class="nav-item" data-section="settings">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Configuracion
+      </button>
+    </nav>
+    <div class="admin-footer">
+      <a href="../index.html">
+        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Ver sitio publico
+      </a>
+    </div>
+    <div style="padding:16px 24px;border-top:1px solid var(--rule)">
+      <a id="logoutBtn" href="#" style="font-size:12px;color:var(--gray);display:inline-flex;align-items:center;gap:6px">
+        <svg viewBox="0 0 24 24" width="14" height="14"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Cerrar sesion
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+    <div id="alertBox"></div>
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div id="sec-dashboard" class="admin-section active">
+      <div class="admin-header">
+        <h2>Dashboard <em>general</em></h2>
+        <span style="font-size:12px;color:var(--gray)" id="lastSync">Sincronizado: --</span>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-value" id="statCats">0</span>
+          <span class="stat-label">Categorias activas</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="statProds">0</span>
+          <span class="stat-label">Productos totales</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="statFeatured">0</span>
+          <span class="stat-label">Destacados</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="statOnSale">0</span>
+          <span class="stat-label">En oferta</span>
+        </div>
+      </div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+        <!-- HOME CATEGORIES PREVIEW -->
+        <div class="admin-card" style="padding:24px">
+          <h3 style="font-size:15px;margin-bottom:16px;font-weight:600">Categorias en homepage</h3>
+          <div id="dashboardCats"></div>
+        </div>
+        <!-- FEATURED PRODUCTS PREVIEW -->
+        <div class="admin-card" style="padding:24px">
+          <h3 style="font-size:15px;margin-bottom:16px;font-weight:600">Productos destacados</h3>
+          <div id="dashboardFeatured"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CATEGORIES ═══ -->
+    <div id="sec-categories" class="admin-section">
+
+      <!-- LIST VIEW -->
+      <div id="catListView">
+        <div class="admin-header">
+          <h2>Gestiona <em>categorias</em></h2>
+          <div class="admin-actions">
+            <button class="btn btn-primary" id="addCategoryBtn">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Agregar categoria
+            </button>
+          </div>
+        </div>
+        <div class="cat-grid" id="catGrid">
+          <div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--gray)"><span class="spinner"></span></div>
+        </div>
+      </div>
+
+      <!-- DETAIL VIEW (hidden until click) -->
+      <div id="catDetailView" style="display:none">
+        <div class="cat-detail-header">
+          <button class="back-btn" id="backToCatsBtn">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            Categorias
+          </button>
+          <img class="detail-cat-img" id="detailCatImg" src="" alt=""/>
+          <div class="detail-cat-info">
+            <h3 id="detailCatName"></h3>
+            <p id="detailCatMeta"></p>
+          </div>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" id="addProductBtn">
+              <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Agregar producto
+            </button>
+            <button class="btn btn-ghost btn-sm" id="detailEditCatBtn">
+              <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Editar categoria
+            </button>
+          </div>
+        </div>
+        <div class="sub-tabs" id="subTabsContainer"></div>
+        <div class="prod-mini-grid" id="catProdGrid"></div>
+      </div>
+
+    </div>
+
+
+    <!-- ═══ SETTINGS ═══ -->
+    <div id="sec-settings" class="admin-section">
+      <div class="admin-header">
+        <h2>Configuracion <em>del sitio</em></h2>
+      </div>
+
+      <form id="settingsForm" style="display:flex;flex-direction:column;gap:32px">
+
+        <!-- CONTACT INFO -->
+        <div class="admin-card" style="padding:24px">
+          <h3 style="font-size:15px;margin-bottom:20px;font-weight:600">Contacto</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="setWhatsapp">Numero WhatsApp (formato wa.me)</label>
+              <input type="text" id="setWhatsapp" placeholder="593958627206"/>
+            </div>
+            <div class="form-group">
+              <label for="setWhatsappDisplay">WhatsApp display</label>
+              <input type="text" id="setWhatsappDisplay" placeholder="095 862 7206"/>
+            </div>
+            <div class="form-group">
+              <label for="setPhone">Linea directa</label>
+              <input type="text" id="setPhone" placeholder="1800 123 456"/>
+            </div>
+            <div class="form-group">
+              <label for="setEmail">Email</label>
+              <input type="email" id="setEmail" placeholder="info@palito.com"/>
+            </div>
+            <div class="form-group full">
+              <label for="setHoursMonFri">Horario Lun-Vie</label>
+              <input type="text" id="setHoursMonFri" placeholder="8:00 — 20:00"/>
+            </div>
+            <div class="form-group">
+              <label for="setHoursSat">Horario Sabado</label>
+              <input type="text" id="setHoursSat" placeholder="9:00 — 18:00"/>
+            </div>
+            <div class="form-group">
+              <label for="setHoursSun">Horario Domingo</label>
+              <input type="text" id="setHoursSun" placeholder="10:00 — 15:00"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- SOCIAL LINKS -->
+        <div class="admin-card" style="padding:24px">
+          <h3 style="font-size:15px;margin-bottom:20px;font-weight:600">Redes sociales</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="setFb">Facebook URL</label>
+              <input type="url" id="setFb" placeholder="https://facebook.com/..."/>
+            </div>
+            <div class="form-group">
+              <label for="setIg">Instagram URL</label>
+              <input type="url" id="setIg" placeholder="https://instagram.com/..."/>
+            </div>
+            <div class="form-group">
+              <label for="setYt">YouTube URL</label>
+              <input type="url" id="setYt" placeholder="https://youtube.com/..."/>
+            </div>
+            <div class="form-group">
+              <label for="setWaSocial">WhatsApp social link</label>
+              <input type="url" id="setWaSocial" placeholder="https://wa.me/..."/>
+            </div>
+          </div>
+        </div>
+
+        <!-- HERO SECTION -->
+        <div class="admin-card" style="padding:24px">
+          <h3 style="font-size:15px;margin-bottom:20px;font-weight:600">Hero (pagina principal)</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="setHeroEyebrow">Eyebrow texto</label>
+              <input type="text" id="setHeroEyebrow" placeholder="Coleccion 2025"/>
+            </div>
+            <div class="form-group">
+              <label for="setHeroTitle">Titulo principal</label>
+              <input type="text" id="setHeroTitle" placeholder="Espacios que hablan de ti"/>
+            </div>
+            <div class="form-group full">
+              <label for="setHeroSubtitle">Subtitulo</label>
+              <textarea id="setHeroSubtitle" rows="2" placeholder="Muebles de autor para quienes entienden que cada rincon..." style="min-height:64px"></textarea>
+            </div>
+            <div class="form-group full">
+              <label for="setHeroImage">Imagen hero URL (o subir en Storage)</label>
+              <input type="url" id="setHeroImage" placeholder="https://...",/>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROMO BANNER -->
+        <div class="admin-card" style="padding:24px">
+          <h3 style="font-size:15px;margin-bottom:20px;font-weight:600">Banner promocional</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="setBannerTitle">Titulo banner</label>
+              <input type="text" id="setBannerTitle" placeholder="Reinventa tu descanso"/>
+            </div>
+            <div class="form-group">
+              <label for="setBannerDiscountPct">Descuento %</label>
+              <input type="number" id="setBannerDiscountPct" placeholder="30"/>
+            </div>
+            <div class="form-group">
+              <label for="setBannerDiscountText">Texto descuento</label>
+              <input type="text" id="setBannerDiscountText" placeholder="30%"/>
+            </div>
+            <div class="form-group">
+              <label for="setBannerCta">Texto CTA</label>
+              <input type="text" id="setBannerCta" placeholder="Ver oferta"/>
+            </div>
+            <div class="form-group full">
+              <label for="setBannerSubtitle">Subtitulo</label>
+              <textarea id="setBannerSubtitle" rows="2" style="min-height:64px"></textarea>
+            </div>
+            <div class="form-group full">
+              <label for="setBannerImage">Imagen banner URL</label>
+              <input type="url" id="setBannerImage" placeholder="https://..."/>
+            </div>
+          </div>
+        </div>
+
+        <!-- STORE LOCATIONS -->
+        <div class="admin-card" style="padding:24px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+            <h3 style="font-size:15px;font-weight:600">Tiendas fisicas</h3>
+            <button type="button" class="btn btn-ghost btn-sm" id="addStoreBtn">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Agregar tienda
+            </button>
+          </div>
+          <div id="storeLocations" style="display:flex;flex-direction:column;gap:16px"></div>
+        </div>
+
+        <div style="display:flex;gap:16px;justify-content:flex-end;padding-top:8px">
+          <button type="button" class="btn btn-ghost" id="resetSettingsBtn">Restablecer</button>
+          <button type="submit" class="btn btn-primary" id="saveSettingsBtn">
+            <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Guardar configuracion
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ═══ SEED DATA ═══ -->
+        </main>
+</div>
+
+<!-- ══════════ MODALS ══════════ -->
+
+<!-- CATEGORY MODAL -->
+<div class="modal-overlay" id="categoryModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="catModalTitle">Nueva categoria</h3>
+      <button class="modal-close" onclick="closeModal('categoryModal')" aria-label="Cerrar">&times;</button>
+    </div>
+    <form id="categoryForm">
+      <input type="hidden" id="catEditId"/>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label for="catName">Nombre</label>
+          <input type="text" id="catName" placeholder="Comedores" required/>
+        </div>
+        <div class="form-group full">
+          <label for="catImageUrl">URL imagen portada</label>
+          <input type="url" id="catImageUrl" placeholder="https://images.unsplash.com/..."/>
+        </div>
+        <div class="form-group">
+          <label for="catProductCount">Cuenta de productos</label>
+          <input type="number" id="catProductCount" placeholder="32"/>
+        </div>
+        <div class="form-group">
+          <label for="catDisplayOrder">Orden en home</label>
+          <input type="number" id="catDisplayOrder" placeholder="1"/>
+        </div>
+        <div class="form-group full">
+          <label style="display:flex;align-items:center;gap:12px;cursor:pointer;text-transform:none;font-size:13px;color:var(--cream);letter-spacing:normal">
+            <div class="toggle"><input type="checkbox" id="catShowOnHomepage" checked/><span class="toggle-slider"></span></div>
+            Mostrar en pagina principal
+          </label>
+        </div>
+        <div class="form-group full">
+          <label>Subcategorias</label>
+          <div style="display:flex;gap:8px">
+            <input type="text" id="catSubInput" placeholder="Escribe subcategoria y presiona Agregar" style="flex:1"/>
+            <button type="button" class="btn btn-ghost btn-sm" id="addSubBtn">Agregar</button>
+          </div>
+          <div class="sub-tags" id="catSubTags"></div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('categoryModal')">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- PRODUCT DRAWER -->
+<div class="drawer-overlay" id="productDrawerOverlay"></div>
+<div class="drawer" id="productDrawer" style="transform:translateX(100%)">
+  <div class="drawer-header">
+    <h3 id="prodModalTitle">Nuevo producto</h3>
+    <button class="drawer-close" id="closeProductDrawerBtn">&times;</button>
+  </div>
+  <div class="drawer-body">
+    <form id="productForm">
+      <input type="hidden" id="prodEditId"/>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label for="prodName">Nombre</label>
+          <input type="text" id="prodName" placeholder="Sofa Seccional Lineal" required/>
+        </div>
+        <div class="form-group full">
+          <label for="prodDesc">Descripcion</label>
+          <textarea id="prodDesc" placeholder="Descripcion corta del producto..." rows="2" style="min-height:64px"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="prodCategory">Categoria</label>
+          <select id="prodCategory" required><option value="">Seleccionar categoria</option></select>
+        </div>
+        <div class="form-group">
+          <label for="prodSubcategory">Subcategoria</label>
+          <select id="prodSubcategory"><option value="">Sin subcategoria</option></select>
+        </div>
+        <div class="form-group full">
+          <label for="prodImage">URL imagen principal</label>
+          <input type="url" id="prodImage" placeholder="https://muebleria-palito-cdn.b-cdn.net/..."/>
+        </div>
+        <div class="form-group">
+          <label for="prodPrice">Precio actual</label>
+          <input type="number" id="prodPrice" step="0.01" placeholder="1240" required/>
+        </div>
+        <div class="form-group">
+          <label for="prodOriginalPrice">Precio original (sin oferta = vacio)</label>
+          <input type="number" id="prodOriginalPrice" step="0.01" placeholder=""/>
+        </div>
+        <div class="form-group">
+          <label for="prodDisplayOrder">Orden</label>
+          <input type="number" id="prodDisplayOrder" placeholder="1"/>
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;text-transform:none;font-size:13px;color:var(--cream);letter-spacing:normal">
+            <div class="toggle"><input type="checkbox" id="prodFeatured"/><span class="toggle-slider"></span></div>
+            Destacado (home carousel)
+          </label>
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;text-transform:none;font-size:13px;color:var(--cream);letter-spacing:normal">
+            <div class="toggle"><input type="checkbox" id="prodNew"/><span class="toggle-slider"></span></div>
+            Producto nuevo
+          </label>
+        </div>
+        <div class="form-group full">
+          <label>Colores disponibles</label>
+          <div style="display:flex;gap:8px">
+            <input type="color" id="prodColorInput" value="#8b7355" style="width:36px;height:36px;border:1px solid var(--rule);border-radius:4px;padding:2px;cursor:pointer"/>
+            <input type="text" id="prodColorText" placeholder="#8b7355" style="flex:1"/>
+            <button type="button" class="btn btn-ghost btn-sm" id="addColorBtn">+</button>
+          </div>
+          <div class="color-inputs" id="prodColors"></div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="drawer-footer">
+    <button type="button" class="btn btn-ghost" id="cancelProductDrawerBtn">Cancelar</button>
+    <button type="submit" form="productForm" class="btn btn-primary">Guardar</button>
+  </div>
+</div>
+
+<script type="module" src="../js/admin.js"></script>
+</body>
+</html>
