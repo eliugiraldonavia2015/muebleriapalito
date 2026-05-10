@@ -461,10 +461,14 @@ function switchSubTab(sub, clickedBtn) {
 }
 
 function buildProdMiniCard(p) {
+  console.log("[CARD] Built: " + p.name + " | id=" + p.id + " type:" + typeof p.id);
   const card = document.createElement("div");
   card.className = "prod-mini-card";
   card.dataset.prodId = p.id;
-  card.addEventListener("click", () => openProductDrawer(p.id));
+  card.addEventListener("click", () => {
+    console.log("[CARD] CLICK:", p.name, "id=" + p.id, "(" + typeof p.id + ")");
+    openProductDrawer(p.id);
+  });
 
   const img = document.createElement("img");
   img.className = "prod-mini-img";
@@ -514,7 +518,14 @@ function buildProdMiniCard(p) {
   editBtn.className = "prod-mini-edit-btn";
   editBtn.title = "Editar producto";
   editBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
-  editBtn.addEventListener("click", e => { e.stopPropagation(); openProductDrawer(p.id); });
+  editBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    console.log("[CARD] EDIT:", p.name, "id=" + p.id);
+    openProductDrawer(p.id);
+  });
+
+  // Attach product data directly to the card element
+  card._prodData = p;
 
   card.append(img, badges, editBtn, overlay);
   return card;
@@ -1016,20 +1027,36 @@ document.getElementById("prodCategory").addEventListener("change", e => {
 });
 
 function openProductDrawer(id = null, preCatId = null) {
-  const gsap = window.gsap;
-  const overlay = document.getElementById("productDrawerOverlay");
-  const drawer = document.getElementById("productDrawer");
+  console.group("[DRAWER] openProductDrawer");
+  console.log("[DRAWER] id:", id, "| typeof:", typeof id, "| preCatId:", preCatId);
+  var overlay = document.getElementById("productDrawerOverlay");
+  var drawer = document.getElementById("productDrawer");
+  console.log("[DRAWER] overlay:", overlay ? "FOUND" : "MISSING");
+  console.log("[DRAWER] drawer:", drawer ? "FOUND" : "MISSING");
+  if (drawer) console.log("[DRAWER] drawer.transform NOW:", drawer.style.transform || "(unset)");
+  if (overlay) console.log("[DRAWER] overlay.display NOW:", overlay.style.display || "(unset)");
 
   editingProdId = id;
   editingProdColors = [];
 
   if (id) {
-    const p = catProductsAll.find(x => x.id === id) || products.find(x => x.id === id);
+    var p = null;
+    p = catProductsAll.find(function(x) { return String(x.id) === String(id); }) || null;
+    if (p) { console.log("[DRAWER] Found in catProductsAll:", p.name); }
+    else {
+      p = products.find(function(x) { return String(x.id) === String(id); }) || null;
+      if (p) { console.log("[DRAWER] Found in products:", p.name); }
+    }
+    console.log("[DRAWER] catProductsAll:", catProductsAll.length, "| products:", products.length);
+    if (catProductsAll.length) console.log("[DRAWER] sample IDs:", JSON.stringify(catProductsAll.slice(0,5).map(function(x){return x.id})));
+    if (products.length) console.log("[DRAWER] sample IDs:", JSON.stringify(products.slice(0,5).map(function(x){return x.id})));
     if (!p) {
-      console.warn("[admin] Product not found:", id, "catProductsAll:", catProductsAll.length, "products:", products.length);
-      showAlert("No se encontro el producto. Actualiza la pagina.", "error");
+      console.error("[DRAWER] PRODUCT NOT FOUND");
+      showAlert("No se encontro el producto. Revisa la consola.", "error");
+      console.groupEnd();
       return;
     }
+    console.log("[DRAWER] Editing:", p.name);
     document.getElementById("prodModalTitle").textContent = "Editar producto";
     document.getElementById("prodEditId").value = id;
     document.getElementById("prodName").value = p.name || "";
@@ -1044,6 +1071,7 @@ function openProductDrawer(id = null, preCatId = null) {
     populateCatSelect(p.categoryId || "");
     populateSubcategorySelect(p.categoryId || "", p.subcategory || "");
   } else {
+    console.log("[DRAWER] New product, preCatId:", preCatId);
     document.getElementById("prodModalTitle").textContent = "Nuevo producto";
     document.getElementById("productForm").reset();
     document.getElementById("prodEditId").value = "";
@@ -1052,21 +1080,26 @@ function openProductDrawer(id = null, preCatId = null) {
     populateSubcategorySelect(preCatId || "", "");
   }
   renderColorSwatches();
-
-  overlay.style.display = "block";
-  gsap.set(drawer, { xPercent: 100 });
-  gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.25 });
-  gsap.to(drawer, { xPercent: 0, duration: 0.38, ease: "power3.out" });
+  console.log("[DRAWER] Showing overlay + animating drawer...");
+  overlay.style.display = "flex";
+  console.log("[DRAWER] overlay.display set to:", overlay.style.display);
+  requestAnimationFrame(function() {
+    drawer.style.transform = "translateX(0)";
+    console.log("[DRAWER] drawer.transform set to: translateX(0)");
+  });
+  console.groupEnd();
 }
 
 function closeProductDrawer() {
-  const gsap = window.gsap;
-  const overlay = document.getElementById("productDrawerOverlay");
-  const drawer = document.getElementById("productDrawer");
-  gsap.to(drawer, { xPercent: 100, duration: 0.3, ease: "power3.in" });
-  gsap.to(overlay, { opacity: 0, duration: 0.3, onComplete: () => { overlay.style.display = "none"; } });
+  console.group("[DRAWER] close");
+  var overlay = document.getElementById("productDrawerOverlay");
+  var drawer = document.getElementById("productDrawer");
+  drawer.style.transform = "translateX(100%)";
+  overlay.style.display = "none";
+  console.log("[CLOSE] drawer.transform:", drawer.style.transform);
+  console.log("[CLOSE] overlay.display:", overlay.style.display);
+  console.groupEnd();
 }
-
 document.getElementById("closeProductDrawerBtn").addEventListener("click", closeProductDrawer);
 document.getElementById("cancelProductDrawerBtn").addEventListener("click", closeProductDrawer);
 document.getElementById("productDrawerOverlay").addEventListener("click", closeProductDrawer);
