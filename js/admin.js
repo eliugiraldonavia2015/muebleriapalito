@@ -164,6 +164,7 @@ async function runLoader() {
 
   setLoaderStatus(statusEl, barEl, gsap, "Cargando categorias...", "75%");
   await loadCategories();
+  await loadProducts();
 
   setLoaderStatus(statusEl, barEl, gsap, "Preparando panel...", "95%");
   renderDashboard();
@@ -1024,7 +1025,11 @@ function openProductDrawer(id = null, preCatId = null) {
 
   if (id) {
     const p = catProductsAll.find(x => x.id === id) || products.find(x => x.id === id);
-    if (!p) return;
+    if (!p) {
+      console.warn("[admin] Product not found:", id, "catProductsAll:", catProductsAll.length, "products:", products.length);
+      showAlert("No se encontro el producto. Actualiza la pagina.", "error");
+      return;
+    }
     document.getElementById("prodModalTitle").textContent = "Editar producto";
     document.getElementById("prodEditId").value = id;
     document.getElementById("prodName").value = p.name || "";
