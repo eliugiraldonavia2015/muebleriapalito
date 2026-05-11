@@ -27,7 +27,7 @@ export { firebaseConfig };
  */
 const BUNNY_CDN = {
   zoneName: "muebleria-palito-cdn",                  // Storage Zone name
-  apiKey: "63ab4787-ab96-43c4-86da7c32777c-8927-4afa", // Storage Zone API Key
+  apiKey: "0338fa2d-9cce-4b31-b445-93b9ab9842f101f9e23d-cb07-4562-99d8-695bdd10806b", // Bunny Account API Access Key
   cdnUrl: "https://muebleria-palito-cdn.b-cdn.net",   // Public CDN URL
   apiUrl: "https://br.storage.bunnycdn.com",           // Storage API endpoint (São Paulo region)
 };
