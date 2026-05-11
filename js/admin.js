@@ -7,7 +7,7 @@ import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { firebaseConfig } from "./firebase-config.js";
+import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js";
 import { CATEGORIES, PRODUCTS, SETTINGS } from "./seed-data.js";
 
 const app = initializeApp(firebaseConfig);
@@ -673,6 +673,49 @@ function renderDashboard() {
 
 }
 
+// ─── BUNNY CDN UPLOAD ───
+async function uploadImageToBunny(file, subFolder) {
+  if (subFolder === void 0) { subFolder = 'products'; }
+  console.group('[BUNNY] uploadImageToBunny');
+  console.log('[BUNNY] file:', file.name, '| size:', Math.round(file.size / 1024) + 'KB');
+  if (!BUNNY_CDN.apiKey || BUNNY_CDN.apiKey.indexOf('PASTE_YOUR') !== -1) {
+    console.error('[BUNNY] ERROR API key not configured — edit firebase-config.js');
+    console.groupEnd();
+    throw new Error('Bunny CDN API key not configured');
+  }
+  var ext = file.name.indexOf('.') !== -1 ? file.name.split('.').pop() : 'jpg';
+  var base = file.name.replace(/.[^.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase() || 'img';
+  var ts = Date.now();
+  var fname = base + '-' + ts + '.' + ext;
+  var fpath = '/' + BUNNY_CDN.zoneName + '/' + subFolder + '/' + fname;
+  var cdnUrl = BUNNY_CDN.cdnUrl + '/' + subFolder + '/' + fname;
+  var apiUrl = BUNNY_CDN.apiUrl + fpath;
+  console.log('[BUNNY] PUT', apiUrl);
+  return new Promise(function(resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('PUT', apiUrl, true);
+    xhr.setRequestHeader('AccessKey', BUNNY_CDN.apiKey);
+    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+    xhr.onload = function() {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        console.log('[BUNNY] OK uploaded:', cdnUrl);
+        console.groupEnd();
+        resolve(cdnUrl);
+      } else {
+        console.error('[BUNNY] ERROR status:', xhr.status, xhr.responseText);
+        console.groupEnd();
+        reject(new Error('Bunny upload failed: ' + xhr.status + ' ' + xhr.responseText));
+      }
+    };
+    xhr.onerror = function() {
+      console.error('[BUNNY] ERROR network error');
+      console.groupEnd();
+      reject(new Error('Bunny upload network error'));
+    };
+    xhr.send(file);
+  });
+}
+
 // ─── SEED ───
 async function runSeed() {
 
@@ -1084,7 +1127,7 @@ function openProductDrawer(id = null, preCatId = null) {
     document.getElementById("prodEditId").value = id;
     document.getElementById("prodName").value = p.name || "";
     document.getElementById("prodDesc").value = p.description || "";
-    document.getElementById("prodImage").value = p.primaryImage || p.imageUrl || "";
+    setProductImagePreview(p.primaryImage || p.imageUrl || "");
     document.getElementById("prodDisplayOrder").value = p.displayOrder ?? "";
     document.getElementById("prodPrice").value = p.price || "";
     document.getElementById("prodOriginalPrice").value = p.originalPrice || "";
@@ -1124,6 +1167,50 @@ function closeProductDrawer() {
   console.groupEnd();
 }
 document.getElementById("closeProductDrawerBtn").addEventListener("click", closeProductDrawer);
+// ─── PRODUCT IMAGE FILE PICKER ───
+function setProductImagePreview(url) {
+  var hid = document.getElementById("prodImage");
+  var prev = document.getElementById("prodImagePreview");
+  var st = document.getElementById("prodImageStatus");
+  var fi = document.getElementById("prodImageFile");
+  hid.value = url || "";
+  if (url && url.trim()) {
+    prev.src = url;
+    prev.style.display = "block";
+    st.textContent = "Imagen actual del producto";
+    st.style.color = "var(--gray)";
+    console.log("[IMG] preview set:", url);
+  } else {
+    prev.style.display = "none";
+    st.textContent = "Sin imagen";
+  }
+  if (fi) { fi.value = ""; }
+}
+
+document.getElementById("prodImageFile").addEventListener("change", async function(e) {
+  var file = e.target.files[0];
+  if (!file) { return; }
+  console.log("[IMG] selected:", file.name, Math.round(file.size / 1024) + "KB");
+  var prev = document.getElementById("prodImagePreview");
+  var st = document.getElementById("prodImageStatus");
+  prev.src = URL.createObjectURL(file);
+  prev.style.display = "block";
+  st.textContent = "Subiendo a Bunny CDN...";
+  st.style.color = "var(--copper-lt)";
+  try {
+    var cdnUrl = await uploadImageToBunny(file, "products");
+    document.getElementById("prodImage").value = cdnUrl;
+    prev.src = cdnUrl;
+    st.textContent = "OK Imagen subida";
+    st.style.color = "var(--green-ok)";
+    console.log("[IMG] uploaded:", cdnUrl);
+  } catch (err) {
+    st.textContent = "ERROR " + err.message;
+    st.style.color = "var(--red-fail)";
+    console.error("[IMG] upload failed:", err);
+  }
+});
+
 document.getElementById("cancelProductDrawerBtn").addEventListener("click", closeProductDrawer);
 document.getElementById("productDrawerOverlay").addEventListener("click", closeProductDrawer);
 
@@ -1170,7 +1257,7 @@ function renderColorSwatches() {
 document.getElementById("productForm").addEventListener("submit", async e => {
   e.preventDefault();
   const origPrice = document.getElementById("prodOriginalPrice").value;
-  const imageUrl = document.getElementById("prodImage").value.trim();
+  var imageUrl = document.getElementById("prodImage").value.trim();
   const catId = document.getElementById("prodCategory").value;
   const catName = categories.find(c => c.id === catId)?.name || catId;
   const price = parseFloat(document.getElementById("prodPrice").value) || 0;

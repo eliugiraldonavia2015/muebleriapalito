@@ -697,8 +697,15 @@
           <select id="prodSubcategory"><option value="">Sin subcategoria</option></select>
         </div>
         <div class="form-group full">
-          <label for="prodImage">URL imagen principal</label>
-          <input type="url" id="prodImage" placeholder="https://muebleria-palito-cdn.b-cdn.net/..."/>
+          <label>Imagen del producto</label>
+          <div style="display:flex;gap:12px;align-items:center">
+            <img id="prodImagePreview" src="" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid var(--rule);background:var(--charcoal-deep);display:none"/>
+            <div style="flex:1">
+              <input type="file" id="prodImageFile" accept="image/*" style="font-size:13px;color:var(--cream);cursor:pointer"/>
+              <input type="hidden" id="prodImage"/>
+              <p id="prodImageStatus" style="font-size:11px;color:var(--gray);margin:4px 0 0"></p>
+            </div>
+          </div>
         </div>
         <div class="form-group">
           <label for="prodPrice">Precio actual</label>

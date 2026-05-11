@@ -20,3 +20,16 @@ const firebaseConfig = {
 };
 
 export { firebaseConfig };
+
+/**
+ * Bunny CDN Storage Zone credentials — fill in your API key
+ * Get yours: Storage Zone → FTP & API Access → API Key
+ */
+const BUNNY_CDN = {
+  zoneName: "muebleria-palito-cdn",                  // Storage Zone name
+  apiKey: "63ab4787-ab96-43c4-86da7c32777c-8927-4afa", // Storage Zone API Key
+  cdnUrl: "https://muebleria-palito-cdn.b-cdn.net",   // Public CDN URL
+  apiUrl: "https://br.storage.bunnycdn.com",           // Storage API endpoint (São Paulo region)
+};
+
+export { BUNNY_CDN };
