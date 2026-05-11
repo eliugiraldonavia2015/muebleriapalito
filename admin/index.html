@@ -81,7 +81,7 @@
     .admin-logo span{color:var(--copper)}
     .admin-logo small{display:block;font-size:11px;color:var(--gray);margin-top:2px}
     .admin-nav{display:flex;flex-direction:column;gap:2px;padding:0 12px}
-    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:var(--radius);color:var(--cream-dim);font-size:13px;font-weight:400;transition:all .25s;cursor:pointer}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:var(--radius);color:var(--cream-dim);font-size:13px;font-weight:400;transition:all .25s;cursor:pointer;background:none;border:none;width:100%;text-align:left}
     .nav-item:hover{color:var(--cream);background:rgba(160,220,180,.06)}
     .nav-item.active{color:var(--cream);background:rgba(58,140,92,.15);font-weight:500}
     .nav-item svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.8;fill:none;flex-shrink:0}
@@ -410,14 +410,20 @@
       </div>
 
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
-        <!-- HOME CATEGORIES PREVIEW -->
+        <!-- HOME CATEGORIES ORDER -->
         <div class="admin-card" style="padding:24px">
-          <h3 style="font-size:15px;margin-bottom:16px;font-weight:600">Categorias en homepage</h3>
+          <div style="margin-bottom:14px">
+            <h3 style="font-size:15px;font-weight:600">Categorias en homepage</h3>
+            <p style="font-size:11px;color:var(--gray);margin-top:4px">Posición 1 = foto grande predominante. Reordena y guarda.</p>
+          </div>
           <div id="dashboardCats"></div>
         </div>
-        <!-- FEATURED PRODUCTS PREVIEW -->
+        <!-- FEATURED PRODUCTS PICKER -->
         <div class="admin-card" style="padding:24px">
-          <h3 style="font-size:15px;margin-bottom:16px;font-weight:600">Productos destacados</h3>
+          <div style="margin-bottom:14px">
+            <h3 style="font-size:15px;font-weight:600">Productos destacados</h3>
+            <p style="font-size:11px;color:var(--gray);margin-top:4px">Filtra por categoria y activa/desactiva destacados del home.</p>
+          </div>
           <div id="dashboardFeatured"></div>
         </div>
       </div>

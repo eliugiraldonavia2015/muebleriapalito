@@ -25,6 +25,7 @@ const COL_SETTINGS = "settings";
 let categories = [];
 let products = [];
 let settings = {};
+let dashFeaturedCatFilter = "all";
 let editingCatSubs = [];
 let editingProdColors = [];
 let editingCatId = null;
@@ -614,63 +615,223 @@ async function loadProducts() {
 
 // ─── DASHBOARD ───
 function renderDashboard() {
-  const allProds = catProductsAll.length ? catProductsAll : products;
+  const allProds = products.length ? products : catProductsAll;
   document.getElementById("statCats").textContent = categories.filter(c => c.showOnHomepage).length;
   document.getElementById("statProds").textContent = categories.reduce((s, c) => s + (c.productCount || 0), 0) || allProds.length;
   document.getElementById("statFeatured").textContent = allProds.filter(p => p.featured).length;
   document.getElementById("statOnSale").textContent = allProds.filter(p => p.originalPrice).length;
+  renderDashCatOrder();
+  renderDashFeatured();
+}
 
-  const dashCatsEl = document.getElementById("dashboardCats");
-  dashCatsEl.replaceChildren();
-  const homeCats = categories.filter(c => c.showOnHomepage).slice(0, 5);
-  if (homeCats.length) {
-    homeCats.forEach(c => {
-      const div = document.createElement("div");
-      div.style.cssText = "display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--rule)";
-      const img = document.createElement("img");
-      img.src = c.imageUrl || c.coverImage || "";
-      img.style.cssText = "width:32px;height:32px;border-radius:4px;object-fit:cover";
-      img.onerror = () => { img.style.background = "#1a2e1e"; };
-      const span = document.createElement("span");
-      span.style.fontSize = "13px";
-      span.textContent = c.name;
-      div.append(img, span);
-      dashCatsEl.appendChild(div);
-    });
-  } else {
+function makeDirBtn(label, title, disabled) {
+  const btn = document.createElement("button");
+  btn.textContent = label;
+  btn.title = title;
+  btn.disabled = disabled;
+  btn.style.cssText = "background:none;border:1px solid var(--rule);border-radius:3px;color:var(--cream-dim);cursor:pointer;padding:1px 5px;font-size:11px;line-height:1.4;transition:border-color .2s,color .2s;opacity:" + (disabled ? ".3" : "1");
+  if (!disabled) {
+    btn.addEventListener("mouseover", () => { btn.style.borderColor = "var(--copper)"; btn.style.color = "var(--cream)"; });
+    btn.addEventListener("mouseout", () => { btn.style.borderColor = "var(--rule)"; btn.style.color = "var(--cream-dim)"; });
+  }
+  return btn;
+}
+
+function renderDashCatOrder() {
+  const el = document.getElementById("dashboardCats");
+  el.replaceChildren();
+
+  const homeCats = [...categories]
+    .filter(c => c.showOnHomepage)
+    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+
+  if (!homeCats.length) {
     const p = document.createElement("p");
     p.style.cssText = "font-size:13px;color:var(--gray)";
-    p.textContent = "Sin categorias en home.";
-    dashCatsEl.appendChild(p);
+    p.textContent = "Sin categorias en home. Actívalas desde la sección Categorias.";
+    el.appendChild(p);
+    return;
   }
 
-  const dashFeatEl = document.getElementById("dashboardFeatured");
-  dashFeatEl.replaceChildren();
-  const featProds = products.filter(p => p.featured).slice(0, 5);
-  if (featProds.length) {
-    featProds.forEach(p => {
-      const div = document.createElement("div");
-      div.style.cssText = "display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--rule)";
-      const img = document.createElement("img");
-      img.src = p.primaryImage || p.imageUrl || "";
-      img.style.cssText = "width:32px;height:32px;border-radius:4px;object-fit:cover";
-      img.onerror = () => { img.style.background = "#1a2e1e"; };
-      const name = document.createElement("span");
-      name.style.cssText = "font-size:13px;flex:1";
-      name.textContent = p.name;
-      const price = document.createElement("span");
-      price.style.cssText = "font-size:12px;color:var(--copper-lt)";
-      price.textContent = "$" + (p.price || 0).toLocaleString();
-      div.append(img, name, price);
-      dashFeatEl.appendChild(div);
+  const list = document.createElement("div");
+  list.style.cssText = "display:flex;flex-direction:column;gap:5px";
+
+  homeCats.forEach((cat, idx) => {
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;border:1px solid var(--rule);background:rgba(160,220,180,.04)";
+
+    const posEl = document.createElement("div");
+    posEl.style.cssText = "width:20px;text-align:center;font-size:13px;font-weight:700;flex-shrink:0;color:" + (idx === 0 ? "var(--copper-lt)" : "var(--gray)");
+    posEl.textContent = String(idx + 1);
+
+    const img = document.createElement("img");
+    img.src = cat.imageUrl || cat.coverImage || "";
+    img.style.cssText = "width:34px;height:34px;border-radius:4px;object-fit:cover;flex-shrink:0";
+    img.onerror = () => { img.style.background = "#1a2e1e"; };
+
+    const info = document.createElement("div");
+    info.style.cssText = "flex:1;min-width:0";
+    const nameEl = document.createElement("div");
+    nameEl.style.cssText = "font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+    nameEl.textContent = cat.name;
+    info.appendChild(nameEl);
+    if (idx === 0) {
+      const badge = document.createElement("div");
+      badge.style.cssText = "font-size:10px;color:var(--copper);margin-top:2px;letter-spacing:.04em";
+      badge.textContent = "★ Foto predominante";
+      info.appendChild(badge);
+    }
+
+    const arrows = document.createElement("div");
+    arrows.style.cssText = "display:flex;flex-direction:column;gap:2px;flex-shrink:0";
+    const upBtn = makeDirBtn("↑", "Subir", idx === 0);
+    const dnBtn = makeDirBtn("↓", "Bajar", idx === homeCats.length - 1);
+    if (!upBtn.disabled) upBtn.addEventListener("click", () => moveCatInHomeDashboard(cat.id, -1));
+    if (!dnBtn.disabled) dnBtn.addEventListener("click", () => moveCatInHomeDashboard(cat.id, +1));
+    arrows.append(upBtn, dnBtn);
+
+    row.append(posEl, img, info, arrows);
+    list.appendChild(row);
+  });
+
+  el.appendChild(list);
+
+  const saveBtn = document.createElement("button");
+  saveBtn.className = "btn btn-primary btn-sm";
+  saveBtn.style.cssText = "margin-top:12px;width:100%;justify-content:center";
+  saveBtn.textContent = "Guardar orden";
+  saveBtn.addEventListener("click", saveCatDisplayOrder);
+  el.appendChild(saveBtn);
+}
+
+function moveCatInHomeDashboard(catId, dir) {
+  const homeCats = [...categories]
+    .filter(c => c.showOnHomepage)
+    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+
+  const idx = homeCats.findIndex(c => c.id === catId);
+  if (idx < 0) return;
+  const target = idx + dir;
+  if (target < 0 || target >= homeCats.length) return;
+
+  [homeCats[idx], homeCats[target]] = [homeCats[target], homeCats[idx]];
+  homeCats.forEach((hc, i) => {
+    const g = categories.find(c => c.id === hc.id);
+    if (g) g.displayOrder = i + 1;
+  });
+
+  renderDashCatOrder();
+}
+
+async function saveCatDisplayOrder() {
+  const homeCats = categories.filter(c => c.showOnHomepage);
+  try {
+    const b = writeBatch(db);
+    homeCats.forEach(cat => {
+      b.update(doc(db, COL_CATEGORIES, cat.id), { displayOrder: cat.displayOrder || 0, updatedAt: serverTimestamp() });
     });
-  } else {
+    await b.commit();
+    showAlert("Orden de categorias guardado.");
+  } catch (err) {
+    showAlert("Error al guardar: " + err.message, "error");
+  }
+}
+
+function renderDashFeatured() {
+  const el = document.getElementById("dashboardFeatured");
+  el.replaceChildren();
+
+  const allProds = products.length ? products : [];
+
+  if (!allProds.length) {
     const p = document.createElement("p");
     p.style.cssText = "font-size:13px;color:var(--gray)";
-    p.textContent = "Sin productos destacados.";
-    dashFeatEl.appendChild(p);
+    p.textContent = "Cargando productos...";
+    el.appendChild(p);
+    return;
   }
 
+  // Category filter tabs
+  const tabs = document.createElement("div");
+  tabs.style.cssText = "display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px";
+  const catNames = [...new Set(allProds.map(p => p.category).filter(Boolean))].sort();
+
+  ["all", ...catNames].forEach(cname => {
+    const btn = document.createElement("button");
+    const isActive = cname === dashFeaturedCatFilter;
+    btn.textContent = cname === "all" ? "Todas" : cname;
+    btn.style.cssText = "padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500;letter-spacing:.04em;cursor:pointer;transition:all .2s;border:1px solid;" +
+      (isActive ? "background:var(--copper);color:var(--bg);border-color:var(--copper);" : "background:none;color:var(--cream-dim);border-color:var(--rule);");
+    btn.addEventListener("click", () => { dashFeaturedCatFilter = cname; renderDashFeatured(); });
+    tabs.appendChild(btn);
+  });
+  el.appendChild(tabs);
+
+  const filtered = (dashFeaturedCatFilter === "all"
+    ? [...allProds]
+    : allProds.filter(p => p.category === dashFeaturedCatFilter)
+  ).sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0) || (a.name || "").localeCompare(b.name || ""));
+
+  if (!filtered.length) {
+    const p = document.createElement("p");
+    p.style.cssText = "font-size:13px;color:var(--gray)";
+    p.textContent = "No hay productos en esta categoría.";
+    el.appendChild(p);
+    return;
+  }
+
+  const list = document.createElement("div");
+  list.style.cssText = "display:flex;flex-direction:column;gap:4px;max-height:300px;overflow-y:auto;padding-right:2px";
+
+  filtered.forEach(p => {
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:5px;border:1px solid;" +
+      (p.featured ? "rgba(58,140,92,.25);background:rgba(58,140,92,.06);" : "var(--rule);background:transparent;");
+
+    const img = document.createElement("img");
+    img.src = p.primaryImage || p.imageUrl || "";
+    img.style.cssText = "width:30px;height:30px;border-radius:3px;object-fit:cover;flex-shrink:0";
+    img.onerror = () => { img.style.background = "#1a2e1e"; };
+
+    const info = document.createElement("div");
+    info.style.cssText = "flex:1;min-width:0";
+    const nameEl = document.createElement("div");
+    nameEl.style.cssText = "font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+    nameEl.textContent = p.name;
+    const catEl = document.createElement("div");
+    catEl.style.cssText = "font-size:10px;color:var(--gray);margin-top:1px";
+    catEl.textContent = p.category + (p.subcategory ? " · " + p.subcategory : "");
+    info.append(nameEl, catEl);
+
+    const toggleBtn = document.createElement("button");
+    toggleBtn.style.cssText = "flex-shrink:0;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.05em;cursor:pointer;transition:all .2s;border:1px solid;" +
+      (p.featured ? "background:rgba(58,140,92,.18);color:var(--copper-lt);border-color:rgba(58,140,92,.35);" : "background:none;color:var(--gray);border-color:var(--rule);");
+    toggleBtn.textContent = p.featured ? "★ Dest." : "Destacar";
+    toggleBtn.addEventListener("click", () => toggleFeaturedProduct(p.id));
+
+    row.append(img, info, toggleBtn);
+    list.appendChild(row);
+  });
+  el.appendChild(list);
+
+  const featCount = allProds.filter(p => p.featured).length;
+  const countEl = document.createElement("div");
+  countEl.style.cssText = "font-size:11px;color:var(--gray);margin-top:8px;text-align:right";
+  countEl.textContent = featCount + " producto" + (featCount !== 1 ? "s" : "") + " destacado" + (featCount !== 1 ? "s" : "");
+  el.appendChild(countEl);
+}
+
+async function toggleFeaturedProduct(prodId) {
+  const prod = products.find(p => p.id === prodId);
+  if (!prod) return;
+  prod.featured = !prod.featured;
+  try {
+    await updateDoc(doc(db, COL_PRODUCTS, prodId), { featured: prod.featured, updatedAt: serverTimestamp() });
+  } catch (err) {
+    prod.featured = !prod.featured;
+    showAlert("Error: " + err.message, "error");
+  }
+  renderDashboard();
 }
 
 // ─── BUNNY CDN UPLOAD ───
