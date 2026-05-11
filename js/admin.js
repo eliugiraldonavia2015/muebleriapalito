@@ -153,13 +153,13 @@ async function runLoader() {
 
   await tl;
 
-  // Always sync seed-data.js catalog to Firestore on every admin load
-  setLoaderStatus(statusEl, barEl, gsap, "Sincronizando catálogo...", "40%");
-  await runSeed();
+  setLoaderStatus(statusEl, barEl, gsap, "Verificando catalogo...", "40%");
+  await runSeedIfNeeded();
 
-  setLoaderStatus(statusEl, barEl, gsap, "Cargando categorias...", "75%");
+  setLoaderStatus(statusEl, barEl, gsap, "Cargando datos...", "75%");
   await loadCategories();
   await loadProducts();
+  await loadSettings();
 
   setLoaderStatus(statusEl, barEl, gsap, "Preparando panel...", "95%");
   renderDashboard();
@@ -834,6 +834,22 @@ async function toggleFeaturedProduct(prodId) {
   renderDashboard();
 }
 
+async function deleteImageFromBunny(imageUrl) {
+  if (!imageUrl || !imageUrl.startsWith(BUNNY_CDN.cdnUrl)) return;
+  const path = imageUrl.slice(BUNNY_CDN.cdnUrl.length);
+  const storageUrl = BUNNY_CDN.apiUrl + "/" + BUNNY_CDN.zoneName + path;
+  try {
+    await fetch(storageUrl, { method: "DELETE", headers: { AccessKey: BUNNY_CDN.apiKey } });
+    // Purge CDN cache so the file stops being served immediately
+    await fetch("https://api.bunny.net/purge?url=" + encodeURIComponent(imageUrl), {
+      method: "POST",
+      headers: { AccessKey: BUNNY_CDN.apiKey }
+    });
+  } catch (e) {
+    console.warn("[BUNNY] DELETE/purge failed:", e.message);
+  }
+}
+
 // ─── BUNNY CDN UPLOAD ───
 async function uploadImageToBunny(file, subFolder) {
   if (subFolder === void 0) { subFolder = 'products'; }
@@ -878,6 +894,17 @@ async function uploadImageToBunny(file, subFolder) {
 }
 
 // ─── SEED ───
+async function runSeedIfNeeded() {
+  try {
+    const snap = await getDoc(doc(db, COL_SETTINGS, "store"));
+    if (snap.exists() && (snap.data().catalogVersion || 0) >= 2) {
+      settings = snap.data();
+      return; // already seeded, skip destructive reset
+    }
+  } catch { /* proceed to seed on error */ }
+  await runSeed();
+}
+
 async function runSeed() {
 
   // Clean: delete all existing products before re-seeding
@@ -1106,6 +1133,25 @@ document.getElementById("settingsForm").addEventListener("submit", async e => {
 
 document.getElementById("resetSettingsBtn").addEventListener("click", () => populateSettingsForm());
 
+document.getElementById("hardResetCatalogBtn").addEventListener("click", async () => {
+  if (!confirm("Esto BORRARA todo el catalogo actual y lo recargara desde seed-data.js. Continuar?")) return;
+  const btn = document.getElementById("hardResetCatalogBtn");
+  btn.disabled = true;
+  btn.textContent = "Reseteando...";
+  try {
+    await runSeed();
+    await loadCategories();
+    await loadProducts();
+    renderDashboard();
+    renderCatCards();
+    showAlert("Catalogo reseteado correctamente.");
+  } catch (err) {
+    showAlert("Error: " + err.message, "error");
+  }
+  btn.disabled = false;
+  btn.textContent = "Resetear catalogo";
+});
+
 // ─── CATEGORY MODAL ───
 document.getElementById("addCategoryBtn").addEventListener("click", () => {
   editingCatId = null;
@@ -1200,10 +1246,22 @@ function editCategory(id) {
 }
 
 async function deleteCategory(id) {
-  if (!confirm("Eliminar esta categoria?")) return;
+  if (!confirm("Eliminar esta categoria y TODOS sus productos?")) return;
   try {
-    await deleteDoc(doc(db, COL_CATEGORIES, id));
-    showAlert("Categoria eliminada.");
+    const ids = [...new Set([id, id.toLowerCase()])];
+    const q = query(collection(db, COL_PRODUCTS), where("categoryId", "in", ids));
+    const prodsSnap = await getDocs(q);
+    const imageUrls = prodsSnap.docs.map(d => d.data().primaryImage || d.data().imageUrl).filter(Boolean);
+
+    const b = writeBatch(db);
+    prodsSnap.docs.forEach(d => b.delete(d.ref));
+    b.delete(doc(db, COL_CATEGORIES, id));
+    await b.commit();
+
+    await Promise.allSettled(imageUrls.map(url => deleteImageFromBunny(url)));
+    products = products.filter(p => !ids.includes(p.categoryId));
+
+    showAlert("Categoria eliminada. " + prodsSnap.size + " producto(s) eliminado(s).");
     await loadCategories();
     renderCatCards();
     renderDashboard();
@@ -1307,6 +1365,7 @@ function openProductDrawer(id = null, preCatId = null) {
     populateSubcategorySelect(preCatId || "", "");
   }
   renderColorSwatches();
+  document.getElementById("deleteProductBtn").style.display = id ? "inline-flex" : "none";
   console.log("[DRAWER] Showing overlay + animating drawer...");
   overlay.style.display = "flex";
   console.log("[DRAWER] overlay.display set to:", overlay.style.display);
@@ -1374,6 +1433,9 @@ document.getElementById("prodImageFile").addEventListener("change", async functi
 
 document.getElementById("cancelProductDrawerBtn").addEventListener("click", closeProductDrawer);
 document.getElementById("productDrawerOverlay").addEventListener("click", closeProductDrawer);
+document.getElementById("deleteProductBtn").addEventListener("click", async () => {
+  if (editingProdId) { await deleteProduct(editingProdId); closeProductDrawer(); }
+});
 
 document.getElementById("addProductBtn").addEventListener("click", () => openProductDrawer(null, null));
 
@@ -1468,9 +1530,12 @@ function editProduct(id) {
 }
 
 async function deleteProduct(id) {
+  const prod = catProductsAll.find(p => p.id === id) || products.find(p => p.id === id);
   if (!confirm("Eliminar este producto?")) return;
   try {
     await deleteDoc(doc(db, COL_PRODUCTS, id));
+    if (prod) await deleteImageFromBunny(prod.primaryImage || prod.imageUrl);
+    products = products.filter(p => p.id !== id);
     showAlert("Producto eliminado.");
     renderDashboard();
     if (currentDetailCatId) await loadCategoryProducts(currentDetailCatId);

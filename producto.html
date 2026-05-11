@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title id="page-title">Producto — Muebleria Palito Outlet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js"></script>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#0c1f14;--bg2:#122a1c;--cream:#e8f5ec;--cream-dim:#9dc4aa;
+      --copper:#3a8c5c;--copper-lt:#5ab87c;--white:#f0faf3;--rule:rgba(160,220,180,.12);
+      --f-display:'Cormorant Garamond',Georgia,serif;--f-wide:'Bebas Neue',sans-serif;
+      --f-body:'DM Sans',sans-serif;
+      --ease-silk:cubic-bezier(.22,.88,.12,1);--ease-snappy:cubic-bezier(.76,0,.18,1);
+    }
+    body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-weight:300;overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    img{display:block;width:100%;height:100%;object-fit:cover}
+    button{border:none;background:none;font-family:var(--f-body);cursor:pointer}
+
+    body::after{content:'';position:fixed;inset:0;z-index:9990;pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");opacity:.028}
+
+    ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--copper);border-radius:2px}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:0 clamp(24px,5vw,80px);height:72px;display:flex;align-items:center;justify-content:space-between;background:rgba(12,31,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--rule)}
+    .nav-logo{display:flex;align-items:center}
+    .nav-logo img{height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,.5))}
+    .nav-links{display:flex;gap:40px;list-style:none;font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+    .nav-links li a{color:var(--cream-dim);transition:color .3s;position:relative}
+    .nav-links li a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:var(--copper);transition:width .4s var(--ease-silk)}
+    .nav-links li a:hover{color:var(--cream)}
+    .nav-links li a:hover::after{width:100%}
+    .nav-actions{display:flex;align-items:center;gap:20px}
+    .nav-icon{width:20px;height:20px;stroke:var(--cream-dim);transition:stroke .3s}
+    .nav-icon:hover{stroke:var(--cream)}
+
+    /* BACK BUTTON */
+    .back-bar{margin-top:72px;padding:16px clamp(24px,5vw,80px);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--rule)}
+    .back-btn{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream-dim);transition:color .3s}
+    .back-btn:hover{color:var(--cream)}
+    .back-btn svg{width:14px;height:14px;stroke:currentColor}
+    .breadcrumb-sep{color:var(--copper);opacity:.5;font-size:11px}
+    .breadcrumb-cat{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-dim)}
+    .breadcrumb-name{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}
+
+    /* PRODUCT DETAIL */
+    .product-detail{display:grid;grid-template-columns:58fr 42fr;min-height:calc(100vh - 120px);border-bottom:1px solid var(--rule)}
+
+    /* IMAGE PANEL */
+    .img-panel{position:sticky;top:120px;height:calc(100vh - 120px);overflow:hidden;border-right:1px solid var(--rule)}
+    .main-img-wrap{position:relative;height:calc(100% - 112px);overflow:hidden;cursor:crosshair}
+    .main-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform 6s var(--ease-silk)}
+    .main-img-wrap:hover img{transform:scale(1.04)}
+
+    /* LOUPE */
+    .loupe{position:absolute;width:160px;height:160px;border-radius:50%;border:2px solid rgba(90,184,124,.6);box-shadow:0 0 0 1px rgba(0,0,0,.4),0 8px 32px rgba(0,0,0,.5);pointer-events:none;overflow:hidden;opacity:0;z-index:50;transform:translate(-50%,-50%);background-repeat:no-repeat;background-size:280%;will-change:transform,left,top}
+    .loupe-ring{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(90,184,124,.25);pointer-events:none}
+
+    /* THUMBNAIL STRIP */
+    .thumb-strip{height:104px;display:flex;gap:8px;padding:12px 20px;background:rgba(18,42,28,.8);overflow-x:auto;scrollbar-width:none;align-items:center}
+    .thumb-strip::-webkit-scrollbar{display:none}
+    .thumb{width:76px;height:76px;flex-shrink:0;overflow:hidden;border:2px solid transparent;cursor:pointer;transition:border-color .25s,transform .25s}
+    .thumb:hover{transform:scale(1.06)}
+    .thumb.active{border-color:var(--copper)}
+    .thumb img{width:100%;height:100%;object-fit:cover}
+
+    /* INFO PANEL */
+    .info-panel{padding:clamp(32px,4vw,60px) clamp(28px,4vw,56px);display:flex;flex-direction:column;gap:0;overflow-y:auto;max-height:calc(100vh - 120px)}
+    .prod-category{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--copper);margin-bottom:10px;opacity:0}
+    .prod-name{font-family:var(--f-display);font-size:clamp(32px,4.5vw,56px);font-weight:300;line-height:1.05;color:var(--cream);margin-bottom:6px;opacity:0}
+    .prod-subcategory{font-size:11px;letter-spacing:.14em;color:var(--cream-dim);margin-bottom:28px;opacity:0}
+    .prod-price-row{display:flex;align-items:baseline;gap:14px;margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid var(--rule);opacity:0}
+    .prod-price{font-family:var(--f-display);font-size:clamp(28px,3.5vw,44px);font-weight:600;color:var(--cream)}
+    .prod-price-orig{font-family:var(--f-display);font-size:22px;color:var(--cream-dim);text-decoration:line-through;opacity:.5}
+    .prod-discount{font-size:11px;letter-spacing:.12em;background:var(--copper);color:var(--bg);padding:3px 8px;font-weight:500}
+
+    .prod-desc{font-size:14px;line-height:1.75;color:var(--cream-dim);margin-bottom:32px;opacity:0}
+
+    /* COLORS */
+    .prod-colors{margin-bottom:32px;opacity:0}
+    .prod-colors-label{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--cream-dim);margin-bottom:12px}
+    .color-swatches{display:flex;gap:10px;flex-wrap:wrap}
+    .cswatch{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:border-color .2s,transform .25s;position:relative}
+    .cswatch:hover{transform:scale(1.2)}
+    .cswatch.active{border-color:var(--cream)}
+    .cswatch.active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid var(--copper)}
+
+    /* QUANTITY */
+    .prod-qty{margin-bottom:36px;opacity:0}
+    .prod-qty-label{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--cream-dim);margin-bottom:12px}
+    .qty-control{display:inline-flex;align-items:center;border:1px solid var(--rule)}
+    .qty-btn{width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:var(--cream-dim);font-size:18px;transition:color .2s,background .2s}
+    .qty-btn:hover{color:var(--cream);background:rgba(160,220,180,.06)}
+    .qty-val{width:52px;text-align:center;font-family:var(--f-display);font-size:20px;color:var(--cream);border-left:1px solid var(--rule);border-right:1px solid var(--rule)}
+
+    /* CTA */
+    .prod-cta{display:flex;flex-direction:column;gap:12px;margin-bottom:36px;opacity:0}
+    .btn-order{display:flex;align-items:center;justify-content:center;gap:10px;height:52px;background:var(--copper);color:var(--bg);font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:500;transition:background .3s,transform .2s}
+    .btn-order:hover{background:var(--copper-lt);transform:translateY(-1px)}
+    .btn-order svg{width:18px;height:18px;stroke:currentColor;fill:none}
+    .btn-secondary{display:flex;align-items:center;justify-content:center;height:48px;border:1px solid var(--rule);color:var(--cream-dim);font-size:11px;letter-spacing:.2em;text-transform:uppercase;transition:border-color .3s,color .3s}
+    .btn-secondary:hover{border-color:var(--copper);color:var(--cream)}
+
+    /* ACCORDION SPECS */
+    .specs-section{border-top:1px solid var(--rule);opacity:0}
+    .specs-toggle{display:flex;align-items:center;justify-content:space-between;padding:18px 0;cursor:pointer;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cream-dim);transition:color .2s}
+    .specs-toggle:hover{color:var(--cream)}
+    .specs-chevron{width:14px;height:14px;stroke:currentColor;transition:transform .35s var(--ease-silk)}
+    .specs-body{height:0;overflow:hidden}
+    .specs-body.open{height:auto}
+    .specs-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding-bottom:20px}
+    .spec-item{display:flex;flex-direction:column;gap:4px}
+    .spec-label{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--copper);opacity:.7}
+    .spec-val{font-size:13px;color:var(--cream)}
+
+    /* ORDER PANEL */
+    .order-panel{background:var(--bg2);border-top:1px solid var(--rule);padding:0 clamp(24px,5vw,80px);max-height:0;overflow:hidden;transition:max-height .6s var(--ease-silk)}
+    .order-panel.open{max-height:900px}
+    .order-inner{padding:48px 0}
+    .order-title{font-family:var(--f-display);font-size:clamp(28px,3vw,44px);font-weight:300;margin-bottom:8px}
+    .order-sub{font-size:13px;color:var(--cream-dim);margin-bottom:40px}
+    .order-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+    .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:20px}
+    .form-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--copper)}
+    .form-input{background:transparent;border:none;border-bottom:1px solid var(--rule);padding:10px 0;font-family:var(--f-body);font-size:14px;color:var(--cream);outline:none;transition:border-color .25s;width:100%}
+    .form-input:focus{border-color:var(--copper)}
+    .form-input::placeholder{color:rgba(157,196,170,.35);font-size:13px}
+    .form-select{background:var(--bg);border:1px solid var(--rule);padding:10px 14px;font-family:var(--f-body);font-size:13px;color:var(--cream);outline:none;width:100%;cursor:pointer;transition:border-color .25s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239dc4aa' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-color:var(--bg)}
+    .form-select:focus{border-color:var(--copper)}
+    .form-select option{background:var(--bg)}
+    .payment-opts{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+    .pay-opt{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid var(--rule);cursor:pointer;transition:border-color .25s}
+    .pay-opt:hover{border-color:rgba(90,184,124,.3)}
+    .pay-opt.selected{border-color:var(--copper);background:rgba(58,140,92,.06)}
+    .pay-radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--rule);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:border-color .2s}
+    .pay-opt.selected .pay-radio{border-color:var(--copper)}
+    .pay-dot{width:7px;height:7px;border-radius:50%;background:var(--copper);opacity:0;transition:opacity .2s}
+    .pay-opt.selected .pay-dot{opacity:1}
+    .pay-name{font-size:13px;color:var(--cream)}
+    .pay-desc{font-size:11px;color:var(--cream-dim);margin-left:auto}
+    .order-summary{background:rgba(12,31,20,.6);border:1px solid var(--rule);padding:24px}
+    .summary-title{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--copper);margin-bottom:20px}
+    .summary-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;font-size:13px}
+    .summary-row.total{border-top:1px solid var(--rule);padding-top:14px;margin-top:14px}
+    .summary-label{color:var(--cream-dim)}
+    .summary-val{color:var(--cream);font-family:var(--f-display);font-size:16px}
+    .summary-val.big{font-size:24px;color:var(--cream)}
+    .btn-whatsapp{display:flex;align-items:center;justify-content:center;gap:12px;height:56px;background:#25D366;color:#fff;font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:500;width:100%;margin-top:24px;transition:background .3s,transform .2s}
+    .btn-whatsapp:hover{background:#20bd5a;transform:translateY(-1px)}
+    .btn-whatsapp svg{width:22px;height:22px;fill:currentColor}
+
+    /* RELATED */
+    .related-section{padding:clamp(60px,8vw,120px) clamp(24px,5vw,80px)}
+    .section-header{display:flex;align-items:baseline;gap:24px;margin-bottom:48px}
+    .section-title{font-family:var(--f-wide);font-size:clamp(28px,5vw,56px);letter-spacing:.04em;color:var(--cream)}
+    .section-line{flex:1;height:1px;background:var(--rule)}
+    .related-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .rel-card{cursor:pointer;overflow:hidden}
+    .rel-img{aspect-ratio:3/4;overflow:hidden;position:relative}
+    .rel-img img{width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease-silk)}
+    .rel-card:hover .rel-img img{transform:scale(1.06)}
+    .rel-badge{position:absolute;top:12px;left:12px;background:var(--copper);color:var(--bg);font-size:10px;letter-spacing:.12em;padding:3px 8px;font-weight:500}
+    .rel-info{padding:14px 0 8px}
+    .rel-cat{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--copper);margin-bottom:4px}
+    .rel-name{font-family:var(--f-display);font-size:18px;font-weight:300;color:var(--cream);margin-bottom:6px;line-height:1.2}
+    .rel-price{font-family:var(--f-display);font-size:16px;color:var(--cream)}
+
+    /* NOT FOUND */
+    .not-found{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;text-align:center}
+    .not-found-title{font-family:var(--f-wide);font-size:clamp(40px,8vw,80px);color:var(--copper);letter-spacing:.04em}
+    .not-found-sub{font-size:14px;color:var(--cream-dim)}
+
+    /* RESPONSIVE */
+    @media(max-width:900px){
+      .product-detail{grid-template-columns:1fr;min-height:auto}
+      .img-panel{position:relative;top:0;height:50vw;min-height:320px}
+      .info-panel{max-height:none;overflow-y:visible}
+      .order-grid{grid-template-columns:1fr}
+      .related-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media(max-width:600px){
+      .related-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+      .thumb{width:60px;height:60px}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <img src="logo.png" alt="Muebleria Palito Outlet"/>
+    </a>
+    <ul class="nav-links" id="nav-links"></ul>
+    <div class="nav-actions">
+      <a href="catalogo.html" aria-label="Catalogo">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+        </svg>
+      </a>
+    </div>
+  </nav>
+
+  <!-- BACK BAR -->
+  <div class="back-bar">
+    <button class="back-btn" id="back-btn" onclick="history.back()">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Volver
+    </button>
+    <span class="breadcrumb-sep">›</span>
+    <a href="catalogo.html" class="breadcrumb-cat" id="bc-cat">Catalogo</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-name" id="bc-name">Producto</span>
+  </div>
+
+  <!-- PRODUCT DETAIL -->
+  <section class="product-detail" id="product-detail">
+
+    <!-- IMAGE PANEL -->
+    <div class="img-panel" id="img-panel">
+      <div class="main-img-wrap" id="img-wrap">
+        <img id="main-img" src="" alt=""/>
+        <div class="loupe" id="loupe">
+          <div class="loupe-ring"></div>
+        </div>
+      </div>
+      <div class="thumb-strip" id="thumb-strip"></div>
+    </div>
+
+    <!-- INFO PANEL -->
+    <div class="info-panel" id="info-panel">
+      <div class="prod-category" id="prod-category"></div>
+      <h1 class="prod-name" id="prod-name"></h1>
+      <div class="prod-subcategory" id="prod-subcategory"></div>
+      <div class="prod-price-row" id="prod-price-row">
+        <span class="prod-price" id="prod-price"></span>
+        <span class="prod-price-orig" id="prod-price-orig" style="display:none"></span>
+        <span class="prod-discount" id="prod-discount" style="display:none"></span>
+      </div>
+      <p class="prod-desc" id="prod-desc"></p>
+      <div class="prod-colors" id="prod-colors-wrap">
+        <div class="prod-colors-label">Color</div>
+        <div class="color-swatches" id="prod-colors"></div>
+      </div>
+      <div class="prod-qty" id="prod-qty-wrap">
+        <div class="prod-qty-label">Cantidad</div>
+        <div class="qty-control">
+          <button class="qty-btn" id="qty-minus">−</button>
+          <div class="qty-val" id="qty-val">1</div>
+          <button class="qty-btn" id="qty-plus">+</button>
+        </div>
+      </div>
+      <div class="prod-cta" id="prod-cta">
+        <button class="btn-order" id="btn-order">
+          <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          Hacer pedido por WhatsApp
+        </button>
+        <a href="catalogo.html" class="btn-secondary">Ver mas productos</a>
+      </div>
+      <div class="specs-section" id="specs-section">
+        <button class="specs-toggle" id="specs-toggle">
+          Especificaciones
+          <svg class="specs-chevron" id="specs-chevron" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="specs-body" id="specs-body">
+          <div class="specs-grid" id="specs-grid"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ORDER PANEL -->
+  <div class="order-panel" id="order-panel">
+    <div class="order-inner">
+      <h2 class="order-title">Completa tu pedido</h2>
+      <p class="order-sub">Te contactaremos por WhatsApp para coordinar la entrega.</p>
+      <div class="order-grid">
+        <div>
+          <div class="form-group">
+            <label class="form-label">Nombre completo</label>
+            <input class="form-input" id="o-name" type="text" placeholder="Tu nombre"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Telefono / WhatsApp</label>
+            <input class="form-input" id="o-phone" type="tel" placeholder="+504 9999-9999"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Direccion de entrega</label>
+            <input class="form-input" id="o-address" type="text" placeholder="Calle, colonia, ciudad"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Referencias adicionales</label>
+            <input class="form-input" id="o-ref" type="text" placeholder="Punto de referencia, indicaciones..."/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Metodo de pago</label>
+            <div class="payment-opts" id="payment-opts">
+              <div class="pay-opt selected" data-pay="efectivo">
+                <div class="pay-radio"><div class="pay-dot"></div></div>
+                <span class="pay-name">Efectivo</span>
+                <span class="pay-desc">Al entregar</span>
+              </div>
+              <div class="pay-opt" data-pay="transferencia">
+                <div class="pay-radio"><div class="pay-dot"></div></div>
+                <span class="pay-name">Transferencia</span>
+                <span class="pay-desc">BAC / Ficohsa</span>
+              </div>
+              <div class="pay-opt" data-pay="tarjeta">
+                <div class="pay-radio"><div class="pay-dot"></div></div>
+                <span class="pay-name">Tarjeta</span>
+                <span class="pay-desc">Debito / Credito</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notas del pedido</label>
+            <input class="form-input" id="o-notes" type="text" placeholder="Color, medidas, preferencias..."/>
+          </div>
+        </div>
+        <div>
+          <div class="order-summary" id="order-summary">
+            <div class="summary-title">Resumen del pedido</div>
+            <div class="summary-row">
+              <span class="summary-label" id="s-prod-name">—</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Cantidad</span>
+              <span class="summary-val" id="s-qty">1</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Precio unitario</span>
+              <span class="summary-val" id="s-unit-price">—</span>
+            </div>
+            <div class="summary-row total">
+              <span class="summary-label">Total estimado</span>
+              <span class="summary-val big" id="s-total">—</span>
+            </div>
+          </div>
+          <button class="btn-whatsapp" id="btn-whatsapp">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.133.558 4.133 1.535 5.867L.057 23.5l5.764-1.513A11.938 11.938 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818c-1.96 0-3.782-.537-5.337-1.47l-.383-.228-3.42.897.913-3.32-.25-.404A9.793 9.793 0 012.182 12C2.182 6.573 6.573 2.182 12 2.182c5.426 0 9.818 4.39 9.818 9.818 0 5.427-4.392 9.818-9.818 9.818z"/></svg>
+            Enviar pedido por WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RELATED -->
+  <section class="related-section" id="related-section" style="display:none">
+    <div class="section-header">
+      <h2 class="section-title">Tambien te puede gustar</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="related-grid" id="related-grid"></div>
+  </section>
+
+  <script type="module" src="js/producto-renderer.js"></script>
+</body>
+</html>

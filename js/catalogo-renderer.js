@@ -184,6 +184,17 @@ function renderProductsGrid(products) {
       </div>
     </div>
   `).join("");
+
+  // Make cards navigate to producto.html
+  grid.querySelectorAll('.product-card').forEach((card, i) => {
+    const p = filtered[i];
+    if (!p) return;
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.btn-cart') || e.target.closest('.btn-wish')) return;
+      window.location.href = 'producto.html?id=' + p.id;
+    });
+  });
 }
 
 // ─── ACCORDION REINIT (from inline script) ───

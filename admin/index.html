@@ -611,6 +611,7 @@
         </div>
 
         <div style="display:flex;gap:16px;justify-content:flex-end;padding-top:8px">
+          <button type="button" class="btn btn-danger btn-sm" id="hardResetCatalogBtn" style="margin-right:auto" title="Borra todo y recarga el catalogo desde seed-data.js">Resetear catalogo</button>
           <button type="button" class="btn btn-ghost" id="resetSettingsBtn">Restablecer</button>
           <button type="submit" class="btn btn-primary" id="saveSettingsBtn">
             <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -750,6 +751,7 @@
     </form>
   </div>
   <div class="drawer-footer">
+    <button type="button" class="btn btn-danger btn-sm" id="deleteProductBtn" style="display:none;margin-right:auto">Eliminar producto</button>
     <button type="button" class="btn btn-ghost" id="cancelProductDrawerBtn">Cancelar</button>
     <button type="submit" form="productForm" class="btn btn-primary">Guardar</button>
   </div>
