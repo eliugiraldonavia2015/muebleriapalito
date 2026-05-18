@@ -237,6 +237,11 @@
     /* SKELETON LOADING */
     .skeleton{background:linear-gradient(90deg,#f0f0ec 0%,#e8e8e4 40%,#f5f5f2 60%,#f0f0ec 100%);background-size:200% 100%;animation:skelShimmer 1.5s ease-in-out infinite;border-radius:4px}
     @keyframes skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* LOAD MORE */
+    .load-sentinel{grid-column:1/-1;height:48px;display:flex;align-items:center;justify-content:center}
+    .load-more-spinner{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--cream-dim)}
 
     .skel-card{overflow:hidden}
     .skel-img{height:280px;width:100%;border-radius:0}
@@ -494,14 +499,8 @@
         </div>
       </div>
 
-      <div class="pagination">
-        <a href="#" class="page-btn"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></a>
-        <a href="#" class="page-btn active">1</a>
-        <a href="#" class="page-btn">2</a>
-        <a href="#" class="page-btn">3</a>
-        <span class="page-btn" style="border:none;color:var(--cream-dim)">...</span>
-        <a href="#" class="page-btn">7</a>
-        <a href="#" class="page-btn"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
+      <div class="pagination" id="pagination-bar">
+        <span class="page-btn" id="pagination-info" style="border:none;color:var(--cream-dim);cursor:default;"></span>
       </div>
     </main>
   </div>
@@ -564,8 +563,8 @@
       scrollTrigger: { trigger: '.cat-hero', start: 'top top', end: 'bottom top', scrub: 1.2 }
     });
 
-    // Hero entrance
-    gsap.from(['.breadcrumb','.cat-hero-title','.cat-hero-count'], {
+    // Hero entrance — hero-count is populated dynamically, skip animation on it
+    gsap.from(['.breadcrumb','.cat-hero-title'], {
       y: 30, autoAlpha: 0, stagger: .15, duration: .8, ease: 'power3.out', delay: .2
     });
 

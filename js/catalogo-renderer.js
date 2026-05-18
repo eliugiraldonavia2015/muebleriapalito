@@ -1,7 +1,7 @@
 /**
  * Renders catalogo.html dynamically from Firestore.
- * Replaces all inline product data, category sidebar, hero, chips, pagination
- * while preserving the existing GSAP animations.
+ * Infinite scroll – products load in batches, not all at once.
+ * Skeletons show while Firestore fetches, then cards appear in smooth batches.
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -14,10 +14,18 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const $ = s => document.querySelector(s);
 
-// ─── URL PARAMS ─── normalize to lowercase to handle ?cat=Salas and ?cat=salas
+const PAGE_SIZE = 12;
+
+// ─── URL PARAMS ─── normalize to lowercase
 const params = new URLSearchParams(window.location.search);
 const activeCat = (params.get('cat') || '').toLowerCase();
 const activeSub = (params.get('sub') || '').toLowerCase();
+
+// ─── STATE ───
+let allProducts = [];
+let filteredProducts = [];
+let shownCount = 0;
+let scrollObserver = null;
 
 // ─── FETCH ───
 async function getCategories() {
@@ -27,8 +35,7 @@ async function getCategories() {
 }
 
 async function getProducts() {
-  let q = collection(db, "products");
-  q = query(q, orderBy("displayOrder", "asc"));
+  const q = query(collection(db, "products"), orderBy("displayOrder", "asc"));
   const snap = await getDocs(q);
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
@@ -102,26 +109,20 @@ function addUbicacionesBtn() {
 function renderHero(categories) {
   let target = null;
   if (activeCat) {
-    // activeCat already lowercased; slugify(c.name) also lowercases → safe match
     target = categories.find(c => slugify(c.name) === activeCat || slugify(c.id) === activeCat);
   }
   if (!target && categories.length) {
-    // Default to first category
     target = categories[0];
   }
   if (!target) return;
 
   const label = target.name;
   const img = target.heroImage || target.imageUrl || "";
-  const count = target.productCount || 0;
-  const subLabel = activeSub || (target.subcategoryList && target.subcategoryList[0] ? target.subcategoryList[0].name || target.subcategoryList[0] : "");
 
-  // Update DOM
   $("#hero-title").innerHTML = label;
   $("#bc-cat").textContent = label;
   $("#page-title").textContent = label + " — Muebleria Palito Outlet";
-  $("#hero-count").textContent = count + " productos";
-  $("#result-count").textContent = count;
+  // hero-count stays empty until real products load (no flash)
   if (img) $("#hero-img").src = img;
 }
 
@@ -155,117 +156,182 @@ function renderSidebar(categories) {
   });
 
   container.innerHTML = html;
-  // Re-attach accordion events (copied from inline script logic)
   reinitAccordion();
 }
 
 // ─── RENDER PRODUCT GRID ───
 function renderProductsGrid(products) {
-  const grid = $("#product-grid");
-  if (!grid) return;
+  allProducts = products;
+  applyFilters();
+  shownCount = 0;
+  loadNextBatch();
+}
 
-  // Filter by category — match against category name slug OR categoryId slug
-  let filtered = products;
+function applyFilters() {
+  let result = [...allProducts];
   if (activeCat) {
-    filtered = products.filter(p => {
+    result = result.filter(p => {
       const byCatName = slugify(p.category || "");
       const byCatId   = slugify(p.categoryId || "");
       return byCatName === activeCat || byCatId === activeCat;
     });
-    if (activeSub && filtered.length) {
-      filtered = filtered.filter(p => slugify(p.subcategory || "") === activeSub);
+    if (activeSub && result.length) {
+      result = result.filter(p => slugify(p.subcategory || "") === activeSub);
     }
   }
+  filteredProducts = result;
+  shownCount = 0;
 
-  $("#result-count").textContent = filtered.length;
-  $("#hero-count").textContent = filtered.length + " productos";
+  // Update counts
+  $("#result-count").textContent = filteredProducts.length;
+  $("#hero-count").textContent = filteredProducts.length + " productos";
+}
 
-  if (!filtered.length) {
+function loadNextBatch() {
+  if (scrollObserver) { scrollObserver.disconnect(); scrollObserver = null; }
+
+  const grid = $("#product-grid");
+  if (!grid) return;
+
+  // Remove existing sentinel
+  const oldSentinel = grid.querySelector(".load-sentinel");
+  if (oldSentinel) oldSentinel.remove();
+
+  if (!filteredProducts.length) {
     grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--cream-dim)">No se encontraron productos en esta categoría.</p>`;
     return;
   }
 
-  // Fade out skeletons, then swap
-  const skeletons = grid.querySelectorAll('.skeleton-loader');
-  if (skeletons.length && window.gsap) {
-    window.gsap.to(skeletons, {
-      opacity: 0, scale: 0.97, duration: 0.25, ease: "power2.in",
-      stagger: 0.05,
-      onComplete: () => {
-        grid.innerHTML = filtered.map(p => `
-          <div class="product-card">
-            <div class="product-img-wrap">
-              <img src="${p.imageUrl || 'https://via.placeholder.com/500'}" alt="${p.name}"/>
-              ${badgeHTML(p)}
-              <div class="product-actions">
-                <button class="btn-cart">Agregar al carrito</button>
-                <button class="btn-wish" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>
-              </div>
-            </div>
-            <div class="product-info">
-              <div class="product-cat">${p.category || ""}</div>
-              <div class="product-name">${p.name}</div>
-              <div class="product-desc">${p.description || ""}</div>
-              <div class="product-foot">
-                <div class="product-price">
-                  <span class="price-current">${priceFmt(p.price)}</span>
-                  ${p.originalPrice ? `<span class="price-original">${priceFmt(p.originalPrice)}</span>` : ""}
-                  ${p.discountPct ? `<span class="price-off">-${Math.abs(p.discountPct)}%</span>` : ""}
-                </div>
-                ${colorsHTML(p.colors)}
-              </div>
-            </div>
-          </div>
-        `).join("");
-      }
-    });
+  const allSkeletons = grid.querySelectorAll('.skeleton-loader');
+
+  if (shownCount === 0 && allSkeletons.length) {
+    // First batch: fade out skeletons, then swap with cards
+    const skeletons = Array.from(allSkeletons);
+    const dur = 250 + 60 * (skeletons.length - 1);
+    if (window.gsap) {
+      gsap.to(skeletons, {
+        opacity: 0, scale: 0.96,
+        duration: 0.25, ease: "power2.in", stagger: 0.06
+      });
+      setTimeout(() => {
+        grid.innerHTML = '';
+        buildCardsBatch(grid);
+      }, dur + 50);
+    } else {
+      grid.innerHTML = '';
+      buildCardsBatch(grid);
+    }
   } else {
-    grid.innerHTML = filtered.map(p => `
-      <div class="product-card">
-        <div class="product-img-wrap">
-          <img src="${p.imageUrl || 'https://via.placeholder.com/500'}" alt="${p.name}"/>
-          ${badgeHTML(p)}
-          <div class="product-actions">
-            <button class="btn-cart">Agregar al carrito</button>
-            <button class="btn-wish" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>
-          </div>
-        </div>
-        <div class="product-info">
-          <div class="product-cat">${p.category || ""}</div>
-          <div class="product-name">${p.name}</div>
-          <div class="product-desc">${p.description || ""}</div>
-          <div class="product-foot">
-            <div class="product-price">
-              <span class="price-current">${priceFmt(p.price)}</span>
-              ${p.originalPrice ? `<span class="price-original">${priceFmt(p.originalPrice)}</span>` : ""}
-              ${p.discountPct ? `<span class="price-off">-${Math.abs(p.discountPct)}%</span>` : ""}
-            </div>
-            ${colorsHTML(p.colors)}
-          </div>
+    // Subsequent batches: just append
+    buildCardsBatch(grid);
+  }
+}
+
+function buildCardsBatch(grid) {
+  const batch = filteredProducts.slice(shownCount, shownCount + PAGE_SIZE);
+  if (!batch.length) return;
+
+  const fragment = document.createDocumentFragment();
+
+  batch.forEach((p, i) => {
+    const card = document.createElement("div");
+    card.className = "product-card";
+    card.innerHTML = `
+      <div class="product-img-wrap">
+        <img src="${p.imageUrl || 'https://via.placeholder.com/500'}" alt="${p.name}"/>
+        ${badgeHTML(p)}
+        <div class="product-actions">
+          <button class="btn-cart">Agregar al carrito</button>
+          <button class="btn-wish" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>
         </div>
       </div>
-    `).join("");
-  }
-
-  // Make cards navigate to producto.html
-  grid.querySelectorAll('.product-card').forEach((card, i) => {
-    const p = filtered[i];
-    if (!p) return;
+      <div class="product-info">
+        <div class="product-cat">${p.category || ""}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-desc">${p.description || ""}</div>
+        <div class="product-foot">
+          <div class="product-price">
+            <span class="price-current">${priceFmt(p.price)}</span>
+            ${p.originalPrice ? `<span class="price-original">${priceFmt(p.originalPrice)}</span>` : ""}
+            ${p.discountPct ? `<span class="price-off">-${Math.abs(p.discountPct)}%</span>` : ""}
+          </div>
+          ${colorsHTML(p.colors)}
+        </div>
+      </div>
+    `;
     card.style.cursor = 'pointer';
     card.addEventListener('click', (e) => {
       if (e.target.closest('.btn-cart') || e.target.closest('.btn-wish')) return;
       window.location.href = 'producto.html?id=' + p.id;
     });
+    fragment.appendChild(card);
   });
+
+  grid.appendChild(fragment);
+  shownCount += batch.length;
+
+  // Animate new cards
+  if (window.gsap) {
+    const newCards = grid.querySelectorAll('.product-card');
+    // Only animate cards that were just added
+    const startIndex = newCards.length - batch.length;
+    const newCardArr = Array.from(newCards).slice(startIndex);
+    gsap.from(newCardArr, {
+      autoAlpha: 0, y: 32, duration: 0.55, stagger: 0.07,
+      ease: 'power3.out', clearProps: 'transform'
+    });
+  }
+
+  // Setup scroll sentinel for next batch
+  // Also reinit ScrollTrigger batch if available
+  if (shownCount < filteredProducts.length) {
+    const sentinel = document.createElement("div");
+    sentinel.className = "load-sentinel";
+    sentinel.style.cssText = "grid-column:1/-1;height:48px;display:flex;align-items:center;justify-content:center;";
+    sentinel.innerHTML = `<div class="load-more-spinner" style="display:flex;align-items:center;gap:10px;font-size:12px;color:#7b7b70;"><span class="spinner" style="width:16px;height:16px;border:2px solid rgba(0,0,0,.1);border-top-color:var(--copper);border-radius:50%;animation:spin .8s linear infinite;"></span><span>Cargando más...</span></div>`;
+    grid.appendChild(sentinel);
+
+    scrollObserver = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        scrollObserver.disconnect();
+        scrollObserver = null;
+        setTimeout(() => loadNextBatch(), 200);
+      }
+    }, { rootMargin: "400px" });
+    scrollObserver.observe(sentinel);
+  }
+
+  // Reinit ScrollTrigger batch
+  if (window.gsap && window.ScrollTrigger) {
+    setTimeout(() => {
+      window.ScrollTrigger.batch('.product-card', {
+        onEnter: els => window.gsap.to(els, { autoAlpha: 1, y: 0, duration: .65, stagger: .08, ease: 'power3.out', clearProps: 'transform' }),
+        start: 'top 88%'
+      });
+      window.ScrollTrigger.refresh();
+    }, 300);
+  }
+
+  // Update pagination info
+  const infoEl = document.getElementById("pagination-info");
+  if (infoEl) {
+    const total = filteredProducts.length;
+    const pct = Math.min(shownCount, total);
+    if (total === 0) {
+      infoEl.textContent = "No se encontraron productos";
+    } else if (shownCount >= total) {
+      infoEl.textContent = `Mostrando ${total} producto${total !== 1 ? "s" : ""}`;
+    } else {
+      infoEl.textContent = `Mostrando ${pct} de ${total} producto${total !== 1 ? "s" : ""}`;
+    }
+  }
 }
 
-// ─── ACCORDION REINIT (from inline script) ───
+// ─── ACCORDION REINIT ───
 function reinitAccordion() {
-  // Accordion: categories with subcategories
   document.querySelectorAll('.cat-has-sub').forEach(parent => {
     const catName = parent.dataset.cat;
     const subEl = document.getElementById('sub-' + slugify(catName));
-
     if (!subEl) return;
 
     parent.addEventListener('click', () => {
@@ -292,33 +358,27 @@ function reinitAccordion() {
 // ─── MAIN INIT ───
 async function init() {
   try {
-    // Phase 1: Load categories FIRST → hero + count appear immediately with skeletons still showing
-    const [categories, settings] = await Promise.all([
-      getCategories(),
-      getSettings()
-    ]);
-
+    // Phase 1: categories first → hero + sidebar visible
+    const categories = await getCategories();
     renderNav(categories);
     addUbicacionesBtn();
     renderHero(categories);
     renderSidebar(categories);
 
-    // Phase 2: Load products → replace skeletons with real cards
+    // Phase 2: load products → infinite scroll
     const products = await getProducts();
     renderProductsGrid(products);
-
-    // Re-initialize GSAP ScrollTrigger animations after DOM swap
-    if (window.gsap && window.ScrollTrigger) {
-      setTimeout(() => {
-        window.ScrollTrigger.batch('.product-card', {
-          onEnter: els => window.gsap.to(els, { autoAlpha: 1, y: 0, duration: .65, stagger: .08, ease: 'power3.out', clearProps: 'transform' }),
-          start: 'top 88%'
-        });
-        window.ScrollTrigger.refresh();
-      }, 300);
-    }
   } catch (err) {
     console.error("[catalogo-renderer] Error:", err);
+    // Hide skeletons on error
+    const grid = $("#product-grid");
+    if (grid) {
+      grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--cream-dim)">Error al cargar el catálogo. Intenta de nuevo.</p>`;
+      const errEl = document.createElement("div");
+      errEl.style.cssText = "grid-column:1/-1;text-align:center;color:#c0392b;font-size:12px;";
+      errEl.textContent = err.message;
+      grid.appendChild(errEl);
+    }
   }
 }
 

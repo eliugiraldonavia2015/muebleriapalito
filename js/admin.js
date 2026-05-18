@@ -8,7 +8,7 @@ import {
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js";
-import { CATEGORIES, PRODUCTS, SETTINGS } from "./seed-data.js";
+import { CATEGORIES, SETTINGS } from "./seed-data.js";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -906,29 +906,20 @@ async function runSeedIfNeeded() {
 }
 
 async function runSeed() {
+  // Only seed categories + settings — products are managed manually from the admin panel.
+  // No destructive cleanup of products here.
 
-  // Clean: delete all existing products before re-seeding
-  var prodsSnap = await getDocs(collection(db, COL_PRODUCTS));
-  if (!prodsSnap.empty) {
-    var bsize = 400;
-    var pids = prodsSnap.docs.map(d => d.ref);
-    for (var i = 0; i < pids.length; i += bsize) {
-      var del = writeBatch(db);
-      pids.slice(i, i + bsize).forEach(r => del.delete(r));
-      await del.commit();
-    }
-  }
-  // Clean: delete all existing categories before re-seeding
   var catsSnap = await getDocs(collection(db, COL_CATEGORIES));
   if (!catsSnap.empty) {
-    var del = writeBatch(db);
-    catsSnap.docs.map(d => d.ref).forEach(r => del.delete(r));
-    await del.commit();
+    // Categories already exist — skip seed, just load settings
+    const snap = await getDoc(doc(db, COL_SETTINGS, "store"));
+    if (snap.exists()) { settings = snap.data(); }
+    return;
   }
-  const catNameMap = {};
 
-  // Batch 1: categories (16) + settings (1) = 17 ops
+  const catNameMap = {};
   const b1 = writeBatch(db);
+
   for (const cat of CATEGORIES) {
     b1.set(doc(db, COL_CATEGORIES, cat.id), {
       name: cat.name,
@@ -945,35 +936,9 @@ async function runSeed() {
     });
     catNameMap[cat.id] = cat.name;
   }
+
   b1.set(doc(db, COL_SETTINGS, "store"), { ...SETTINGS, catalogVersion: 2, updatedAt: serverTimestamp() });
   await b1.commit();
-
-  // Seed products with per-category displayOrder (Salas 0..19, Comedores 0..19, etc.)
-  var catOrd = {};
-  for (var pi = 0; pi < PRODUCTS.length; pi += 1) {
-    var pr = PRODUCTS[pi];
-    var cid = pr.categoryId;
-    catOrd[cid] = (catOrd[cid] || 0) + 1;
-  }
-  var catCur = {};
-  for (var si = 0; si < PRODUCTS.length; si += 490) {
-    var b = writeBatch(db);
-    PRODUCTS.slice(si, si + 490).forEach(function(prod) {
-      var do_ = (catCur[prod.categoryId] = (catCur[prod.categoryId] || 0) + 1);
-      var docId = "p-" + prod.categoryId + "-" + String(do_).padStart(3, "0");
-      var cn = catNameMap[prod.categoryId] || prod.categoryId || "";
-      b.set(doc(db, COL_PRODUCTS, docId), {
-        ...prod,
-        imageUrl: prod.primaryImage || prod.imageUrl,
-        category: cn,
-        displayOrder: do_,
-        available: true,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-    });
-    await b.commit();
-  }
 }
 
 // ─── SETTINGS ───
