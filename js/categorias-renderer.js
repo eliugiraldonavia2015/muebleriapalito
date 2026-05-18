@@ -41,6 +41,32 @@ function renderNav(categories) {
   navList.innerHTML = top.map(c => `<li><a href="catalogo.html?cat=${slugify(c.name)}">${c.name}</a></li>`).join("");
 }
 
+function addUbicacionesBtnCats() {
+  const navList = document.querySelector(".nav-links");
+  if (!navList) return;
+  const liLoc = document.createElement("li");
+  const aLoc = document.createElement("a");
+  aLoc.href = "contacto.html";
+  aLoc.className = "nav-link-btn";
+  const svgNS = "http://www.w3.org/2000/svg";
+  const locSvg = document.createElementNS(svgNS, "svg");
+  locSvg.setAttribute("viewBox", "0 0 24 24");
+  locSvg.setAttribute("fill", "none");
+  locSvg.setAttribute("stroke-width", "1.8");
+  locSvg.setAttribute("stroke-linecap", "round");
+  locSvg.setAttribute("stroke-linejoin", "round");
+  locSvg.style.cssText = "width:11px;height:11px;stroke:currentColor";
+  const lp = document.createElementNS(svgNS, "path");
+  lp.setAttribute("d", "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z");
+  const lc = document.createElementNS(svgNS, "circle");
+  lc.setAttribute("cx", "12"); lc.setAttribute("cy", "10"); lc.setAttribute("r", "3");
+  locSvg.appendChild(lp); locSvg.appendChild(lc);
+  aLoc.appendChild(locSvg);
+  aLoc.appendChild(document.createTextNode(" Ubicaciones"));
+  liLoc.appendChild(aLoc);
+  navList.appendChild(liLoc);
+}
+
 // ─── RENDER HERO ───
 function renderHero(categories) {
   const total = categories.length;
@@ -138,6 +164,7 @@ async function init() {
     ]);
 
     renderNav(categories);
+    addUbicacionesBtnCats();
     renderHero(categories);
     renderFeaturedCategories(categories);
     renderRegularCategories(categories);

@@ -46,8 +46,8 @@
     .nav-logo{display:flex;align-items:center}
     .nav-logo img{height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,.5))}
     .nav-logo span{color:var(--copper)}
-    .nav-links{display:flex;gap:40px;list-style:none;font-size:11px;letter-spacing:.18em;text-transform:uppercase}
-    .nav-links li a{color:var(--cream-dim);transition:color .3s;position:relative}
+    .nav-links{display:flex;gap:40px;list-style:none;font-size:12px;letter-spacing:.18em;text-transform:uppercase}
+    .nav-links li a{color:#c4d9cc;transition:color .3s;position:relative}
     .nav-links li a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:var(--copper);transition:width .4s var(--ease-silk)}
     .nav-links li a:hover{color:var(--cream)}
     .nav-links li a:hover::after{width:100%}
@@ -273,6 +273,94 @@
     .footer-payments{display:flex;align-items:center;gap:12px}
     .payment-badge{padding:6px 10px;border:1px solid var(--rule);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--cream-dim)}
 
+    /* NAV LOCATION BUTTON */
+    .nav-link-btn{display:inline-flex!important;align-items:center;gap:5px;padding:0;border:none;background:none}
+    .nav-link-btn:hover{background:none}
+    .nav-link-btn::after{display:block!important}
+    .nav-link-btn svg{width:11px;height:11px;stroke:currentColor;flex-shrink:0}
+
+    /* ═══ CREDITO DIRECTO BANNER ═══ */
+    #credito-banner{background:linear-gradient(105deg,#0a2015 0%,#1a4a28 40%,#0f2e1a 100%);border-top:1px solid rgba(90,184,124,.18);border-bottom:1px solid rgba(90,184,124,.18);padding:clamp(32px,5vw,60px) clamp(24px,5vw,80px);position:relative;overflow:hidden}
+    #credito-banner::before{content:'';position:absolute;top:-50%;right:-5%;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(58,140,92,.1) 0%,transparent 70%);pointer-events:none}
+    .credito-inner{display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap}
+    .credito-left{display:flex;flex-direction:column;gap:0}
+    .credito-eyebrow{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:rgba(90,184,124,.7);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+    .credito-eyebrow::before{content:'';width:24px;height:1px;background:rgba(90,184,124,.7)}
+    .credito-headline{font-family:var(--f-display);font-size:clamp(36px,5vw,72px);font-weight:300;line-height:1;color:#e8f5ec}
+    .credito-headline em{font-style:italic;color:#5ab87c}
+    .credito-right{display:flex;flex-direction:column;gap:20px;align-items:flex-end}
+    .credito-methods{display:flex;border:1px solid rgba(90,184,124,.18)}
+    .credito-method{display:flex;flex-direction:column;align-items:center;gap:9px;padding:20px 28px;border-right:1px solid rgba(90,184,124,.14)}
+    .credito-method:last-child{border-right:none}
+    .credito-method-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(90,184,124,.3)}
+    .credito-method-icon svg{width:18px;height:18px;stroke:#5ab87c}
+    .credito-method-name{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#c8e8d4;white-space:nowrap}
+    .credito-cta{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:rgba(58,140,92,.15);border:1px solid rgba(90,184,124,.35);color:#5ab87c;font-size:10px;letter-spacing:.18em;text-transform:uppercase;transition:background .3s,border-color .3s}
+    .credito-cta:hover{background:rgba(58,140,92,.28);border-color:rgba(90,184,124,.65)}
+    @media(max-width:768px){.credito-right{align-items:flex-start}.credito-methods{flex-wrap:wrap}.credito-method{padding:16px 20px}}
+
+    /* ═══ LIGHT CONTENT SECTIONS ═══ */
+    #categories{background:#f9f8f5}
+    #categories .sec-heading{color:#1a1a18}
+    #categories .btn-ghost{border-color:rgba(0,0,0,.15);color:#5c5c58}
+    #categories .btn-ghost:hover{border-color:var(--copper);color:#1a1a18}
+    .cat-footer{border-top-color:rgba(0,0,0,.1)}
+    .btn-ver-mas{color:#1a1a18}
+    .btn-ver-mas-inner{border-color:rgba(0,0,0,.12)}
+    .btn-ver-mas-sub{color:#7b7b70}
+    .btn-ver-mas-divider{background:rgba(0,0,0,.1)}
+
+    #featured{background:#f9f8f5}
+    #featured .sec-heading{color:#1a1a18}
+    .product-card{background:#ffffff;box-shadow:0 2px 20px rgba(0,0,0,.07);border:1px solid rgba(0,0,0,.07)}
+    .product-name{color:#1a1a18}
+    .product-info{background:#ffffff}
+    .price-current{color:#1a1a18}
+    .price-original{color:#a0a09a}
+    .product-cat{color:var(--copper)}
+    .product-actions{background:rgba(255,255,255,.96)}
+    .btn-wish{border-color:rgba(0,0,0,.12)}
+    .btn-wish svg{stroke:#5c5c58}
+
+    #brands{background:#f9f8f5;border-top-color:rgba(0,0,0,.08)}
+    #brands .sec-heading{color:#1a1a18}
+    .brands-grid{border-color:rgba(0,0,0,.08)}
+    .brand-cell{color:#6b6b60;border-right-color:rgba(0,0,0,.08)}
+
+    .lifestyle-content{background:#ffffff}
+    .lifestyle-content .sec-heading{color:#1a1a18}
+    .lifestyle-content .sec-heading em{color:var(--copper)}
+    .lifestyle-features{border-top-color:rgba(0,0,0,.08)}
+    .feat-text{color:#5c5c58}
+    .feat-text strong{color:#1a1a18}
+    .lifestyle-big-num{color:rgba(26,26,24,.03)}
+
+    #stats{background:#f9f8f5;border-top-color:rgba(0,0,0,.08)}
+    .stats-grid{border-color:rgba(0,0,0,.08)}
+    .stat-cell{border-right-color:rgba(0,0,0,.08)}
+    .stat-num{color:#1a1a18}
+    .stat-label{color:#7b7b70}
+
+    #newsletter{background:#ffffff;border-top-color:rgba(0,0,0,.08)}
+    .nl-title{color:#1a1a18}
+    .nl-sub{color:#6b6b60}
+    .nl-input{background:#f5f4f0;border-color:rgba(0,0,0,.12);color:#1a1a18}
+    .nl-input::placeholder{color:#b0b0a8}
+    .nl-input:focus{border-color:var(--copper)}
+
+    footer{background:#141a14;border-top-color:rgba(255,255,255,.06)}
+    .footer-logo{color:#c8d8c8}
+    .footer-tagline{color:#6b7e6b}
+    .footer-copy{color:#5c7060}
+    .footer-col-title{color:#c8d8c8}
+    .footer-links li a{color:#6b7e6b}
+    .footer-links li a:hover{color:#c8d8c8}
+    .footer-bottom{border-top-color:rgba(255,255,255,.06)}
+    .payment-badge{border-color:rgba(255,255,255,.1);color:#6b7e6b}
+    .social-link{border-color:rgba(255,255,255,.1)}
+    .social-link svg{stroke:#6b7e6b}
+    footer .footer-socials .social-link:hover{border-color:var(--copper);background:rgba(58,140,92,.12)}
+
     /* WA */
     .wa-float{position:fixed;bottom:32px;right:32px;z-index:800;width:52px;height:52px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.3);transition:transform .3s var(--ease-silk),box-shadow .3s}
     .wa-float:hover{transform:scale(1.1);box-shadow:0 8px 30px rgba(37,211,102,.4)}
@@ -322,6 +410,10 @@
       <li><a href="catalogo.html?cat=Dormitorios">Dormitorios</a></li>
       <li><a href="catalogo.html?cat=Entretenimiento">Entretenimiento</a></li>
       <li><a href="catalogo.html?cat=Bar">Bar</a></li>
+      <li><a href="contacto.html" class="nav-link-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Ubicaciones
+      </a></li>
     </ul>
     <div class="nav-actions">
       <a href="#" aria-label="Buscar">
@@ -381,6 +473,40 @@
       <span class="marquee-item">HOGAR <span class="marquee-dot"></span></span>
     </div>
   </div>
+
+  <section id="credito-banner">
+    <div class="credito-inner">
+      <div class="credito-left">
+        <div class="credito-eyebrow">Financiamiento flexible</div>
+        <div class="credito-headline">Aceptamos<br><em>Credito Directo</em></div>
+      </div>
+      <div class="credito-right">
+        <div class="credito-methods">
+          <div class="credito-method">
+            <div class="credito-method-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20"/><path d="M6 14h.01M10 14h4"/></svg>
+            </div>
+            <span class="credito-method-name">Efectivo</span>
+          </div>
+          <div class="credito-method">
+            <div class="credito-method-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+            <span class="credito-method-name">Credito Directo</span>
+          </div>
+          <div class="credito-method">
+            <div class="credito-method-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+            </div>
+            <span class="credito-method-name">Pagos Acumulativos</span>
+          </div>
+        </div>
+        <a href="contacto.html" class="credito-cta">Consultar financiamiento
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" width="14" height="14" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
 
   <section id="categories">
     <div class="cat-header">
@@ -746,7 +872,20 @@
       onComplete() {
         gsap.to(loaderEl, {
           autoAlpha: 0, duration: .65, ease: 'power2.inOut',
-          onComplete() { loaderEl.remove(); setupPage(); }
+          onComplete() {
+            // Pre-hide hero elements before removing loader to prevent single-frame flash
+            gsap.set(['.hero-eyebrow','.hero-title','.hero-subtitle',
+                       '#hero .btn-primary','#hero .btn-ghost',
+                       '.hero-img-wrap img','.hero-scroll-hint'], { autoAlpha: 0 });
+            gsap.set('.hero-eyebrow',  { x: -30 });
+            gsap.set('.hero-title',    { y: 50 });
+            gsap.set('.hero-subtitle', { y: 20 });
+            gsap.set('#hero .btn-primary, #hero .btn-ghost', { y: 16 });
+            gsap.set('.hero-img-wrap img', { scale: 1.08 });
+            gsap.set('.hero-scroll-hint', { y: 8 });
+            loaderEl.remove();
+            setupPage();
+          }
         });
       }
     })
@@ -785,14 +924,14 @@
         nav.classList.toggle('scrolled', window.scrollY > 60);
       }, { passive: true });
 
-      // HERO ENTRANCE
+      // HERO ENTRANCE — use .to() since elements are pre-hidden before loader removal
       gsap.timeline({ defaults: { ease: 'power3.out' } })
-        .from('.hero-eyebrow',  { x: -30, autoAlpha: 0, duration: .65 })
-        .from('.hero-title',    { y: 50,  autoAlpha: 0, duration: .8 },  '-=.3')
-        .from('.hero-subtitle', { y: 20,  autoAlpha: 0, duration: .6 },  '-=.45')
-        .from('#hero .btn-primary, #hero .btn-ghost', { y: 16, autoAlpha: 0, stagger: .1, duration: .55 }, '-=.35')
-        .from('.hero-img-wrap img', { scale: 1.08, autoAlpha: 0, duration: 1.2, ease: 'power2.out' }, 0)
-        .from('.hero-scroll-hint',  { autoAlpha: 0, y: 8, duration: .6 }, '-=.4');
+        .to('.hero-eyebrow',  { x: 0, autoAlpha: 1, duration: .65, clearProps: 'transform,opacity,visibility' })
+        .to('.hero-title',    { y: 0, autoAlpha: 1, duration: .8,  clearProps: 'transform,opacity,visibility' },  '-=.3')
+        .to('.hero-subtitle', { y: 0, autoAlpha: 1, duration: .6,  clearProps: 'transform,opacity,visibility' },  '-=.45')
+        .to('#hero .btn-primary, #hero .btn-ghost', { y: 0, autoAlpha: 1, stagger: .1, duration: .55, clearProps: 'transform,opacity,visibility' }, '-=.35')
+        .to('.hero-img-wrap img', { scale: 1, autoAlpha: 1, duration: 1.2, ease: 'power2.out' }, 0)
+        .to('.hero-scroll-hint',  { y: 0, autoAlpha: 1, duration: .6, clearProps: 'transform,opacity,visibility' }, '-=.4');
 
       // SCROLL REVEALS — batch for performance
       ScrollTrigger.batch('.sec-heading', {
@@ -887,7 +1026,10 @@
           gsap.to(btn, { x: (e.clientX - r.left - r.width / 2) * .22, y: (e.clientY - r.top - r.height / 2) * .22, duration: .35, ease: 'power2.out', overwrite: 'auto' });
         });
         btn.addEventListener('mouseleave', () => {
-          gsap.to(btn, { x: 0, y: 0, duration: .5, ease: 'elastic.out(1,.45)', overwrite: 'auto' });
+          const target = btn;
+          gsap.to(btn, { x: 0, y: 0, duration: .5, ease: 'elastic.out(1,.45)', overwrite: 'auto',
+            onComplete() { gsap.set(target, { clearProps: 'transform' }); }
+          });
         });
       });
 

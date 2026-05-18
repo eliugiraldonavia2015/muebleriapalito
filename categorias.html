@@ -31,11 +31,15 @@
     nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:0 clamp(24px,5vw,80px);height:72px;display:flex;align-items:center;justify-content:space-between;background:rgba(12,31,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--rule)}
     .nav-logo{display:flex;align-items:center}
     .nav-logo img{height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,.5))}
-    .nav-links{display:flex;gap:40px;list-style:none;font-size:11px;letter-spacing:.18em;text-transform:uppercase}
-    .nav-links li a{color:var(--cream-dim);transition:color .3s;position:relative}
+    .nav-links{display:flex;gap:40px;list-style:none;font-size:12px;letter-spacing:.18em;text-transform:uppercase}
+    .nav-links li a{color:#c4d9cc;transition:color .3s;position:relative}
     .nav-links li a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:var(--copper);transition:width .4s var(--ease-silk)}
     .nav-links li a:hover{color:var(--cream)}
     .nav-links li a:hover::after{width:100%}
+    .nav-link-btn{display:inline-flex!important;align-items:center;gap:5px;padding:0;border:none;background:none}
+    .nav-link-btn:hover{background:none}
+    .nav-link-btn::after{display:block!important}
+    .nav-link-btn svg{width:11px;height:11px;stroke:currentColor;flex-shrink:0}
     .nav-actions{display:flex;align-items:center;gap:20px}
     .nav-icon{width:20px;height:20px;stroke:var(--cream-dim);transition:stroke .3s}
     .nav-icon:hover{stroke:var(--cream)}
@@ -224,6 +228,10 @@
       <li><a href="catalogo.html?cat=Dormitorios">Dormitorios</a></li>
       <li><a href="catalogo.html?cat=Entretenimiento">Entretenimiento</a></li>
       <li><a href="catalogo.html?cat=Bar">Bar</a></li>
+      <li><a href="contacto.html" class="nav-link-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Ubicaciones
+      </a></li>
     </ul>
     <div class="nav-actions">
       <a href="#" aria-label="Buscar">

@@ -72,6 +72,32 @@ function renderNav(categories) {
   ).join("");
 }
 
+function addUbicacionesBtn() {
+  const ul = document.querySelector(".nav-links");
+  if (!ul) return;
+  const liLoc = document.createElement("li");
+  const aLoc = document.createElement("a");
+  aLoc.href = "contacto.html";
+  aLoc.className = "nav-link-btn";
+  const svgNS = "http://www.w3.org/2000/svg";
+  const locSvg = document.createElementNS(svgNS, "svg");
+  locSvg.setAttribute("viewBox", "0 0 24 24");
+  locSvg.setAttribute("fill", "none");
+  locSvg.setAttribute("stroke-width", "1.8");
+  locSvg.setAttribute("stroke-linecap", "round");
+  locSvg.setAttribute("stroke-linejoin", "round");
+  locSvg.style.cssText = "width:11px;height:11px;stroke:currentColor";
+  const locPath = document.createElementNS(svgNS, "path");
+  locPath.setAttribute("d", "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z");
+  const locCircle = document.createElementNS(svgNS, "circle");
+  locCircle.setAttribute("cx", "12"); locCircle.setAttribute("cy", "10"); locCircle.setAttribute("r", "3");
+  locSvg.appendChild(locPath); locSvg.appendChild(locCircle);
+  aLoc.appendChild(locSvg);
+  aLoc.appendChild(document.createTextNode(" Ubicaciones"));
+  liLoc.appendChild(aLoc);
+  ul.appendChild(liLoc);
+}
+
 // ─── RENDER HERO ───
 function renderHero(categories) {
   let target = null;
@@ -237,6 +263,7 @@ async function init() {
     ]);
 
     renderNav(categories);
+    addUbicacionesBtn();
     renderHero(categories);
     renderSidebar(categories);
     renderProductsGrid(products);

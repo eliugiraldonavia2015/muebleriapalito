@@ -29,36 +29,33 @@ function setText(sel, val) {
 }
 
 // ─── LOUPE ───
+// Uses left/top CSS positioning (centered via transform:translate(-50%,-50%) in CSS).
+// background-image mirrors the main image at 320% size; background-position
+// tracks the cursor percentage so the zoomed area stays under the loupe center.
 function initLoupe(imageUrl) {
   const wrap = $("#img-wrap");
   const loupe = $("#loupe");
-  const mainImg = $("#main-img");
   if (!wrap || !loupe) return;
 
   loupe.style.backgroundImage = "url(" + imageUrl + ")";
-  gsap.set(loupe, { xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 0.7 });
 
-  const xTo = gsap.quickTo(loupe, "x", { duration: 0.07, ease: "none" });
-  const yTo = gsap.quickTo(loupe, "y", { duration: 0.07, ease: "none" });
+  wrap.addEventListener("mouseenter", () => { loupe.style.opacity = "1"; });
+  wrap.addEventListener("mouseleave", () => { loupe.style.opacity = "0"; });
 
-  function onMove(e) {
+  wrap.addEventListener("mousemove", (e) => {
     const rect = wrap.getBoundingClientRect();
     const px = e.clientX - rect.left;
     const py = e.clientY - rect.top;
-    xTo(px);
-    yTo(py);
-    const bpx = Math.max(0, Math.min(100, (px / rect.width) * 100 + (px / rect.width - 0.5) * 80));
-    const bpy = Math.max(0, Math.min(100, (py / rect.height) * 100 + (py / rect.height - 0.5) * 80));
-    loupe.style.backgroundPosition = bpx + "% " + bpy + "%";
-  }
 
-  wrap.addEventListener("mouseenter", () => {
-    gsap.to(loupe, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(1.4)" });
+    // Position the loupe — CSS transform:translate(-50%,-50%) centers it on cursor
+    loupe.style.left = px + "px";
+    loupe.style.top  = py + "px";
+
+    // Zoom area: map cursor position (0-1) directly to background-position (0%-100%)
+    loupe.style.backgroundPosition =
+      ((px / rect.width) * 100).toFixed(2) + "% " +
+      ((py / rect.height) * 100).toFixed(2) + "%";
   });
-  wrap.addEventListener("mouseleave", () => {
-    gsap.to(loupe, { opacity: 0, scale: 0.7, duration: 0.25, ease: "power2.in" });
-  });
-  wrap.addEventListener("mousemove", onMove);
 }
 
 // ─── THUMBNAILS ───
@@ -128,16 +125,305 @@ function initQty(price) {
 
 // ─── PAYMENT ───
 function initPayment() {
+  const panels = {
+    efectivo: document.getElementById("pay-cash"),
+    transferencia: document.getElementById("pay-transfer"),
+    tarjeta: document.getElementById("pay-card"),
+  };
+
+  function showPanel(key) {
+    Object.entries(panels).forEach(([k, el]) => {
+      if (!el) return;
+      if (k === key) {
+        el.style.display = "";
+        // Re-trigger animation
+        el.style.animation = "none";
+        el.offsetHeight; // reflow
+        el.style.animation = "";
+      } else {
+        el.style.display = "none";
+      }
+    });
+    // Show efectivo panel by default on load (already selected)
+    if (key === "tarjeta") initCardInteractivity();
+    if (key === "transferencia") initCopyBtn();
+  }
+
   document.querySelectorAll(".pay-opt").forEach(opt => {
     opt.addEventListener("click", () => {
       document.querySelectorAll(".pay-opt").forEach(o => o.classList.remove("selected"));
       opt.classList.add("selected");
       selectedPayment = opt.dataset.pay || "efectivo";
+      showPanel(selectedPayment);
     });
+  });
+
+  // Show default panel
+  showPanel("efectivo");
+}
+
+// ─── CARD INTERACTIVITY ───
+let cardInitialized = false;
+function initCardInteractivity() {
+  if (cardInitialized) return;
+  cardInitialized = true;
+
+  const card3d   = document.getElementById("card-3d");
+  const numDisp  = document.getElementById("card-num");
+  const nameDisp = document.getElementById("card-holder");
+  const expDisp  = document.getElementById("card-exp");
+  const cvvDisp  = document.getElementById("card-cvv-disp");
+  const netDisp  = document.getElementById("card-net");
+
+  const numIn  = document.getElementById("c-number");
+  const nameIn = document.getElementById("c-name");
+  const expIn  = document.getElementById("c-exp");
+  const cvvIn  = document.getElementById("c-cvv");
+
+  if (!card3d || !numIn) return;
+
+  // Format card number as groups of 4
+  numIn.addEventListener("input", () => {
+    let v = numIn.value.replace(/\D/g, "").slice(0, 16);
+    numIn.value = v.replace(/(.{4})/g, "$1 ").trim();
+    const masked = v.padEnd(16, "•");
+    const parts = [masked.slice(0,4), masked.slice(4,8), masked.slice(8,12), masked.slice(12,16)];
+    numDisp.textContent = parts.join("  ");
+    // Detect network
+    const first = v[0];
+    if (first === "4") netDisp.textContent = "VISA";
+    else if (first === "5") netDisp.textContent = "MASTERCARD";
+    else if (first === "3") netDisp.textContent = "AMEX";
+    else netDisp.textContent = "VISA";
+  });
+
+  nameIn.addEventListener("input", () => {
+    const v = nameIn.value.toUpperCase() || "TU NOMBRE";
+    nameDisp.textContent = v;
+  });
+
+  expIn.addEventListener("input", () => {
+    let v = expIn.value.replace(/\D/g, "").slice(0, 4);
+    if (v.length >= 3) v = v.slice(0,2) + "/" + v.slice(2);
+    expIn.value = v;
+    expDisp.textContent = v || "MM/AA";
+  });
+
+  cvvIn.addEventListener("input", () => {
+    const v = cvvIn.value.replace(/\D/g, "");
+    cvvDisp.textContent = v.length ? v.replace(/./g, "•") : "•••";
+  });
+
+  // Flip card on CVV focus/blur
+  cvvIn.addEventListener("focus", () => { card3d.classList.add("flipped"); });
+  cvvIn.addEventListener("blur",  () => { card3d.classList.remove("flipped"); });
+  [numIn, nameIn, expIn].forEach(el => {
+    el.addEventListener("focus", () => { card3d.classList.remove("flipped"); });
   });
 }
 
-// ─── SPECS ───
+// ─── COPY BUTTON ───
+function initCopyBtn() {
+  const btn  = document.getElementById("copy-acct");
+  const acct = document.getElementById("bank-acct");
+  if (!btn || !acct) return;
+  btn.addEventListener("click", () => {
+    const txt = acct.textContent.trim();
+    navigator.clipboard.writeText(txt).then(() => {
+      const orig = btn.textContent.trim();
+      btn.classList.add("done");
+      const span = document.createTextNode(" Copiado!");
+      btn.appendChild(span);
+      setTimeout(() => {
+        btn.classList.remove("done");
+        btn.removeChild(span);
+      }, 2200);
+    }).catch(() => {});
+  });
+}
+
+// ─── PAGAR BUTTON ───
+function initPayButton(product) {
+  const btn = document.getElementById("btn-pagar");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    btn.classList.add("loading");
+    btn.textContent = "Procesando…";
+    setTimeout(() => {
+      btn.classList.remove("loading");
+      btn.querySelector ? null : null;
+      showReceipt(product);
+    }, 900);
+  });
+}
+
+// ─── GENERIC QR (SVG, no library) ───
+function drawGenericQR(svg) {
+  const NS  = "http://www.w3.org/2000/svg";
+  const N   = 21;
+  const C   = 6; // cell px
+  const SZ  = N * C;
+  const DK  = "#0c1f14";
+  const LT  = "#f5f0e6";
+
+  svg.setAttribute("viewBox", "0 0 " + SZ + " " + SZ);
+  svg.setAttribute("width",  "128");
+  svg.setAttribute("height", "128");
+
+  // clear previous
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+  const r = (x, y, w, h, fill) => {
+    const el = document.createElementNS(NS, "rect");
+    el.setAttribute("x", x * C); el.setAttribute("y", y * C);
+    el.setAttribute("width", w * C); el.setAttribute("height", h * C);
+    el.setAttribute("fill", fill);
+    svg.appendChild(el);
+  };
+
+  // background
+  r(0, 0, N, N, LT);
+
+  // finder pattern helper: outer 7×7 dark, inner 5×5 light, core 3×3 dark
+  const finder = (ox, oy) => {
+    r(ox,   oy,   7, 7, DK);
+    r(ox+1, oy+1, 5, 5, LT);
+    r(ox+2, oy+2, 3, 3, DK);
+  };
+  finder(0, 0);       // top-left
+  finder(N-7, 0);     // top-right
+  finder(0, N-7);     // bottom-left
+
+  // timing strips (row 6, col 6, between finders)
+  for (let i = 8; i <= N-9; i++) {
+    if (i % 2 === 0) {
+      r(i, 6, 1, 1, DK);
+      r(6, i, 1, 1, DK);
+    }
+  }
+
+  // data modules — deterministic pseudo-random pattern
+  const bits = [
+    1,0,1,1,0,1,0,0,1,0,1,0,1,1,
+    0,1,0,1,1,0,1,1,0,1,0,1,0,0,
+    1,1,0,0,1,0,1,0,1,1,0,0,1,1,
+    0,0,1,1,0,1,0,1,0,0,1,1,0,1,
+    1,0,0,1,1,0,0,1,1,0,1,0,1,0,
+    0,1,1,0,1,1,0,0,1,1,0,1,0,1,
+    1,0,1,0,0,1,1,0,0,1,1,0,1,1,
+    0,1,0,1,1,0,1,1,0,0,1,0,0,1,
+    1,1,1,0,0,1,0,1,1,0,0,1,1,0,
+    0,0,1,1,0,0,1,0,1,1,0,1,0,1,
+  ];
+
+  let bi = 0;
+  for (let row = 0; row < N; row++) {
+    for (let col = 0; col < N; col++) {
+      // skip finder zones + separator
+      if (row < 8 && col < 8) continue;
+      if (row < 8 && col >= N-8) continue;
+      if (row >= N-8 && col < 8) continue;
+      // skip timing
+      if (row === 6 || col === 6) continue;
+      if (bits[bi % bits.length]) r(col, row, 1, 1, DK);
+      bi++;
+    }
+  }
+}
+
+// ─── RECEIPT ───
+function showReceipt(product) {
+  const overlay = document.getElementById("receipt-overlay");
+  if (!overlay) return;
+
+  const v = id => { const e = document.getElementById(id); return e ? e.value.trim() : ""; };
+  const name    = v("o-name")    || "Cliente";
+  const phone   = v("o-phone")   || "—";
+  const address = v("o-address") || "—";
+  const notes   = v("o-notes");
+  const total   = priceFmt(product.price * qty);
+  const orderId = "ORD-" + Date.now().toString(36).toUpperCase().slice(-8);
+  const date    = new Date().toLocaleDateString("es-HN", { day:"2-digit", month:"long", year:"numeric" });
+
+  // Populate static slots
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set("r-thanks",  "Gracias, " + name + "!");
+  set("r-prod",    product.name);
+  set("r-qty",     qty);
+  set("r-total",   total);
+  set("r-name",    name);
+  set("r-phone",   phone);
+  set("r-addr",    address);
+  set("r-orderid", "Orden: " + orderId);
+  set("r-date",    date);
+
+  if (selectedColor) {
+    const crow = document.getElementById("r-color-row");
+    if (crow) { crow.style.display = ""; set("r-color", selectedColor); }
+  }
+  if (notes) {
+    const nrow = document.getElementById("r-notes-row");
+    if (nrow) { nrow.style.display = ""; set("r-notes", notes); }
+  }
+
+  // Generic QR — drawn with SVG, no external library
+  const qrSvg = document.getElementById("qr-svg");
+  if (qrSvg) drawGenericQR(qrSvg);
+
+  overlay.style.display = "flex";
+
+  // Set initial states
+  gsap.set("#receipt-wrap",    { y: 70, autoAlpha: 0, scale: 0.97 });
+  gsap.set("#receipt-overlay", { autoAlpha: 0 });
+  gsap.set("#r-check-circle",  { scale: 0 });
+  gsap.set(".r-title, .r-thanks", { autoAlpha: 0, y: 12 });
+  gsap.set(".r-dash",          { autoAlpha: 0, scaleX: 0, transformOrigin: "left center" });
+  gsap.set(".r-row",           { autoAlpha: 0, x: -14 });
+  gsap.set(".r-qr-wrap",       { autoAlpha: 0, scale: 0.85 });
+  gsap.set(".r-orderid, .r-date, #receipt-close", { autoAlpha: 0, y: 8 });
+
+  const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+  tl.to("#receipt-overlay", { autoAlpha: 1, duration: 0.38 })
+    .to("#receipt-wrap",    { y: 0, autoAlpha: 1, scale: 1, duration: 0.6, ease: "back.out(1.35)" }, "-=0.15")
+    .to("#r-check-circle",  { scale: 1, duration: 0.7, ease: "elastic.out(1, 0.5)" }, "-=0.2")
+    .to(".r-title",         { autoAlpha: 1, y: 0, duration: 0.4 }, "-=0.1")
+    .to(".r-thanks",        { autoAlpha: 1, y: 0, duration: 0.38 }, "-=0.22")
+    .to(".r-dash",          { autoAlpha: 1, scaleX: 1, duration: 0.45, ease: "power2.out", stagger: 0.18 }, "-=0.1")
+    .to(".r-row",           { autoAlpha: 1, x: 0, duration: 0.38, stagger: 0.07 }, "-=0.35")
+    .to(".r-qr-wrap",       { autoAlpha: 1, scale: 1, duration: 0.5, ease: "back.out(1.5)" }, "-=0.15")
+    .to(".r-orderid, .r-date, #receipt-close", { autoAlpha: 1, y: 0, duration: 0.4, stagger: 0.08 }, "-=0.2");
+
+  document.getElementById("receipt-close").onclick = () => {
+    gsap.timeline()
+      .to("#receipt-wrap",    { y: -40, autoAlpha: 0, scale: 0.96, duration: 0.38, ease: "power2.in" })
+      .to("#receipt-overlay", { autoAlpha: 0, duration: 0.3, ease: "power2.in" }, "-=0.15")
+      .call(() => {
+        overlay.style.display = "none";
+        const btn = document.getElementById("btn-pagar");
+        if (btn) {
+          btn.classList.remove("loading");
+          btn.textContent = "";
+          const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          svg.setAttribute("viewBox", "0 0 24 24");
+          svg.setAttribute("stroke-width", "1.5");
+          svg.setAttribute("stroke-linecap", "round");
+          svg.setAttribute("stroke-linejoin", "round");
+          svg.style.cssText = "width:15px;height:15px;stroke:currentColor;fill:none;flex-shrink:0";
+          const rect1 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+          rect1.setAttribute("x","3"); rect1.setAttribute("y","11");
+          rect1.setAttribute("width","18"); rect1.setAttribute("height","11");
+          rect1.setAttribute("rx","2"); rect1.setAttribute("ry","2");
+          const path1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          path1.setAttribute("d","M7 11V7a5 5 0 0110 0v4");
+          svg.appendChild(rect1); svg.appendChild(path1);
+          btn.appendChild(svg);
+          btn.appendChild(document.createTextNode(" Confirmar pago"));
+        }
+      });
+  };
+}
+
+// ─── SPECS — always visible, no accordion ───
 function buildSpecs(product) {
   const grid = $("#specs-grid");
   const section = $("#specs-section");
@@ -150,8 +436,9 @@ function buildSpecs(product) {
     ["Disponibilidad", product.available !== false ? "Disponible" : "Agotado"],
   ].filter(([, v]) => v);
 
-  if (!fields.length) { section.style.display = "none"; return; }
+  if (!fields.length) return;
 
+  section.style.display = "";
   fields.forEach(([label, val]) => {
     const item = document.createElement("div");
     item.className = "spec-item";
@@ -165,26 +452,9 @@ function buildSpecs(product) {
     item.appendChild(vEl);
     grid.appendChild(item);
   });
-
-  const toggle = $("#specs-toggle");
-  const body = $("#specs-body");
-  const chevron = $("#specs-chevron");
-  let open = false;
-
-  if (toggle) toggle.addEventListener("click", () => {
-    open = !open;
-    if (open) {
-      body.classList.add("open");
-      gsap.fromTo(body, { height: 0 }, { height: body.scrollHeight, duration: 0.4, ease: "power3.out" });
-      gsap.to(chevron, { rotation: 90, duration: 0.35, ease: "power2.out" });
-    } else {
-      gsap.to(body, { height: 0, duration: 0.35, ease: "power2.inOut", onComplete: () => body.classList.remove("open") });
-      gsap.to(chevron, { rotation: 0, duration: 0.3, ease: "power2.out" });
-    }
-  });
 }
 
-// ─── ORDER PANEL ───
+// ─── ORDER PANEL — always visible, btn scrolls to it ───
 function initOrderPanel(product) {
   const btn = $("#btn-order");
   const panel = $("#order-panel");
@@ -193,19 +463,11 @@ function initOrderPanel(product) {
   addEl("#s-prod-name", product.name);
   addEl("#s-unit-price", priceFmt(product.price));
 
-  let panelOpen = false;
-
+  // Scroll to the always-visible order form
   if (btn) btn.addEventListener("click", () => {
-    panelOpen = !panelOpen;
-    if (panelOpen) {
-      panel.classList.add("open");
-      gsap.to(window, { duration: 0.7, scrollTo: { y: panel, offsetY: -80 }, ease: "power3.out" });
-      gsap.from("#order-panel .order-inner > *", { y: 28, opacity: 0, duration: 0.6, stagger: 0.09, ease: "power3.out" });
-      btn.textContent = "Cerrar formulario";
-    } else {
-      panel.classList.remove("open");
-      btn.textContent = "Hacer pedido por WhatsApp";
-    }
+    gsap.to(window, { duration: 0.75, scrollTo: { y: panel, offsetY: -80 }, ease: "power3.out" });
+    const inputs = panel.querySelectorAll(".form-input");
+    if (inputs.length) setTimeout(() => inputs[0].focus(), 800);
   });
 
   const waBtn = $("#btn-whatsapp");
@@ -314,21 +576,24 @@ async function loadRelated(product) {
 }
 
 // ─── ENTRANCE ANIMATION ───
+// Elements are visible in CSS; GSAP sets initial invisible state then animates in.
 function playEntrance() {
-  gsap.set(["#prod-category","#prod-name","#prod-subcategory","#prod-price-row",
-    "#prod-desc","#prod-colors-wrap","#prod-qty-wrap","#prod-cta"], { y: 24 });
+  const infoEls = ["#prod-category","#prod-name","#prod-subcategory","#prod-price-row",
+    "#prod-desc","#prod-colors-wrap","#prod-qty-wrap","#prod-cta","#specs-section"];
+
+  gsap.set(infoEls, { autoAlpha: 0, y: 24 });
 
   const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-  tl.from("#img-panel", { x: -60, opacity: 0, duration: 0.9 }, 0)
-    .to("#prod-category",    { opacity: 1, y: 0, duration: 0.5 }, 0.3)
-    .to("#prod-name",        { opacity: 1, y: 0, duration: 0.6 }, 0.42)
-    .to("#prod-subcategory", { opacity: 1, y: 0, duration: 0.5 }, 0.52)
-    .to("#prod-price-row",   { opacity: 1, y: 0, duration: 0.5 }, 0.6)
-    .to("#prod-desc",        { opacity: 1, y: 0, duration: 0.5 }, 0.68)
-    .to("#prod-colors-wrap", { opacity: 1, y: 0, duration: 0.45 }, 0.76)
-    .to("#prod-qty-wrap",    { opacity: 1, y: 0, duration: 0.45 }, 0.82)
-    .to("#prod-cta",         { opacity: 1, y: 0, duration: 0.5 }, 0.9)
-    .to("#specs-section",    { opacity: 1, duration: 0.4 }, 1.0);
+  tl.from("#img-panel", { x: -50, autoAlpha: 0, duration: 0.85 }, 0)
+    .to("#prod-category",    { autoAlpha: 1, y: 0, duration: 0.5 }, 0.28)
+    .to("#prod-name",        { autoAlpha: 1, y: 0, duration: 0.6 }, 0.38)
+    .to("#prod-subcategory", { autoAlpha: 1, y: 0, duration: 0.5 }, 0.48)
+    .to("#prod-price-row",   { autoAlpha: 1, y: 0, duration: 0.5 }, 0.56)
+    .to("#prod-desc",        { autoAlpha: 1, y: 0, duration: 0.5 }, 0.64)
+    .to("#prod-colors-wrap", { autoAlpha: 1, y: 0, duration: 0.45 }, 0.72)
+    .to("#prod-qty-wrap",    { autoAlpha: 1, y: 0, duration: 0.45 }, 0.78)
+    .to("#prod-cta",         { autoAlpha: 1, y: 0, duration: 0.5 }, 0.86)
+    .to("#specs-section",    { autoAlpha: 1, y: 0, duration: 0.4 }, 0.94);
 }
 
 // ─── NAV ───
@@ -348,6 +613,31 @@ async function renderNav() {
         li.appendChild(a);
         ul.appendChild(li);
       });
+    // Add Ubicaciones button
+    const liLoc = document.createElement("li");
+    const aLoc = document.createElement("a");
+    aLoc.href = "contacto.html";
+    aLoc.className = "nav-link-btn";
+    const svgNS = "http://www.w3.org/2000/svg";
+    const locSvg = document.createElementNS(svgNS, "svg");
+    locSvg.setAttribute("viewBox", "0 0 24 24");
+    locSvg.setAttribute("fill", "none");
+    locSvg.setAttribute("stroke-width", "1.8");
+    locSvg.setAttribute("stroke-linecap", "round");
+    locSvg.setAttribute("stroke-linejoin", "round");
+    locSvg.style.cssText = "width:11px;height:11px;stroke:currentColor";
+    const pinPath = document.createElementNS(svgNS, "path");
+    pinPath.setAttribute("d", "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z");
+    const pinCircle = document.createElementNS(svgNS, "circle");
+    pinCircle.setAttribute("cx", "12");
+    pinCircle.setAttribute("cy", "10");
+    pinCircle.setAttribute("r", "3");
+    locSvg.appendChild(pinPath);
+    locSvg.appendChild(pinCircle);
+    aLoc.appendChild(locSvg);
+    aLoc.appendChild(document.createTextNode(" Ubicaciones"));
+    liLoc.appendChild(aLoc);
+    ul.appendChild(liLoc);
   } catch { /* silent */ }
 }
 
@@ -445,6 +735,7 @@ async function init() {
     initPayment();
     buildSpecs(product);
     initOrderPanel(product);
+    initPayButton(product);
 
     const afterLoad = () => initLoupe(images[0]);
     if (mainImg) {

@@ -34,8 +34,8 @@
     nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:0 clamp(24px,5vw,80px);height:72px;display:flex;align-items:center;justify-content:space-between;background:rgba(12,31,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--rule)}
     .nav-logo{display:flex;align-items:center}
     .nav-logo img{height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,.5))}
-    .nav-links{display:flex;gap:40px;list-style:none;font-size:11px;letter-spacing:.18em;text-transform:uppercase}
-    .nav-links li a{color:var(--cream-dim);transition:color .3s;position:relative}
+    .nav-links{display:flex;gap:40px;list-style:none;font-size:12px;letter-spacing:.18em;text-transform:uppercase}
+    .nav-links li a{color:#c4d9cc;transition:color .3s;position:relative}
     .nav-links li a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:var(--copper);transition:width .4s var(--ease-silk)}
     .nav-links li a:hover{color:var(--cream)}
     .nav-links li a:hover::after{width:100%}
@@ -123,21 +123,46 @@
     .swatch:hover{transform:scale(1.15)}
     .swatch.active{border-color:var(--cream)}
 
+    /* NAV LOCATION BUTTON */
+    .nav-link-btn{display:inline-flex!important;align-items:center;gap:5px;padding:0;border:none;background:none}
+    .nav-link-btn:hover{background:none}
+    .nav-link-btn::after{display:block!important}
+    .nav-link-btn svg{width:11px;height:11px;stroke:currentColor;flex-shrink:0}
+
+    /* LIGHT CATALOG AREA */
+    .catalog-layout{background:#f9f8f5}
+    .sidebar{background:#0c1f14;--cream:#e8f5ec;--cream-dim:#9dc4aa;--rule:rgba(160,220,180,.12);color:#e8f5ec}
+    .sidebar .sidebar-title{color:var(--copper)}
+    .sidebar .cat-link{color:#9dc4aa}
+    .sidebar .cat-link:hover,.sidebar .cat-link.active{color:#e8f5ec;background:rgba(160,220,180,.05)}
+    .sidebar .cat-sub-link{color:#9dc4aa;border-left-color:rgba(160,220,180,.1)}
+    .sidebar .cat-sub-link:hover{color:#e8f5ec}
+    .sidebar .cat-sub-link.active{color:var(--copper-lt)}
+    .sidebar .check-item{color:#9dc4aa}
+    .sidebar .check-item:hover{color:#e8f5ec}
+    .sidebar .check-box{border-color:rgba(160,220,180,.12)}
+    .sidebar .check-item.checked .check-box{border-color:var(--copper);background:var(--copper)}
+    .sidebar .price-val{color:#e8f5ec}
+    .sidebar .price-sep{color:#9dc4aa}
+    .sidebar .range-track{background:rgba(160,220,180,.12)}
+    .sidebar input[type=range]::-webkit-slider-thumb{background:var(--copper);border-color:#0c1f14}
+    .sidebar .swatch.active{border-color:#e8f5ec}
+
     /* PRODUCT GRID */
-    .product-area{padding:32px clamp(24px,4vw,56px)}
+    .product-area{padding:32px clamp(24px,4vw,56px);background:#f9f8f5}
     .grid-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
-    .grid-result{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-dim)}
-    .grid-result strong{color:var(--cream);font-weight:400}
+    .grid-result{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7b7b70}
+    .grid-result strong{color:#1a1a18;font-weight:400}
     .view-toggle{display:flex;gap:4px}
-    .view-btn{width:32px;height:32px;border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;transition:border-color .2s,background .2s}
-    .view-btn.active{border-color:var(--copper);background:rgba(58,140,92,.12)}
-    .view-btn svg{width:14px;stroke:var(--cream-dim)}
+    .view-btn{width:32px;height:32px;border:1px solid rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;transition:border-color .2s,background .2s}
+    .view-btn.active{border-color:var(--copper);background:rgba(58,140,92,.08)}
+    .view-btn svg{width:14px;stroke:#7b7b70}
 
     .product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
     .product-grid.list-view{grid-template-columns:1fr}
 
     /* PRODUCT CARD */
-    .product-card{display:flex;flex-direction:column;background:var(--bg2);opacity:0;transform:translateY(32px)}
+    .product-card{display:flex;flex-direction:column;background:#ffffff;opacity:0;transform:translateY(32px);box-shadow:0 2px 16px rgba(0,0,0,.07);border:1px solid rgba(0,0,0,.07)}
     .product-img-wrap{position:relative;padding-top:118%;overflow:hidden}
     .product-img-wrap img{position:absolute;inset:0;transition:transform 1s var(--ease-silk)}
     .product-card:hover .product-img-wrap img{transform:scale(1.05)}
@@ -152,14 +177,14 @@
     .btn-wish{width:40px;height:40px;border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;transition:border-color .25s}
     .btn-wish:hover{border-color:var(--copper)}
     .btn-wish svg{width:15px;stroke:var(--cream-dim)}
-    .product-info{padding:18px 18px 22px;flex:1;display:flex;flex-direction:column;gap:6px}
+    .product-info{padding:18px 18px 22px;flex:1;display:flex;flex-direction:column;gap:6px;background:#ffffff}
     .product-cat{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--copper)}
-    .product-name{font-family:var(--f-display);font-size:20px;font-weight:300;line-height:1.15}
-    .product-desc{font-size:12px;color:var(--cream-dim);line-height:1.5;margin-top:2px}
-    .product-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:10px;border-top:1px solid var(--rule)}
+    .product-name{font-family:var(--f-display);font-size:20px;font-weight:300;line-height:1.15;color:#1a1a18}
+    .product-desc{font-size:12px;color:#6b6b60;line-height:1.5;margin-top:2px}
+    .product-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:10px;border-top:1px solid rgba(0,0,0,.08)}
     .product-price{display:flex;align-items:baseline;gap:8px}
-    .price-current{font-family:var(--f-display);font-size:22px;color:var(--cream)}
-    .price-original{font-size:13px;color:var(--cream-dim);text-decoration:line-through}
+    .price-current{font-family:var(--f-display);font-size:22px;color:#1a1a18}
+    .price-original{font-size:13px;color:#a0a09a;text-decoration:line-through}
     .price-off{font-size:10px;color:#9e7e2a}
     .product-colors-mini{display:flex;gap:4px}
     .dot{width:12px;height:12px;border-radius:50%;border:2px solid transparent}
@@ -175,9 +200,9 @@
 
     /* PAGINATION */
     .pagination{display:flex;align-items:center;justify-content:center;gap:4px;padding:56px 0 40px}
-    .page-btn{width:40px;height:40px;border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--cream-dim);transition:border-color .25s,color .25s,background .25s}
-    .page-btn:hover{border-color:var(--copper);color:var(--cream)}
-    .page-btn.active{background:var(--copper);border-color:var(--copper);color:var(--bg)}
+    .page-btn{width:40px;height:40px;border:1px solid rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;font-size:13px;color:#7b7b70;transition:border-color .25s,color .25s,background .25s}
+    .page-btn:hover{border-color:var(--copper);color:#1a1a18}
+    .page-btn.active{background:var(--copper);border-color:var(--copper);color:#ffffff}
     .page-btn svg{width:14px;stroke:currentColor}
 
     /* BUTTONS */
@@ -222,6 +247,10 @@
       <li><a href="catalogo.html?cat=Dormitorios">Dormitorios</a></li>
       <li><a href="catalogo.html?cat=Entretenimiento">Entretenimiento</a></li>
       <li><a href="catalogo.html?cat=Bar">Bar</a></li>
+      <li><a href="contacto.html" class="nav-link-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Ubicaciones
+      </a></li>
     </ul>
     <div class="nav-actions">
       <a href="#" aria-label="Buscar">
@@ -249,7 +278,7 @@
         <span id="bc-cat">Dormitorios</span>
       </div>
       <div class="cat-hero-title" id="hero-title">Dormitorios</div>
-      <div class="cat-hero-count" id="hero-count">56 productos</div>
+      <div class="cat-hero-count" id="hero-count"></div>
     </div>
   </div>
 
@@ -386,7 +415,7 @@
 
     <main class="product-area">
       <div class="grid-header">
-        <div class="grid-result"><strong id="result-count">56</strong> productos encontrados</div>
+        <div class="grid-result"><strong id="result-count"></strong> productos encontrados</div>
         <div class="view-toggle">
           <button class="view-btn active" id="grid-view-btn" aria-label="Vista cuadricula">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>

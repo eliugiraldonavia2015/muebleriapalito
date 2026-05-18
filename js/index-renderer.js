@@ -78,6 +78,28 @@ function renderNav(categories) {
   navList.innerHTML = topCats.map(c =>
     `<li><a href="catalogo.html?cat=${slugify(c.name)}">${c.name}</a></li>`
   ).join("");
+  // Add Ubicaciones button via safe DOM
+  const liLoc = document.createElement("li");
+  const aLoc = document.createElement("a");
+  aLoc.href = "contacto.html";
+  aLoc.className = "nav-link-btn";
+  const svgNS2 = "http://www.w3.org/2000/svg";
+  const navSvg = document.createElementNS(svgNS2, "svg");
+  navSvg.setAttribute("viewBox", "0 0 24 24");
+  navSvg.setAttribute("fill", "none");
+  navSvg.setAttribute("stroke-width", "1.8");
+  navSvg.setAttribute("stroke-linecap", "round");
+  navSvg.setAttribute("stroke-linejoin", "round");
+  navSvg.style.cssText = "width:11px;height:11px;stroke:currentColor";
+  const navPath = document.createElementNS(svgNS2, "path");
+  navPath.setAttribute("d", "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z");
+  const navCircle = document.createElementNS(svgNS2, "circle");
+  navCircle.setAttribute("cx", "12"); navCircle.setAttribute("cy", "10"); navCircle.setAttribute("r", "3");
+  navSvg.appendChild(navPath); navSvg.appendChild(navCircle);
+  aLoc.appendChild(navSvg);
+  aLoc.appendChild(document.createTextNode(" Ubicaciones"));
+  liLoc.appendChild(aLoc);
+  navList.appendChild(liLoc);
 }
 
 // Hero
