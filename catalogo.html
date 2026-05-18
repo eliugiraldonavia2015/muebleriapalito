@@ -234,7 +234,23 @@
     .wa-float:hover{transform:scale(1.1)}
     .wa-float svg{width:26px;stroke:white}
 
-    @media(max-width:1024px){.catalog-layout{grid-template-columns:1fr}.sidebar{display:none}.product-grid{grid-template-columns:repeat(2,1fr)}}
+    /* SKELETON LOADING */
+    .skeleton{background:linear-gradient(90deg,#f0f0ec 0%,#e8e8e4 40%,#f5f5f2 60%,#f0f0ec 100%);background-size:200% 100%;animation:skelShimmer 1.5s ease-in-out infinite;border-radius:4px}
+    @keyframes skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    .skel-card{overflow:hidden}
+    .skel-img{height:280px;width:100%;border-radius:0}
+    .skel-cat{height:10px;width:60%;margin-top:16px;margin-bottom:10px}
+    .skel-name{height:18px;width:80%;margin-bottom:8px}
+    .skel-desc{height:12px;width:100%;margin-bottom:14px}
+    .skel-price-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+    .skel-price{height:22px;width:80px}
+    .skel-original{height:16px;width:60px}
+    .skel-off{height:16px;width:40px}
+    .skel-colors{display:flex;gap:6px;margin-top:10px}
+    .skel-dot{width:16px;height:16px;border-radius:50%}
+
+    @media(max-width:1024px){.catalog-layout{grid-template-columns:1fr}.sidebar{display:none}}
     @media(max-width:640px){.product-grid{grid-template-columns:1fr}.footer-top{grid-template-columns:1fr 1fr;gap:32px}.nav-links{display:none}}
   </style>
 </head>
@@ -427,221 +443,52 @@
       </div>
 
       <div class="product-grid" id="product-grid">
-        <!-- Card 1 -->
-        <div class="product-card">
-          <div class="product-img-wrap">
-            <img src="https://muebleria-palito-cdn.b-cdn.net/products/cama-platform-oslo.jpg" alt="Cama Platform Oslo"/>
-            <span class="product-badge">-31%</span>
-            <div class="product-actions">
-              <button class="btn-cart">Agregar al carrito</button>
-              <button class="btn-wish" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>
-            </div>
-          </div>
+        <!-- Skeletons shown while Firestore loads -->
+        <div class="skel-card skeleton-loader">
+          <div class="product-img-wrap"><div class="skeleton skel-img"></div></div>
           <div class="product-info">
-            <div class="product-cat">Camas</div>
-            <div class="product-name">Cama Platform Oslo</div>
-            <div class="product-desc">Estructura en madera de nogal, cabecera tapizada</div>
-            <div class="product-foot">
-              <div class="product-price">
-                <span class="price-current">$980</span>
-                <span class="price-original">$1,420</span>
-                <span class="price-off">-31%</span>
-              </div>
-              <div class="product-colors-mini">
-                <div class="dot active" style="background:#c8bfa8"></div>
-                <div class="dot" style="background:#4a4a4a"></div>
-              </div>
+            <div class="skeleton skel-cat"></div>
+            <div class="skeleton skel-name"></div>
+            <div class="skeleton skel-desc"></div>
+            <div class="skel-price-row">
+              <div class="skeleton skel-price"></div>
+              <div class="skeleton skel-original"></div>
+              <div class="skeleton skel-off"></div>
+            </div>
+            <div class="skel-colors">
+              <div class="skeleton skel-dot"></div>
+              <div class="skeleton skel-dot"></div>
             </div>
           </div>
         </div>
-        <!-- Card 2 -->
-        <div class="product-card">
-          <div class="product-img-wrap">
-            <img src="https://muebleria-palito-cdn.b-cdn.net/products/cama-king-monarch.jpg" alt="Cama King Monarch"/>
-            <span class="product-badge new">Nuevo</span>
-            <div class="product-actions">
-              <button class="btn-cart">Agregar al carrito</button>
-              <button class="btn-wish" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>
-            </div>
-          </div>
+        <div class="skel-card skeleton-loader">
+          <div class="product-img-wrap"><div class="skeleton skel-img"></div></div>
           <div class="product-info">
-            <div class="product-cat">Camas</div>
-            <div class="product-name">Cama King Monarch</div>
-            <div class="product-desc">Diseño imperial, patas torneadas, cabecera alta</div>
-            <div class="product-foot">
-              <div class="product-price"><span class="price-current">$1,450</span></div>
-              <div class="product-colors-mini">
-                <div class="dot active" style="background:#2c2c2c"></div>
-                <div class="dot" style="background:#8b7355"></div>
-                <div class="dot" style="background:#5c3d1e"></div>
-              </div>
+            <div class="skeleton skel-cat"></div>
+            <div class="skeleton skel-name"></div>
+            <div class="skeleton skel-desc"></div>
+            <div class="skel-price-row">
+              <div class="skeleton skel-price"></div>
+              <div class="skeleton skel-original"></div>
+              <div class="skeleton skel-off"></div>
+            </div>
+            <div class="skel-colors">
+              <div class="skeleton skel-dot"></div>
+              <div class="skeleton skel-dot"></div>
             </div>
           </div>
         </div>
-        <!-- Card 3 -->
-        <div class="product-card">
-          <div class="product-img-wrap">
-            <img src="https://muebleria-palito-cdn.b-cdn.net/products/set-dormitorio-milano.jpg" alt="Set Dormitorio Milano"/>
-            <span class="product-badge">-18%</span>
-            <div class="product-actions">
-              <button class="btn-cart">Agregar al carrito</button>
-              <button class="btn-wish" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>
-            </div>
-          </div>
+        <div class="skel-card skeleton-loader">
+          <div class="product-img-wrap"><div class="skeleton skel-img"></div></div>
           <div class="product-info">
-            <div class="product-cat">Sets</div>
-            <div class="product-name">Set Dormitorio Milano</div>
-            <div class="product-desc">Cama + 2 mesas de noche + comodas doble</div>
-            <div class="product-foot">
-              <div class="product-price">
-                <span class="price-current">$2,200</span>
-                <span class="price-original">$2,680</span>
-                <span class="price-off">-18%</span>
-              </div>
-              <div class="product-colors-mini">
-                <div class="dot active" style="background:#8b7355"></div>
-                <div class="dot" style="background:#c8bfa8"></div>
-              </div>
+            <div class="skeleton skel-cat"></div>
+            <div class="skeleton skel-name"></div>
+            <div class="skeleton skel-desc"></div>
+            <div class="skel-price-row">
+              <div class="skeleton skel-price"></div>
             </div>
-          </div>
-        </div>
-        <!-- Card 4 -->
-        <div class="product-card">
-          <div class="product-img-wrap">
-            <img src="https://muebleria-palito-cdn.b-cdn.net/products/colchon-memory-plus.jpg" alt="Colchon Memory Plus"/>
-            <span class="product-badge">-20%</span>
-            <div class="product-actions">
-              <button class="btn-cart">Agregar al carrito</button>
-              <button class="btn-wish" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>
-            </div>
-          </div>
-          <div class="product-info">
-            <div class="product-cat">Colchones</div>
-            <div class="product-name">Colchon Memory Plus</div>
-            <div class="product-desc">Foam viscoelastico, 60 noches de garantia</div>
-            <div class="product-foot">
-              <div class="product-price">
-                <span class="price-current">$680</span>
-                <span class="price-original">$850</span>
-                <span class="price-off">-20%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Card 5 -->
-        <div class="product-card">
-          <div class="product-img-wrap">
-            <img src="https://muebleria-palito-cdn.b-cdn.net/products/mesa-noche-flux.jpg" alt="Mesa de Noche Flux"/>
-            <div class="product-actions">
-              <button class="btn-cart">Agregar al carrito</button>
-              <button class="btn-wish" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>
-            </div>
-          </div>
-          <div class="product-info">
-            <div class="product-cat">Mesas de noche</div>
-            <div class="product-name">Mesa de Noche Flux</div>
-            <div class="product-desc">Madera solida con cajones suaves al tacto</div>
-            <div class="product-foot">
-              <div class="product-price"><span class="price-current">$245</span></div>
-              <div class="product-colors-mini">
-                <div class="dot active" style="background:#8b7355"></div>
-                <div class="dot" style="background:#2c2c2c"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Card 6 -->
-        <div class="product-card">
-          <div class="product-img-wrap">
-            <img src="https://muebleria-palito-cdn.b-cdn.net/products/armario-3-puertas.jpg" alt="Armario 3 Puertas"/>
-            <div class="product-actions">
-              <button class="btn-cart">Agregar al carrito</button>
-              <button class="btn-wish" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>
-            </div>
-          </div>
-          <div class="product-info">
-            <div class="product-cat">Armarios</div>
-            <div class="product-name">Armario 3 Puertas Espejo</div>
-            <div class="product-desc">Espejo de cuerpo entero, organizacion interior</div>
-            <div class="product-foot">
-              <div class="product-price"><span class="price-current">$890</span></div>
-              <div class="product-colors-mini">
-                <div class="dot active" style="background:#c8bfa8"></div>
-                <div class="dot" style="background:#2c2c2c"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Card 7 -->
-        <div class="product-card">
-          <div class="product-img-wrap">
-            <img src="https://muebleria-palito-cdn.b-cdn.net/products/cabecera-terciopelo-vienna.jpg" alt="Cabecera Terciopelo"/>
-            <span class="product-badge new">Nuevo</span>
-            <div class="product-actions">
-              <button class="btn-cart">Agregar al carrito</button>
-              <button class="btn-wish" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>
-            </div>
-          </div>
-          <div class="product-info">
-            <div class="product-cat">Cabeceras</div>
-            <div class="product-name">Cabecera Terciopelo Vienna</div>
-            <div class="product-desc">Terciopelo artesanal, marco en dorado mate</div>
-            <div class="product-foot">
-              <div class="product-price"><span class="price-current">$380</span></div>
-              <div class="product-colors-mini">
-                <div class="dot active" style="background:#1a1a2e"></div>
-                <div class="dot" style="background:#4a6741"></div>
-                <div class="dot" style="background:#8b4513"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Card 8 -->
-        <div class="product-card">
-          <div class="product-img-wrap">
-            <img src="https://muebleria-palito-cdn.b-cdn.net/products/cama-tapizada-berlin.jpg" alt="Cama Tapizada"/>
-            <span class="product-badge">-15%</span>
-            <div class="product-actions">
-              <button class="btn-cart">Agregar al carrito</button>
-              <button class="btn-wish" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>
-            </div>
-          </div>
-          <div class="product-info">
-            <div class="product-cat">Camas</div>
-            <div class="product-name">Cama Tapizada Berlin</div>
-            <div class="product-desc">Estructura acolchada de lino natural, queen</div>
-            <div class="product-foot">
-              <div class="product-price">
-                <span class="price-current">$1,180</span>
-                <span class="price-original">$1,390</span>
-                <span class="price-off">-15%</span>
-              </div>
-              <div class="product-colors-mini">
-                <div class="dot active" style="background:#d4c5b0"></div>
-                <div class="dot" style="background:#4a4a4a"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Card 9 -->
-        <div class="product-card">
-          <div class="product-img-wrap">
-            <img src="https://muebleria-palito-cdn.b-cdn.net/products/comoda-doble-lund.jpg" alt="Comoda Doble"/>
-            <div class="product-actions">
-              <button class="btn-cart">Agregar al carrito</button>
-              <button class="btn-wish" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>
-            </div>
-          </div>
-          <div class="product-info">
-            <div class="product-cat">Comodas</div>
-            <div class="product-name">Comoda Doble Lund</div>
-            <div class="product-desc">6 cajones con guias metalicas, manijas brutas</div>
-            <div class="product-foot">
-              <div class="product-price"><span class="price-current">$520</span></div>
-              <div class="product-colors-mini">
-                <div class="dot active" style="background:#8b7355"></div>
-                <div class="dot" style="background:#c8bfa8"></div>
-              </div>
+            <div class="skel-colors">
+              <div class="skeleton skel-dot"></div>
             </div>
           </div>
         </div>

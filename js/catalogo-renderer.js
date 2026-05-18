@@ -185,31 +185,67 @@ function renderProductsGrid(products) {
     return;
   }
 
-  grid.innerHTML = filtered.map(p => `
-    <div class="product-card">
-      <div class="product-img-wrap">
-        <img src="${p.imageUrl || 'https://via.placeholder.com/500'}" alt="${p.name}"/>
-        ${badgeHTML(p)}
-        <div class="product-actions">
-          <button class="btn-cart">Agregar al carrito</button>
-          <button class="btn-wish" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>
-        </div>
-      </div>
-      <div class="product-info">
-        <div class="product-cat">${p.category || ""}</div>
-        <div class="product-name">${p.name}</div>
-        <div class="product-desc">${p.description || ""}</div>
-        <div class="product-foot">
-          <div class="product-price">
-            <span class="price-current">${priceFmt(p.price)}</span>
-            ${p.originalPrice ? `<span class="price-original">${priceFmt(p.originalPrice)}</span>` : ""}
-            ${p.discountPct ? `<span class="price-off">-${Math.abs(p.discountPct)}%</span>` : ""}
+  // Fade out skeletons, then swap
+  const skeletons = grid.querySelectorAll('.skeleton-loader');
+  if (skeletons.length && window.gsap) {
+    window.gsap.to(skeletons, {
+      opacity: 0, scale: 0.97, duration: 0.25, ease: "power2.in",
+      stagger: 0.05,
+      onComplete: () => {
+        grid.innerHTML = filtered.map(p => `
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <img src="${p.imageUrl || 'https://via.placeholder.com/500'}" alt="${p.name}"/>
+              ${badgeHTML(p)}
+              <div class="product-actions">
+                <button class="btn-cart">Agregar al carrito</button>
+                <button class="btn-wish" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>
+              </div>
+            </div>
+            <div class="product-info">
+              <div class="product-cat">${p.category || ""}</div>
+              <div class="product-name">${p.name}</div>
+              <div class="product-desc">${p.description || ""}</div>
+              <div class="product-foot">
+                <div class="product-price">
+                  <span class="price-current">${priceFmt(p.price)}</span>
+                  ${p.originalPrice ? `<span class="price-original">${priceFmt(p.originalPrice)}</span>` : ""}
+                  ${p.discountPct ? `<span class="price-off">-${Math.abs(p.discountPct)}%</span>` : ""}
+                </div>
+                ${colorsHTML(p.colors)}
+              </div>
+            </div>
           </div>
-          ${colorsHTML(p.colors)}
+        `).join("");
+      }
+    });
+  } else {
+    grid.innerHTML = filtered.map(p => `
+      <div class="product-card">
+        <div class="product-img-wrap">
+          <img src="${p.imageUrl || 'https://via.placeholder.com/500'}" alt="${p.name}"/>
+          ${badgeHTML(p)}
+          <div class="product-actions">
+            <button class="btn-cart">Agregar al carrito</button>
+            <button class="btn-wish" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>
+          </div>
+        </div>
+        <div class="product-info">
+          <div class="product-cat">${p.category || ""}</div>
+          <div class="product-name">${p.name}</div>
+          <div class="product-desc">${p.description || ""}</div>
+          <div class="product-foot">
+            <div class="product-price">
+              <span class="price-current">${priceFmt(p.price)}</span>
+              ${p.originalPrice ? `<span class="price-original">${priceFmt(p.originalPrice)}</span>` : ""}
+              ${p.discountPct ? `<span class="price-off">-${Math.abs(p.discountPct)}%</span>` : ""}
+            </div>
+            ${colorsHTML(p.colors)}
+          </div>
         </div>
       </div>
-    </div>
-  `).join("");
+    `).join("");
+  }
 
   // Make cards navigate to producto.html
   grid.querySelectorAll('.product-card').forEach((card, i) => {
@@ -256,9 +292,9 @@ function reinitAccordion() {
 // ─── MAIN INIT ───
 async function init() {
   try {
-    const [categories, products, settings] = await Promise.all([
+    // Phase 1: Load categories FIRST → hero + count appear immediately with skeletons still showing
+    const [categories, settings] = await Promise.all([
       getCategories(),
-      getProducts(),
       getSettings()
     ]);
 
@@ -266,6 +302,9 @@ async function init() {
     addUbicacionesBtn();
     renderHero(categories);
     renderSidebar(categories);
+
+    // Phase 2: Load products → replace skeletons with real cards
+    const products = await getProducts();
     renderProductsGrid(products);
 
     // Re-initialize GSAP ScrollTrigger animations after DOM swap
@@ -276,7 +315,7 @@ async function init() {
           start: 'top 88%'
         });
         window.ScrollTrigger.refresh();
-      }, 250);
+      }, 300);
     }
   } catch (err) {
     console.error("[catalogo-renderer] Error:", err);
