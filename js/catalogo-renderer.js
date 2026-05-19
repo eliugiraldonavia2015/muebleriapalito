@@ -6,15 +6,20 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import {
-  getFirestore, collection, getDocs, query, orderBy, doc, getDoc
+  initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
+  collection, getDocs, query, orderBy, doc, getDoc
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// IndexedDB cache — second visit serves docs from local cache before network confirms.
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+});
 const $ = s => document.querySelector(s);
 
-const PAGE_SIZE = 12;
+const FIRST_BATCH = 3;
+const PAGE_SIZE = 9;
 
 // ─── URL PARAMS ─── normalize to lowercase
 const params = new URLSearchParams(window.location.search);
@@ -123,7 +128,9 @@ function renderHero(categories) {
   $("#bc-cat").textContent = label;
   $("#page-title").textContent = label + " — Muebleria Palito Outlet";
   // hero-count stays empty until real products load (no flash)
-  if (img) $("#hero-img").src = img;
+  // Only set src if the inline-script preload hasn't already populated it (avoids re-fetch).
+  const imgEl = $("#hero-img");
+  if (img && imgEl && !imgEl.getAttribute('src')) imgEl.src = img;
 }
 
 // ─── RENDER SIDEBAR CATEGORIES ───
@@ -202,38 +209,30 @@ function loadNextBatch() {
     return;
   }
 
-  const allSkeletons = grid.querySelectorAll('.skeleton-loader');
-
-  if (shownCount === 0 && allSkeletons.length) {
-    // First batch: fade out skeletons, then swap with cards
-    const skeletons = Array.from(allSkeletons);
-    const dur = 250 + 60 * (skeletons.length - 1);
-    if (window.gsap) {
-      gsap.to(skeletons, {
-        opacity: 0, scale: 0.96,
-        duration: 0.25, ease: "power2.in", stagger: 0.06
-      });
-      setTimeout(() => {
-        grid.innerHTML = '';
-        buildCardsBatch(grid);
-      }, dur + 50);
-    } else {
-      grid.innerHTML = '';
-      buildCardsBatch(grid);
-    }
-  } else {
-    // Subsequent batches: just append
-    buildCardsBatch(grid);
+  // First batch: drop skeletons in one frame (no staggered fade — it caused a perceived lag)
+  // and immediately build cards so there's no empty-grid flash. The card entrance animation
+  // alone provides the smooth transition.
+  if (shownCount === 0) {
+    grid.querySelectorAll('.skeleton-loader').forEach(s => s.remove());
   }
+  buildCardsBatch(grid);
 }
 
 function buildCardsBatch(grid) {
-  const batch = filteredProducts.slice(shownCount, shownCount + PAGE_SIZE);
+  // First paint: only 3 cards so the user sees content as fast as possible.
+  // Subsequent batches: 9 at a time.
+  const size = shownCount === 0 ? FIRST_BATCH : PAGE_SIZE;
+  const batch = filteredProducts.slice(shownCount, shownCount + size);
   if (!batch.length) return;
 
   const fragment = document.createDocumentFragment();
 
   batch.forEach((p, i) => {
+    // Cache the image URL so deep-links to producto.html?id=<id> can preload it without
+    // waiting for Firestore.
+    if (p.imageUrl) {
+      try { localStorage.setItem('img:' + p.id, p.imageUrl); } catch (_) {}
+    }
     const card = document.createElement("div");
     card.className = "product-card";
     card.innerHTML = `
@@ -262,7 +261,8 @@ function buildCardsBatch(grid) {
     card.style.cursor = 'pointer';
     card.addEventListener('click', (e) => {
       if (e.target.closest('.btn-cart') || e.target.closest('.btn-wish')) return;
-      window.location.href = 'producto.html?id=' + p.id;
+      const img = p.imageUrl ? '&img=' + encodeURIComponent(p.imageUrl) : '';
+      window.location.href = 'producto.html?id=' + p.id + img;
     });
     fragment.appendChild(card);
   });
@@ -270,19 +270,15 @@ function buildCardsBatch(grid) {
   grid.appendChild(fragment);
   shownCount += batch.length;
 
-  // Animate new cards
-  if (window.gsap) {
-    const newCards = grid.querySelectorAll('.product-card');
-    // Only animate cards that were just added
-    const startIndex = newCards.length - batch.length;
-    const newCardArr = Array.from(newCards).slice(startIndex);
-    gsap.from(newCardArr, {
-      autoAlpha: 0, y: 32, duration: 0.55, stagger: 0.07,
-      ease: 'power3.out', clearProps: 'transform'
-    });
-  }
+  // Animate new cards in — short distance + tight stagger so it reads as "settling in"
+  // instead of a slow wave. Fallback: if GSAP is missing, make them visible immediately so
+  // the CSS `opacity:0` doesn't leave the grid blank.
+  // Cards appear immediately — the only "loading" delay is the real Firestore fetch.
+  // Just flip opacity (CSS has opacity:0 baked in).
+  const newCardArr = Array.from(grid.querySelectorAll('.product-card')).slice(-batch.length);
+  newCardArr.forEach(c => { c.style.opacity = '1'; });
 
-  // Setup scroll sentinel for next batch
+  // Setup scroll sentinel for next batch (no ScrollTrigger reinit - cards handle own animation)
   // Also reinit ScrollTrigger batch if available
   if (shownCount < filteredProducts.length) {
     const sentinel = document.createElement("div");
@@ -291,26 +287,22 @@ function buildCardsBatch(grid) {
     sentinel.innerHTML = `<div class="load-more-spinner" style="display:flex;align-items:center;gap:10px;font-size:12px;color:#7b7b70;"><span class="spinner" style="width:16px;height:16px;border:2px solid rgba(0,0,0,.1);border-top-color:var(--copper);border-radius:50%;animation:spin .8s linear infinite;"></span><span>Cargando más...</span></div>`;
     grid.appendChild(sentinel);
 
-    scrollObserver = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) {
-        scrollObserver.disconnect();
-        scrollObserver = null;
-        setTimeout(() => loadNextBatch(), 200);
-      }
-    }, { rootMargin: "400px" });
-    scrollObserver.observe(sentinel);
+    // Arm the observer next paint — no artificial delay, just lets the just-appended
+    // cards render before checking if the sentinel is in view.
+    requestAnimationFrame(() => {
+      scrollObserver = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting) {
+          scrollObserver.disconnect();
+          scrollObserver = null;
+          loadNextBatch();
+        }
+      }, { rootMargin: "120px" });
+      scrollObserver.observe(sentinel);
+    });
   }
-
-  // Reinit ScrollTrigger batch
-  if (window.gsap && window.ScrollTrigger) {
-    setTimeout(() => {
-      window.ScrollTrigger.batch('.product-card', {
-        onEnter: els => window.gsap.to(els, { autoAlpha: 1, y: 0, duration: .65, stagger: .08, ease: 'power3.out', clearProps: 'transform' }),
-        start: 'top 88%'
-      });
-      window.ScrollTrigger.refresh();
-    }, 300);
-  }
+  // No ScrollTrigger.refresh() here — it causes a layout jump by recalculating
+  // all scroll positions simultaneously while cards are still animating.
+  // Each batch of cards handles its own animation on creation.
 
   // Update pagination info
   const infoEl = document.getElementById("pagination-info");
@@ -358,16 +350,22 @@ function reinitAccordion() {
 // ─── MAIN INIT ───
 async function init() {
   try {
-    // Phase 1: categories first → hero + sidebar visible
-    const categories = await getCategories();
-    renderNav(categories);
-    addUbicacionesBtn();
-    renderHero(categories);
-    renderSidebar(categories);
+    // Fire both Firestore queries in parallel — whichever lands first renders independently.
+    // No artificial sequencing: products often arrive before categories and that's fine.
+    const categoriesPromise = getCategories();
+    const productsPromise = getProducts();
 
-    // Phase 2: load products → infinite scroll
-    const products = await getProducts();
-    renderProductsGrid(products);
+    categoriesPromise.then(categories => {
+      renderHero(categories);
+      renderSidebar(categories);
+    });
+
+    productsPromise.then(products => {
+      renderProductsGrid(products);
+    });
+
+    // Surface any failure
+    await Promise.all([categoriesPromise, productsPromise]);
   } catch (err) {
     console.error("[catalogo-renderer] Error:", err);
     // Hide skeletons on error

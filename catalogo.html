@@ -6,6 +6,27 @@
   <title id="page-title">Catalogo — Muebleria Palito Outlet</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="preconnect" href="https://muebleria-palito-cdn.b-cdn.net" crossorigin/>
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin/>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin/>
+  <link rel="modulepreload" href="js/catalogo-renderer.js"/>
+  <link rel="modulepreload" href="js/firebase-config.js"/>
+  <script>
+    // Fire the hero image request as early as possible — before HTML parsing reaches the
+    // body. Uses the CDN slug pattern so the browser starts fetching during head parse.
+    (function () {
+      var raw = new URLSearchParams(location.search).get('cat');
+      if (!raw) return;
+      var slug = decodeURIComponent(raw).toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      var url = 'https://muebleria-palito-cdn.b-cdn.net/categorias/' + slug + '.jpg';
+      var l = document.createElement('link');
+      l.rel = 'preload'; l.as = 'image'; l.href = url; l.fetchPriority = 'high';
+      document.head.appendChild(l);
+      window.__heroImgUrl = url;
+    })();
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
@@ -31,7 +52,7 @@
     ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--copper);border-radius:2px}
 
     /* NAV */
-    nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:0 clamp(24px,5vw,80px);height:72px;display:flex;align-items:center;justify-content:space-between;background:rgba(12,31,20,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--rule)}
+    nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:0 clamp(24px,5vw,80px);height:72px;display:flex;align-items:center;justify-content:space-between;background:rgba(12,31,20,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--rule)}
     .nav-logo{display:flex;align-items:center}
     .nav-logo img{height:44px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,.5))}
     .nav-links{display:flex;gap:40px;list-style:none;font-size:12px;letter-spacing:.18em;text-transform:uppercase}
@@ -162,7 +183,7 @@
     .product-grid.list-view{grid-template-columns:1fr}
 
     /* PRODUCT CARD */
-    .product-card{display:flex;flex-direction:column;background:#ffffff;opacity:0;transform:translateY(32px);box-shadow:0 2px 16px rgba(0,0,0,.07);border:1px solid rgba(0,0,0,.07)}
+    .product-card{display:flex;flex-direction:column;background:#ffffff;opacity:0;box-shadow:0 2px 16px rgba(0,0,0,.07);border:1px solid rgba(0,0,0,.07)}
     .product-img-wrap{position:relative;padding-top:118%;overflow:hidden}
     .product-img-wrap img{position:absolute;inset:0;transition:transform 1s var(--ease-silk)}
     .product-card:hover .product-img-wrap img{transform:scale(1.05)}
@@ -243,8 +264,9 @@
     .load-sentinel{grid-column:1/-1;height:48px;display:flex;align-items:center;justify-content:center}
     .load-more-spinner{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--cream-dim)}
 
-    .skel-card{overflow:hidden}
-    .skel-img{height:280px;width:100%;border-radius:0}
+    .skel-card{overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.07);box-shadow:0 2px 16px rgba(0,0,0,.07)}
+    .skel-card .product-img-wrap{padding-top:118%}
+    .skel-img{position:absolute;inset:0;height:auto;width:auto;border-radius:0}
     .skel-cat{height:10px;width:60%;margin-top:16px;margin-bottom:10px}
     .skel-name{height:18px;width:80%;margin-bottom:8px}
     .skel-desc{height:12px;width:100%;margin-bottom:14px}
@@ -289,19 +311,36 @@
 
   <div class="cat-hero" id="cat-hero">
     <div class="cat-hero-img">
-      <img id="hero-img" src="https://muebleria-palito-cdn.b-cdn.net/products/cama-platform-oslo.jpg" alt="Categoria"/>
+      <img id="hero-img" src="" alt=""/>
     </div>
     <div class="cat-hero-overlay"></div>
     <div class="cat-hero-content">
       <div class="breadcrumb">
         <a href="index.html">Inicio</a>
         <span class="breadcrumb-sep">/</span>
-        <span id="bc-cat">Dormitorios</span>
+        <span id="bc-cat"></span>
       </div>
-      <div class="cat-hero-title" id="hero-title">Dormitorios</div>
+      <div class="cat-hero-title" id="hero-title"></div>
       <div class="cat-hero-count" id="hero-count"></div>
     </div>
   </div>
+  <script>
+    // Set hero title + image from URL param synchronously so the user never sees a stale
+    // category. The image was already preloaded in <head>, so this assignment is instant.
+    (function () {
+      var p = new URLSearchParams(location.search).get('cat');
+      if (!p) return;
+      var label = decodeURIComponent(p).replace(/-/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+      var t = document.getElementById('hero-title');
+      var b = document.getElementById('bc-cat');
+      var pt = document.getElementById('page-title');
+      var img = document.getElementById('hero-img');
+      if (t) t.textContent = label;
+      if (b) b.textContent = label;
+      if (pt) pt.textContent = label + ' — Muebleria Palito Outlet';
+      if (img && window.__heroImgUrl) { img.src = window.__heroImgUrl; img.alt = label; }
+    })();
+  </script>
 
   <div class="toolbar">
     <div class="filter-chips">
@@ -436,7 +475,7 @@
 
     <main class="product-area">
       <div class="grid-header">
-        <div class="grid-result"><strong id="result-count"></strong> productos encontrados</div>
+        <div class="grid-result"><strong id="result-count">Cargando...</strong> productos encontrados</div>
         <div class="view-toggle">
           <button class="view-btn active" id="grid-view-btn" aria-label="Vista cuadricula">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
@@ -448,7 +487,7 @@
       </div>
 
       <div class="product-grid" id="product-grid">
-        <!-- Skeletons shown while Firestore loads -->
+        <!-- Skeletons shown while Firestore loads (1 fila x 3 cols = 3 items) -->
         <div class="skel-card skeleton-loader">
           <div class="product-img-wrap"><div class="skeleton skel-img"></div></div>
           <div class="product-info">
@@ -491,8 +530,11 @@
             <div class="skeleton skel-desc"></div>
             <div class="skel-price-row">
               <div class="skeleton skel-price"></div>
+              <div class="skeleton skel-original"></div>
+              <div class="skeleton skel-off"></div>
             </div>
             <div class="skel-colors">
+              <div class="skeleton skel-dot"></div>
               <div class="skeleton skel-dot"></div>
             </div>
           </div>

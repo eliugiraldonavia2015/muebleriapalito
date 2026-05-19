@@ -4,12 +4,15 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import {
-  getFirestore, collection, getDocs, query, orderBy, doc, getDoc
+  initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
+  collection, getDocs, query, orderBy, doc, getDoc
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+});
 const $ = (s) => document.querySelector(s);
 
 // ─── FETCH ───

@@ -167,6 +167,10 @@ async function runLoader() {
   populateSettingsForm();
   document.getElementById("lastSync").textContent = "Sincronizado: " + new Date().toLocaleTimeString("es-EC");
 
+  // Keep CDN manifest in sync on every admin session login (covers cases where products
+  // were added directly via Firestore console without going through this admin panel).
+  regenerateProductsManifest();
+
   // Complete and reveal app
   await gsap.to(barEl, { width: "100%", duration: 0.3, ease: "power2.in" });
   await gsap.to(loader, { autoAlpha: 0, y: -16, duration: 0.55, ease: "power3.in", delay: 0.1 });
@@ -850,6 +854,38 @@ async function deleteImageFromBunny(imageUrl) {
   }
 }
 
+// ─── MANIFEST REGEN ───
+// Builds {id: imageUrl} for all products and uploads it to Bunny CDN. Called after every
+// product CRUD so the client-side lookup stays fresh without manual edits.
+async function regenerateProductsManifest() {
+  try {
+    const snap = await getDocs(collection(db, COL_PRODUCTS));
+    const manifest = {};
+    snap.docs.forEach(d => {
+      const data = d.data();
+      const img = data.imageUrl || data.primaryImage;
+      if (img) manifest[d.id] = img;
+    });
+    const json = JSON.stringify(manifest);
+    const path = "/" + BUNNY_CDN.zoneName + "/manifests/products.json";
+    const cdnUrl = BUNNY_CDN.cdnUrl + "/manifests/products.json";
+    const apiUrl = BUNNY_CDN.apiUrl + path;
+    await fetch(apiUrl, {
+      method: "PUT",
+      headers: { AccessKey: BUNNY_CDN.apiKey, "Content-Type": "application/json" },
+      body: json
+    });
+    // Purge edge cache so subsequent fetches see the new version
+    fetch("https://api.bunny.net/purge?url=" + encodeURIComponent(cdnUrl), {
+      method: "POST",
+      headers: { AccessKey: BUNNY_CDN.apiKey }
+    }).catch(() => {});
+    console.log("[manifest] regenerated:", Object.keys(manifest).length, "products");
+  } catch (e) {
+    console.warn("[manifest] regenerate failed:", e.message);
+  }
+}
+
 // ─── BUNNY CDN UPLOAD ───
 async function uploadImageToBunny(file, subFolder) {
   if (subFolder === void 0) { subFolder = 'products'; }
@@ -1482,6 +1518,7 @@ document.getElementById("productForm").addEventListener("submit", async e => {
       await addDoc(collection(db, COL_PRODUCTS), data);
       showAlert("Producto creado.");
     }
+    regenerateProductsManifest(); // fire-and-forget, don't block UI
     closeProductDrawer();
     renderDashboard();
     if (currentDetailCatId) await loadCategoryProducts(currentDetailCatId);
@@ -1501,6 +1538,7 @@ async function deleteProduct(id) {
     await deleteDoc(doc(db, COL_PRODUCTS, id));
     if (prod) await deleteImageFromBunny(prod.primaryImage || prod.imageUrl);
     products = products.filter(p => p.id !== id);
+    regenerateProductsManifest(); // fire-and-forget
     showAlert("Producto eliminado.");
     renderDashboard();
     if (currentDetailCatId) await loadCategoryProducts(currentDetailCatId);

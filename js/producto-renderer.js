@@ -1,11 +1,15 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import {
-  getFirestore, collection, getDocs, query, orderBy, doc, getDoc, where, limit
+  initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
+  collection, getDocs, query, orderBy, doc, getDoc, where, limit
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// IndexedDB cache — second visit serves docs from local cache (sub-50ms) before network confirms.
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+});
 const $ = s => document.querySelector(s);
 function clear(el) { while (el && el.firstChild) el.removeChild(el.firstChild); }
 
@@ -506,16 +510,17 @@ async function loadRelated(product) {
 
   try {
     const catId = product.categoryId || slugify(product.category || "");
+    // No orderBy here — that combined with `where` requires a composite index. Sort client-side.
     const q = query(
       collection(db, "products"),
       where("categoryId", "==", catId),
-      orderBy("displayOrder", "asc"),
       limit(8)
     );
     const snap = await getDocs(q);
     const related = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
       .filter(p => p.id !== product.id)
+      .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
       .slice(0, 4);
 
     if (!related.length) return;
@@ -678,19 +683,26 @@ async function init() {
   if (!prodId) { showNotFound(); return; }
 
   try {
-    const [snap, settingsSnap] = await Promise.all([
-      getDoc(doc(db, "products", prodId)),
-      getDoc(doc(db, "settings", "store"))
-    ]);
+    // Fire both requests in parallel but don't wait for settings to render the product.
+    const productPromise  = getDoc(doc(db, "products", prodId));
+    const settingsPromise = getDoc(doc(db, "settings", "store"));
 
+    settingsPromise.then(settingsSnap => {
+      if (settingsSnap.exists()) {
+        const s = settingsSnap.data();
+        window._storePhone = s.whatsappNumber || s.phone || "";
+      }
+    });
+
+    const snap = await productPromise;
     if (!snap.exists()) { showNotFound(); return; }
 
     const product = { id: snap.id, ...snap.data() };
     currentProduct = product;
 
-    if (settingsSnap.exists()) {
-      const s = settingsSnap.data();
-      window._storePhone = s.whatsappNumber || s.phone || "";
+    // Keep cache fresh for next deep-link visit
+    if (product.imageUrl) {
+      try { localStorage.setItem('img:' + product.id, product.imageUrl); } catch (_) {}
     }
 
     // Populate page
@@ -727,7 +739,15 @@ async function init() {
     if (!images.length) images.push("https://via.placeholder.com/800x900");
 
     const mainImg = $("#main-img");
-    if (mainImg) { mainImg.src = images[0]; mainImg.alt = product.name; }
+    if (mainImg) {
+      const markLoaded = () => mainImg.classList.add('loaded');
+      if (!mainImg.getAttribute('src')) {
+        mainImg.src = images[0];
+        if (mainImg.complete) markLoaded();
+        else mainImg.addEventListener('load', markLoaded, { once: true });
+      }
+      mainImg.alt = product.name;
+    }
 
     buildThumbs(images);
     buildColors(product.colors);

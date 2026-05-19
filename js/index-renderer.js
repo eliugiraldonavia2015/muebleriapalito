@@ -5,7 +5,7 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import {
-  getFirestore,
+  initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
   collection,
   doc,
   getDocs,
@@ -18,7 +18,9 @@ import { firebaseConfig } from "./firebase-config.js";
 
 // ─── INIT FIREBASE ───
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+});
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
@@ -420,7 +422,8 @@ async function init() {
       getSettings()
     ]);
 
-    renderNav(categories);
+    // Nav stays as the static HTML so it doesn't flicker on page nav (matches catalogo.html).
+    // renderNav(categories);
     renderHero(settings);
     renderMarquee(categories);
     renderCategories(categories);
