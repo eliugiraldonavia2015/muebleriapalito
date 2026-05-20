@@ -613,16 +613,16 @@ export const SETTINGS = {
   },
 
   promoBanner: {
-    title: "Reinventa tu descanso",
-    subtitle: "Colchones, cabeceras y ropa de cama de primer nivel. Hasta 30% de descuento en toda la linea dormitorio.",
-    discountPct: 30,
-    discountText: "Hasta 30% OFF",
-    ctaText: "Ver oferta",
+    title: "Accede a Crédito Directo",
+    subtitle: "Divide tus compras hasta en 12 meses sin intereses. Y si prefieres pagar en efectivo, disfruta de hasta 30% de descuento en categorias y productos seleccionados.",
+    discountPct: 12,
+    discountText: "12 MESES SIN INTERESES",
+    ctaText: "Consultar financiamiento",
     image: `${CDN}/banners/dormitorios-hero.jpg`,
   },
 
-  whatsappNumber: "593958627206",
-  whatsappPhoneDisplay: "095 862 7206",
+  whatsappNumber: "593989667093",
+  whatsappPhoneDisplay: "098 966 7093",
   phoneLine: "1800 123 456",
   email: "info@palito.com",
 
@@ -636,7 +636,7 @@ export const SETTINGS = {
     facebook: "https://facebook.com/muebleriapalito",
     instagram: "https://instagram.com/muebleriapalito",
     youtube: "https://youtube.com/@muebleriapalito",
-    whatsapp: "https://wa.me/593958627206",
+    whatsapp: "https://wa.me/593989667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA",
   },
 };
 

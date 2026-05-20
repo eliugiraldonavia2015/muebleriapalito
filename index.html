@@ -121,8 +121,8 @@
     .sec-heading em{font-style:italic;color:var(--copper-lt)}
 
     /* CATEGORIES */
-    #categories{padding:clamp(80px,12vw,160px) clamp(24px,5vw,80px)}
-    .cat-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:64px;gap:24px}
+    #categories{padding:clamp(60px,8vw,100px) clamp(24px,5vw,80px) 0}
+    .cat-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:48px;gap:24px}
     .cat-header-left{display:flex;flex-direction:column;gap:16px}
     .cat-grid{display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(2,260px);gap:12px}
     .cat-card{position:relative;overflow:hidden;background:var(--bg2)}
@@ -143,28 +143,31 @@
     .cat-arrow svg{width:16px;stroke:var(--cream)}
 
     /* VER MÁS CATEGORÍAS */
-    .cat-footer{display:flex;justify-content:center;align-items:center;margin-top:56px;padding-top:48px;border-top:1px solid var(--rule);position:relative}
+    .cat-footer{display:flex;justify-content:center;align-items:center;margin-top:24px;padding-top:32px;border-top:1px solid var(--rule);position:relative}
     .cat-footer::before,.cat-footer::after{content:'';position:absolute;top:-1px;width:56px;height:1px;background:var(--copper)}
     .cat-footer::before{left:0}.cat-footer::after{right:0}
     .btn-ver-mas{position:relative;display:inline-flex;align-items:center;cursor:pointer;font-family:var(--f-body);color:var(--cream);text-decoration:none}
-    .btn-ver-mas-inner{display:inline-flex;align-items:center;padding:20px 44px;border:1px solid rgba(160,220,180,.2);position:relative;overflow:hidden;transition:border-color .45s var(--ease-silk)}
-    .btn-ver-mas:hover .btn-ver-mas-inner{border-color:var(--copper)}
-    .btn-ver-mas-fill{position:absolute;inset:0;background:var(--bg2);transform:translateX(-101%);transition:transform .55s var(--ease-snappy);z-index:0}
+    .btn-ver-mas-inner{display:inline-flex;align-items:center;padding:16px 36px;border:1px solid var(--copper);position:relative;overflow:hidden;transition:border-color .45s var(--ease-silk);background:var(--bg2)}
+    .btn-ver-mas:hover .btn-ver-mas-inner{border-color:var(--copper-lt)}
+    .btn-ver-mas-fill{position:absolute;inset:0;background:var(--copper);transform:translateX(-101%);transition:transform .55s var(--ease-snappy);z-index:0}
     .btn-ver-mas:hover .btn-ver-mas-fill{transform:translateX(0)}
-    .btn-ver-mas-count{font-family:var(--f-wide);font-size:44px;line-height:1;color:var(--copper);position:relative;z-index:1;margin-right:20px;letter-spacing:.04em;transition:transform .4s var(--ease-silk),color .3s}
-    .btn-ver-mas:hover .btn-ver-mas-count{transform:translateY(-2px);color:var(--copper-lt)}
-    .btn-ver-mas-copy{display:flex;flex-direction:column;gap:3px;position:relative;z-index:1;margin-right:32px}
-    .btn-ver-mas-label{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cream);font-weight:400}
-    .btn-ver-mas-sub{font-size:11px;color:var(--cream-dim);letter-spacing:.1em}
-    .btn-ver-mas-divider{width:1px;height:32px;background:rgba(160,220,180,.2);margin:0 28px;position:relative;z-index:1;transition:background .4s}
-    .btn-ver-mas:hover .btn-ver-mas-divider{background:rgba(58,140,92,.5)}
-    .btn-ver-mas-icon{width:36px;height:36px;border:1px solid rgba(160,220,180,.2);display:flex;align-items:center;justify-content:center;position:relative;z-index:1;flex-shrink:0;transition:background .4s,border-color .4s,transform .45s var(--ease-silk)}
-    .btn-ver-mas:hover .btn-ver-mas-icon{background:var(--copper);border-color:var(--copper);transform:rotate(-45deg)}
-    .btn-ver-mas-icon svg{width:14px;stroke:var(--cream)}
+    .btn-ver-mas-count{font-family:var(--f-wide);font-size:36px;line-height:1;color:var(--copper);position:relative;z-index:1;margin-right:16px;letter-spacing:.04em;transition:transform .4s var(--ease-silk),color .3s}
+    .btn-ver-mas:hover .btn-ver-mas-count{transform:translateY(-2px);color:var(--bg)}
+    .btn-ver-mas-copy{display:flex;flex-direction:column;gap:2px;position:relative;z-index:1;margin-right:24px}
+    .btn-ver-mas-label{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cream);font-weight:500;transition:color .3s}
+    .btn-ver-mas:hover .btn-ver-mas-label{color:var(--bg)}
+    .btn-ver-mas-sub{font-size:11px;color:var(--cream-dim);letter-spacing:.1em;transition:color .3s}
+    .btn-ver-mas:hover .btn-ver-mas-sub{color:rgba(12,31,20,.7)}
+    .btn-ver-mas-divider{width:1px;height:28px;background:rgba(58,140,92,.5);margin:0 20px;position:relative;z-index:1;transition:background .4s}
+    .btn-ver-mas:hover .btn-ver-mas-divider{background:rgba(12,31,20,.2)}
+    .btn-ver-mas-icon{width:32px;height:32px;border:1px solid var(--copper);display:flex;align-items:center;justify-content:center;position:relative;z-index:1;flex-shrink:0;transition:background .4s,border-color .4s,transform .45s var(--ease-silk)}
+    .btn-ver-mas:hover .btn-ver-mas-icon{background:var(--bg);border-color:var(--bg);transform:rotate(-45deg)}
+    .btn-ver-mas-icon svg{width:14px;stroke:var(--copper);transition:stroke .3s}
+    .btn-ver-mas:hover .btn-ver-mas-icon svg{stroke:var(--copper)}
 
     /* FEATURED PRODUCTS */
-    #featured{padding:clamp(80px,10vw,140px) 0}
-    .featured-header{padding:0 clamp(24px,5vw,80px);display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:56px;gap:24px}
+    #featured{padding:clamp(20px,4vw,40px) 0 clamp(60px,8vw,100px)}
+    .featured-header{padding:0 clamp(24px,5vw,80px);display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:40px;gap:24px}
     .featured-header-left{display:flex;flex-direction:column;gap:16px}
     .products-scroll{display:flex;gap:16px;padding:8px clamp(24px,5vw,80px) 40px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none}
     .products-scroll::-webkit-scrollbar{display:none}
@@ -195,8 +198,8 @@
     .color-swatch.active,.color-swatch:hover{border-color:var(--cream)}
 
     /* BANNER */
-    #full-banner{position:relative;height:70vh;min-height:500px;overflow:hidden}
-    #full-banner img{position:absolute;inset:0}
+    #full-banner{position:relative;height:70vh;min-height:500px;overflow:hidden;display:flex;align-items:center}
+    #full-banner img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
     .full-banner-overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(12,31,20,.88) 0%,rgba(12,31,20,.2) 100%)}
     .full-banner-content{position:absolute;top:50%;left:clamp(24px,5vw,80px);transform:translateY(-50%);max-width:560px;display:flex;flex-direction:column;gap:24px}
     .full-banner-title{font-family:var(--f-display);font-size:clamp(40px,6vw,88px);font-weight:300;line-height:.95}
@@ -207,30 +210,30 @@
     @keyframes rotatePill{to{transform:rotate(360deg)}}
 
     /* BRANDS */
-    #brands{padding:clamp(80px,10vw,140px) clamp(24px,5vw,80px);border-top:1px solid var(--rule)}
-    .brands-header{display:flex;flex-direction:column;gap:16px;margin-bottom:64px}
+    #brands{padding:clamp(60px,8vw,100px) clamp(24px,5vw,80px);border-top:1px solid var(--rule)}
+    .brands-header{display:flex;flex-direction:column;gap:16px;margin-bottom:48px}
     .brands-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;border:1px solid var(--rule)}
-    .brand-cell{display:flex;align-items:center;justify-content:center;height:140px;font-family:var(--f-wide);font-size:24px;letter-spacing:.1em;color:var(--cream-dim);border-right:1px solid var(--rule);transition:background .4s,color .4s;position:relative;overflow:hidden}
+    .brand-cell{display:flex;align-items:center;justify-content:center;height:120px;font-family:var(--f-wide);font-size:26px;letter-spacing:.12em;color:var(--cream-dim);border-right:1px solid var(--rule);transition:background .4s,color .4s;position:relative;overflow:hidden}
     .brand-cell::before{content:'';position:absolute;inset:0;background:var(--copper);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease-snappy)}
     .brand-cell:hover{color:var(--bg)}
     .brand-cell:hover::before{transform:scaleX(1)}
     .brand-cell span{position:relative;z-index:1}
 
     /* LIFESTYLE */
-    #lifestyle{display:grid;grid-template-columns:1fr 1fr;min-height:700px}
+    #lifestyle{display:grid;grid-template-columns:1fr 1fr;min-height:500px}
     .lifestyle-img{position:relative;overflow:hidden}
     .lifestyle-img img{position:absolute;inset:0;transition:transform 1.2s var(--ease-silk)}
     #lifestyle:hover .lifestyle-img img{transform:scale(1.04)}
-    .lifestyle-content{padding:clamp(60px,8vw,120px) clamp(40px,6vw,96px);display:flex;flex-direction:column;justify-content:center;gap:32px;background:var(--bg2)}
-    .lifestyle-big-num{font-family:var(--f-wide);font-size:clamp(100px,16vw,200px);color:rgba(240,234,216,.04);line-height:1;margin-bottom:-40px;margin-left:-8px;user-select:none}
-    .lifestyle-features{display:flex;flex-direction:column;gap:24px;border-top:1px solid var(--rule);padding-top:32px}
+    .lifestyle-content{padding:clamp(40px,5vw,60px) clamp(30px,4vw,60px);display:flex;flex-direction:column;justify-content:center;gap:24px;background:var(--bg2)}
+    .lifestyle-big-num{font-family:var(--f-wide);font-size:clamp(80px,12vw,140px);color:rgba(240,234,216,.04);line-height:1;margin-bottom:-30px;margin-left:-4px;user-select:none}
+    .lifestyle-features{display:flex;flex-direction:column;gap:16px;border-top:1px solid var(--rule);padding-top:24px}
     .lifestyle-feat{display:flex;gap:20px;align-items:flex-start}
     .feat-num{font-family:var(--f-wide);font-size:14px;color:var(--copper);min-width:28px}
     .feat-text{font-size:14px;color:var(--cream-dim);line-height:1.6}
     .feat-text strong{color:var(--cream);font-weight:400}
 
     /* STATS */
-    #stats{padding:clamp(80px,10vw,140px) clamp(24px,5vw,80px);border-top:1px solid var(--rule)}
+    #stats{padding:clamp(60px,8vw,100px) clamp(24px,5vw,80px);border-top:1px solid var(--rule)}
     .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;border:1px solid var(--rule)}
     .stat-cell{padding:48px 40px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:8px}
     .stat-num{font-family:var(--f-display);font-size:clamp(48px,5vw,80px);font-weight:300;line-height:1}
@@ -238,7 +241,7 @@
     .stat-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-dim)}
 
     /* NEWSLETTER */
-    #newsletter{padding:clamp(80px,10vw,140px) clamp(24px,5vw,80px);background:var(--bg2);border-top:1px solid var(--rule);display:flex;align-items:center;gap:clamp(40px,8vw,120px)}
+    #newsletter{padding:clamp(60px,8vw,100px) clamp(24px,5vw,80px);background:var(--bg2);border-top:1px solid var(--rule);display:flex;align-items:center;gap:clamp(40px,8vw,120px)}
     .nl-left{flex:0 0 auto;max-width:440px}
     .nl-title{font-family:var(--f-display);font-size:clamp(40px,5vw,64px);font-weight:300;line-height:1;margin-bottom:16px}
     .nl-sub{font-size:14px;color:var(--cream-dim);line-height:1.7}
@@ -279,7 +282,7 @@
     .nav-link-btn svg{width:11px;height:11px;stroke:currentColor;flex-shrink:0}
 
     /* ═══ CREDITO DIRECTO BANNER ═══ */
-    #credito-banner{background:linear-gradient(105deg,#0a2015 0%,#1a4a28 40%,#0f2e1a 100%);border-top:1px solid rgba(90,184,124,.18);border-bottom:1px solid rgba(90,184,124,.18);padding:clamp(32px,5vw,60px) clamp(24px,5vw,80px);position:relative;overflow:hidden}
+    #credito-banner{background:linear-gradient(105deg,#0a2015 0%,#1a4a28 40%,#0f2e1a 100%);border-top:1px solid rgba(90,184,124,.18);border-bottom:1px solid rgba(90,184,124,.18);padding:clamp(16px,2vw,32px) clamp(24px,5vw,80px);position:relative;overflow:hidden}
     #credito-banner::before{content:'';position:absolute;top:-50%;right:-5%;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(58,140,92,.1) 0%,transparent 70%);pointer-events:none}
     .credito-inner{display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap}
     .credito-left{display:flex;flex-direction:column;gap:0}
@@ -287,16 +290,22 @@
     .credito-eyebrow::before{content:'';width:24px;height:1px;background:rgba(90,184,124,.7)}
     .credito-headline{font-family:var(--f-display);font-size:clamp(36px,5vw,72px);font-weight:300;line-height:1;color:#e8f5ec}
     .credito-headline em{font-style:italic;color:#5ab87c}
-    .credito-right{display:flex;flex-direction:column;gap:20px;align-items:flex-end}
+    .credito-right{display:flex;flex-direction:column;gap:12px;align-items:flex-end}
     .credito-methods{display:flex;border:1px solid rgba(90,184,124,.18)}
-    .credito-method{display:flex;flex-direction:column;align-items:center;gap:9px;padding:20px 28px;border-right:1px solid rgba(90,184,124,.14)}
+    .credito-method{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 24px;border-right:1px solid rgba(90,184,124,.14)}
     .credito-method:last-child{border-right:none}
     .credito-method-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(90,184,124,.3)}
     .credito-method-icon svg{width:18px;height:18px;stroke:#5ab87c}
     .credito-method-name{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#c8e8d4;white-space:nowrap}
     .credito-cta{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:rgba(58,140,92,.15);border:1px solid rgba(90,184,124,.35);color:#5ab87c;font-size:10px;letter-spacing:.18em;text-transform:uppercase;transition:background .3s,border-color .3s}
     .credito-cta:hover{background:rgba(58,140,92,.28);border-color:rgba(90,184,124,.65)}
-    @media(max-width:768px){.credito-right{align-items:flex-start}.credito-methods{flex-wrap:wrap}.credito-method{padding:16px 20px}}
+    @media(max-width:768px){
+      .credito-right{align-items:flex-start;width:100%}
+      .credito-methods{display:grid;grid-template-columns:1fr;width:100%}
+      .credito-method{flex-direction:row;justify-content:flex-start;border-right:none;border-bottom:1px solid rgba(90,184,124,.14);padding:16px;gap:12px}
+      .credito-method:last-child{border-bottom:none}
+      .credito-cta{width:100%;justify-content:center}
+    }
 
     /* ═══ LIGHT CONTENT SECTIONS ═══ */
     #categories{background:#f9f8f5}
@@ -305,9 +314,20 @@
     #categories .btn-ghost:hover{border-color:var(--copper);color:#1a1a18}
     .cat-footer{border-top-color:rgba(0,0,0,.1)}
     .btn-ver-mas{color:#1a1a18}
-    .btn-ver-mas-inner{border-color:rgba(0,0,0,.12)}
+    .btn-ver-mas-inner{border-color:var(--copper);background:#ffffff}
     .btn-ver-mas-sub{color:#7b7b70}
-    .btn-ver-mas-divider{background:rgba(0,0,0,.1)}
+    .btn-ver-mas-divider{background:rgba(58,140,92,.3)}
+    .btn-ver-mas-label{color:#1a1a18}
+    .btn-ver-mas-icon{border-color:var(--copper)}
+    .btn-ver-mas-icon svg{stroke:var(--copper)}
+    
+    .btn-ver-mas:hover .btn-ver-mas-fill{background:var(--copper)}
+    .btn-ver-mas:hover .btn-ver-mas-count{color:#ffffff}
+    .btn-ver-mas:hover .btn-ver-mas-label{color:#ffffff}
+    .btn-ver-mas:hover .btn-ver-mas-sub{color:rgba(255,255,255,.8)}
+    .btn-ver-mas:hover .btn-ver-mas-divider{background:rgba(255,255,255,.3)}
+    .btn-ver-mas:hover .btn-ver-mas-icon{background:#ffffff;border-color:#ffffff}
+    .btn-ver-mas:hover .btn-ver-mas-icon svg{stroke:var(--copper)}
 
     #featured{background:#f9f8f5}
     #featured .sec-heading{color:#1a1a18}
@@ -359,6 +379,82 @@
     .social-link{border-color:rgba(255,255,255,.1)}
     .social-link svg{stroke:#6b7e6b}
     footer .footer-socials .social-link:hover{border-color:var(--copper);background:rgba(58,140,92,.12)}
+
+    /* ═══ LIGHT SECTION EDITORIAL ATMOSPHERE ═══ */
+    /* Make every light section a layered editorial canvas: linen grain + warm halo + chapter watermark */
+    #categories,#featured,#brands,#stats,#newsletter,.lifestyle-content{position:relative;isolation:isolate;overflow:hidden}
+    /* paper grain — gives the cream a tactile, printed feel */
+    #categories::before,#featured::before,#brands::before,#stats::before,#newsletter::before,.lifestyle-content::before{
+      content:'';position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.55;mix-blend-mode:multiply;
+      background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.78' numOctaves='2' stitchTiles='stitch' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .14  0 0 0 0 .12  0 0 0 0 .08  0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    /* warm halo wash — keeps corners from feeling stark */
+    #categories::after,#featured::after,#brands::after,#stats::after,#newsletter::after{
+      content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+      background:
+        radial-gradient(ellipse 60% 40% at 0% 0%, rgba(58,140,92,.045) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 50% at 100% 100%, rgba(192,132,90,.04) 0%, transparent 60%);
+    }
+    /* lift content above ornaments (decorative spans stay at z-0) */
+    #categories > *:not(.light-deco):not(.chapter-mark):not(.editorial-rule),
+    #featured > *:not(.light-deco):not(.chapter-mark):not(.editorial-rule),
+    #brands > *:not(.light-deco):not(.chapter-mark):not(.editorial-rule),
+    #stats > *:not(.light-deco):not(.chapter-mark):not(.editorial-rule),
+    #newsletter > *:not(.light-deco):not(.chapter-mark):not(.editorial-rule),
+    .lifestyle-content > *{position:relative;z-index:1}
+
+    /* editorial corner ornaments — L-brackets in the void */
+    .light-deco{position:absolute;width:38px;height:38px;z-index:0;pointer-events:none;opacity:.35}
+    .light-deco::before,.light-deco::after{content:'';position:absolute;background:#3a8c5c}
+    .light-deco::before{width:100%;height:1px;top:0;left:0}
+    .light-deco::after{width:1px;height:100%;top:0;left:0}
+    .light-deco.tr{transform:scaleX(-1)}
+    .light-deco.bl{transform:scaleY(-1)}
+    .light-deco.br{transform:scale(-1,-1)}
+
+    /* watermark chapter numeral — large serif glyph faded in empty corner */
+    .chapter-mark{position:absolute;font-family:var(--f-display);font-style:italic;font-weight:300;line-height:.8;color:rgba(58,140,92,.07);user-select:none;pointer-events:none;z-index:0;letter-spacing:-.02em}
+
+    /* hairline rule with copper bullet — editorial pull-quote vibe */
+    .editorial-rule{position:absolute;display:flex;align-items:center;gap:10px;z-index:0;pointer-events:none}
+    .editorial-rule::before{content:'';width:64px;height:1px;background:rgba(58,140,92,.45)}
+    .editorial-rule::after{content:'';width:6px;height:6px;background:#3a8c5c;border-radius:50%}
+    .editorial-rule .er-text{font-family:var(--f-wide);font-size:10px;letter-spacing:.34em;color:rgba(58,140,92,.55);text-transform:uppercase}
+
+    /* Section-specific watermark placements */
+    #categories .chapter-mark{top:clamp(40px,5vw,68px);right:clamp(24px,5vw,80px);font-size:clamp(140px,22vw,300px)}
+    #featured .chapter-mark{bottom:24px;left:clamp(24px,5vw,80px);font-size:clamp(120px,18vw,240px)}
+    #brands .chapter-mark{top:50%;right:-30px;transform:translateY(-50%);font-size:clamp(160px,24vw,340px);writing-mode:vertical-rl}
+    #stats .chapter-mark{top:clamp(30px,4vw,60px);left:clamp(24px,5vw,80px);font-size:clamp(120px,16vw,220px)}
+
+    /* Editorial rule placements */
+    #categories .editorial-rule{top:clamp(30px,4vw,60px);right:clamp(24px,5vw,80px)}
+    #featured .editorial-rule{bottom:clamp(28px,4vw,52px);right:clamp(24px,5vw,80px)}
+    #brands .editorial-rule{top:clamp(28px,4vw,52px);left:clamp(24px,5vw,80px)}
+    #stats .editorial-rule{bottom:clamp(28px,4vw,52px);right:clamp(24px,5vw,80px)}
+
+    /* Light-deco corner ornament placements */
+    #categories .light-deco{top:24px;left:24px}
+    #featured .light-deco.tr{top:24px;right:24px;left:auto}
+    #brands .light-deco{bottom:24px;left:24px}
+    #brands .light-deco.tr{bottom:24px;top:auto;right:24px;left:auto;transform:scale(-1,-1)}
+    #stats .light-deco.tr{top:24px;right:24px;left:auto}
+
+    /* Faint dotted grid behind brands — adds editorial density */
+    #brands{background-image:radial-gradient(rgba(58,140,92,.08) 1px,transparent 1.2px);background-size:22px 22px;background-position:0 0}
+
+    /* Tighter padding on cavernous sections */
+    @media(min-width:1280px){
+      #categories{padding-top:clamp(70px,8vw,100px);padding-bottom:0}
+      #featured{padding-top:clamp(20px,3vw,30px);padding-bottom:clamp(70px,7vw,110px)}
+      #brands{padding-top:clamp(70px,7vw,110px);padding-bottom:clamp(70px,7vw,110px)}
+      #stats{padding-top:clamp(70px,7vw,110px);padding-bottom:clamp(70px,7vw,110px)}
+    }
+    @media(max-width:768px){
+      .chapter-mark{display:none}
+      .editorial-rule{display:none}
+      .light-deco{width:24px;height:24px;opacity:.25}
+    }
 
     /* WA */
     .wa-float{position:fixed;bottom:32px;right:32px;z-index:800;width:52px;height:52px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.3);transition:transform .3s var(--ease-silk),box-shadow .3s}
@@ -508,6 +604,9 @@
   </section>
 
   <section id="categories">
+    <span class="light-deco" aria-hidden="true"></span>
+    <span class="chapter-mark" aria-hidden="true">II</span>
+    <span class="editorial-rule" aria-hidden="true"><span class="er-text">Cap. II</span></span>
     <div class="cat-header">
       <div class="cat-header-left">
         <div class="sec-label">Categorias</div>
@@ -559,10 +658,13 @@
   </section>
 
   <section id="featured">
+    <span class="light-deco tr" aria-hidden="true"></span>
+    <span class="chapter-mark" aria-hidden="true">III</span>
+    <span class="editorial-rule" aria-hidden="true"><span class="er-text">Cap. III</span></span>
     <div class="featured-header">
       <div class="featured-header-left">
         <div class="sec-label">Destacados</div>
-        <h2 class="sec-heading">Lo mas<br><em>deseado</em></h2>
+        <h2 class="sec-heading">Lo mas <em>deseado</em></h2>
       </div>
       <a href="categorias.html" class="btn-ghost">Ver coleccion
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" width="16" height="16"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -684,32 +786,36 @@
     <img src="https://muebleria-palito-cdn.b-cdn.net/products/cama-tapizada-berlin.jpg" alt="Campana" />
     <div class="full-banner-overlay"></div>
     <div class="full-banner-content">
-      <div class="sec-label">Campana Especial</div>
-      <h2 class="full-banner-title">Reinventa<br>tu <em style="color:var(--copper-lt);font-style:italic">descanso</em></h2>
-      <p class="full-banner-sub">Colchones, cabeceras y ropa de cama de primer nivel. Hasta 30% de descuento en toda la linea dormitorio.</p>
+      <div class="sec-label">Facilidades de pago</div>
+      <h2 class="full-banner-title">Accede a<br><em style="color:var(--copper-lt);font-style:italic">Credito Directo</em></h2>
+      <p class="full-banner-sub">Divide tus compras hasta en 12 meses sin intereses. Y si prefieres pagar en efectivo, disfruta de hasta 30% de descuento en categorias y productos seleccionados.</p>
       <div>
-        <a href="#" class="btn-primary">Ver oferta
+        <a href="contacto.html" class="btn-primary">Consultar financiamiento
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" width="16" height="16"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
       </div>
     </div>
     <div class="banner-pill">
-      <span class="pill-pct">30%</span>
-      <span class="pill-off">off</span>
+      <span class="pill-pct" style="font-size:32px;margin-bottom:2px">12</span>
+      <span class="pill-off" style="font-size:10px">MESES SIN<br>INTERESES</span>
     </div>
   </section>
 
   <section id="brands">
+    <span class="light-deco" aria-hidden="true"></span>
+    <span class="light-deco tr" aria-hidden="true"></span>
+    <span class="chapter-mark" aria-hidden="true">IV</span>
+    <span class="editorial-rule" aria-hidden="true"><span class="er-text">Cap. IV</span></span>
     <div class="brands-header">
-      <div class="sec-label">Marcas aliadas</div>
+      <div class="sec-label">Garantia de fabricacion</div>
       <h2 class="sec-heading">Calidad <em>certificada</em></h2>
     </div>
     <div class="brands-grid">
-      <div class="brand-cell"><span>NINJA</span></div>
-      <div class="brand-cell"><span>INDURAMA</span></div>
-      <div class="brand-cell"><span>IGLACE</span></div>
-      <div class="brand-cell"><span>KAMADO</span></div>
-      <div class="brand-cell"><span>FLORIDIS</span></div>
+      <div class="brand-cell"><span>DURADERO</span></div>
+      <div class="brand-cell"><span>RESISTENTE</span></div>
+      <div class="brand-cell"><span>ERGONOMICO</span></div>
+      <div class="brand-cell"><span>ATEMPORAL</span></div>
+      <div class="brand-cell"><span>EXCLUSIVO</span></div>
     </div>
   </section>
 
@@ -718,24 +824,27 @@
       <img src="https://muebleria-palito-cdn.b-cdn.net/products/colchon-memory-plus.jpg" alt="Lifestyle" />
     </div>
     <div class="lifestyle-content">
-      <div class="lifestyle-big-num">60</div>
+      <div class="lifestyle-big-num">#1</div>
       <div>
-        <div class="sec-label">Garantia real</div>
-        <h2 class="sec-heading" style="margin-top:16px">60 noches<br>para <em>decidir</em></h2>
+        <div class="sec-label">Asesoría personalizada</div>
+        <h2 class="sec-heading" style="margin-top:16px">¿No sabes qué<br><em>pedir</em> aún?</h2>
       </div>
-      <p style="font-size:15px;color:var(--cream-dim);line-height:1.7;max-width:380px">Si tu colchon no supera tus expectativas, te lo cambiamos sin preguntas. Asi de seguro estamos de nuestra calidad.</p>
+      <p style="font-size:15px;color:var(--cream-dim);line-height:1.7;max-width:380px">Consúltanos y te asesoramos. Tenemos de todo: comedores, dormitorios, salas, y mucho más.</p>
       <div class="lifestyle-features">
-        <div class="lifestyle-feat"><span class="feat-num">01</span><p class="feat-text"><strong>Entrega express</strong> en 48h a todo Ecuador, Panama y Peru</p></div>
-        <div class="lifestyle-feat"><span class="feat-num">02</span><p class="feat-text"><strong>Armado incluido</strong> sin costo adicional en tu hogar</p></div>
-        <div class="lifestyle-feat"><span class="feat-num">03</span><p class="feat-text"><strong>Garantia de 5 anos</strong> en estructura de todos los muebles</p></div>
+        <div class="lifestyle-feat"><span class="feat-num">01</span><p class="feat-text">Somos tu <strong>opción número 1</strong> si estás mudándote o quieres renovar todo tu hogar.</p></div>
+        <div class="lifestyle-feat"><span class="feat-num">02</span><p class="feat-text">Encontramos el <strong>estilo perfecto</strong> que se adapta a tu espacio y presupuesto.</p></div>
+        <div class="lifestyle-feat"><span class="feat-num">03</span><p class="feat-text"><strong>Servicio VIP:</strong> Hacemos que el mueble llegue directo a la puerta de tu casa. Nos encargamos de todo, hasta de dejarlo dentro de tu casa.</p></div>
       </div>
-      <a href="#" class="btn-primary" style="margin-top:8px">Conocer mas
+      <a target="_blank" href="https://wa.me/593989667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="btn-primary" style="margin-top:8px">Asesoría en WhatsApp
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" width="16" height="16"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
     </div>
   </section>
 
   <section id="stats">
+    <span class="light-deco tr" aria-hidden="true"></span>
+    <span class="chapter-mark" aria-hidden="true">V</span>
+    <span class="editorial-rule" aria-hidden="true"><span class="er-text">En cifras</span></span>
     <div class="stats-grid">
       <div class="stat-cell">
         <div class="stat-num"><span class="count-num" data-target="25">0</span><em>+</em></div>
@@ -783,7 +892,7 @@
           <a href="#" class="social-link" aria-label="YouTube">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 00-1.95 1.96A29 29 0 001 12a29 29 0 00.46 5.58A2.78 2.78 0 003.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"/></svg>
           </a>
-          <a href="#" class="social-link" aria-label="WhatsApp">
+          <a target="_blank" href="https://wa.me/593989667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="social-link" aria-label="WhatsApp">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
           </a>
         </div>
@@ -812,7 +921,7 @@
         <div class="footer-col-title">Contacto</div>
         <ul class="footer-links">
           <li><a href="#">info@palito.com</a></li>
-          <li><a href="#">WhatsApp: 095 862 7206</a></li>
+          <li><a href="#">WhatsApp: 098 966 7093</a></li>
           <li><a href="#">1800 123 456</a></li>
           <li><a href="contacto.html">Tiendas fisicas</a></li>
           <li><a href="contacto.html">Ecuador - Panama - Peru</a></li>
@@ -830,20 +939,33 @@
     </div>
   </footer>
 
-  <a href="#" class="wa-float" aria-label="WhatsApp">
+  <a target="_blank" href="https://wa.me/593989667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="wa-float" aria-label="WhatsApp">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
   </a>
 
   <script>
     gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
-    // Pre-hide scroll-reveal elements before any paint to avoid FOUC
+    // Pre-hide scroll-reveal elements AND hero elements before any paint to avoid FOUC.
+    // Hero must be hidden from the start so it doesn't get "revealed" during the loader
+    // fade (visible) and then re-hidden before the entrance animation (causing a perceived
+    // double-render).
     gsap.set([
       '.sec-heading','.sec-label','.cat-card','.product-card',
       '.full-banner-content > *','.brand-cell',
       '.lifestyle-content > *','.lifestyle-img img',
-      '.stat-cell','#newsletter > *'
+      '.stat-cell','#newsletter > *',
+      '.hero-eyebrow','.hero-title','.hero-subtitle',
+      '#hero .btn-primary','#hero .btn-ghost',
+      '.hero-img-wrap img','.hero-scroll-hint'
     ], { autoAlpha: 0 });
+    // Hero initial transforms (matched to setupPage entrance .to() animation).
+    gsap.set('.hero-eyebrow',  { x: -30 });
+    gsap.set('.hero-title',    { y: 50 });
+    gsap.set('.hero-subtitle', { y: 20 });
+    gsap.set('#hero .btn-primary, #hero .btn-ghost', { y: 16 });
+    gsap.set('.hero-img-wrap img', { scale: 1.08 });
+    gsap.set('.hero-scroll-hint', { y: 8 });
 
     // ── LOADER ────────────────────────────────────────────────
     const loaderEl   = document.getElementById('loader');
@@ -869,22 +991,22 @@
 
     gsap.timeline({
       onComplete() {
-        gsap.to(loaderEl, {
-          autoAlpha: 0, duration: .65, ease: 'power2.inOut',
-          onComplete() {
-            // Pre-hide hero elements before removing loader to prevent single-frame flash
-            gsap.set(['.hero-eyebrow','.hero-title','.hero-subtitle',
-                       '#hero .btn-primary','#hero .btn-ghost',
-                       '.hero-img-wrap img','.hero-scroll-hint'], { autoAlpha: 0 });
-            gsap.set('.hero-eyebrow',  { x: -30 });
-            gsap.set('.hero-title',    { y: 50 });
-            gsap.set('.hero-subtitle', { y: 20 });
-            gsap.set('#hero .btn-primary, #hero .btn-ghost', { y: 16 });
-            gsap.set('.hero-img-wrap img', { scale: 1.08 });
-            gsap.set('.hero-scroll-hint', { y: 8 });
-            loaderEl.remove();
-            setupPage();
-          }
+        // Wait for the Firestore renderer before fading the loader. This
+        // keeps the loader visible while innerHTML swaps happen behind it,
+        // so the user never sees the "hardcoded -> replaced" flash.
+        Promise.resolve(window.__indexRendererReady).finally(() => {
+          // Re-pre-hide dynamically-rendered elements (cat-card and
+          // product-card nodes are recreated by the renderer, so the
+          // initial gsap.set targeted nodes that no longer exist).
+          gsap.set(['.cat-card','.product-card'], { autoAlpha: 0 });
+
+          gsap.to(loaderEl, {
+            autoAlpha: 0, duration: .65, ease: 'power2.inOut',
+            onComplete() {
+              loaderEl.remove();
+              setupPage();
+            }
+          });
         });
       }
     })
@@ -1000,8 +1122,9 @@
       gsap.to('.hero-img-wrap img', { yPercent: 10, ease: 'none',
         scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: 1.2 } });
 
-      gsap.to('#full-banner img', { y: '-10%', ease: 'none',
-        scrollTrigger: { trigger: '#full-banner', start: 'top bottom', end: 'bottom top', scrub: 1.5 } });
+      // Eliminado parallax del banner para evitar que la imagen se desplace dejando espacio vacío
+      // gsap.to('#full-banner img', { y: '-10%', ease: 'none',
+      //   scrollTrigger: { trigger: '#full-banner', start: 'top bottom', end: 'bottom top', scrub: 1.5 } });
 
       // COUNTERS
       document.querySelectorAll('.count-num').forEach(el => {
@@ -1037,6 +1160,9 @@
         });
       });
     }
+
+    // Signal that DOM manipulation is complete so GSAP can fade out loader.
+    window.__indexRendererReady = true;
   </script>
-  <script type="module" src="js/index-renderer.js"></script></body>
+  <script type="module" src="js/index-renderer.js?v=2"></script></body>
 </html>

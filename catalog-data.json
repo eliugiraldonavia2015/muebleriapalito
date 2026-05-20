@@ -344,11 +344,11 @@
   "contact": {
     "phones": {
       "tollFree": "1800 123 456",
-      "whatsapp": "095 862 7206",
-      "whatsappInternational": "+593 958 627 206"
+      "whatsapp": "098 966 7093",
+      "whatsappInternational": "+593 989 667 093"
     },
     "email": "info@palito.com",
-    "whatsappUrl": "https://wa.me/593958627206",
+    "whatsappUrl": "https://wa.me/593989667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA",
     "generalHours": {
       "mondayFriday": "8:00 — 20:00",
       "saturday": "9:00 — 18:00",
@@ -455,7 +455,7 @@
     "socialLinks": ["Facebook", "Instagram", "YouTube", "WhatsApp"],
     "contact": {
       "email": "info@palito.com",
-      "whatsapp": "095 862 7206",
+      "whatsapp": "098 966 7093",
       "phone": "1800 123 456",
       "countries": "Ecuador - Panama - Peru"
     },

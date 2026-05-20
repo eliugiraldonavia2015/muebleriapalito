@@ -31,6 +31,7 @@ let allProducts = [];
 let filteredProducts = [];
 let shownCount = 0;
 let scrollObserver = null;
+const hoverPreloaded = new Set();
 
 // ─── FETCH ───
 async function getCategories() {
@@ -42,7 +43,15 @@ async function getCategories() {
 async function getProducts() {
   const q = query(collection(db, "products"), orderBy("displayOrder", "asc"));
   const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  // Cache each product in localStorage so producto.html can render instantly
+  // without waiting for its own Firestore round-trip.
+  try {
+    products.forEach(p => {
+      localStorage.setItem('product:' + p.id, JSON.stringify(p));
+    });
+  } catch (_) {}
+  return products;
 }
 
 async function getSettings() {
@@ -264,6 +273,29 @@ function buildCardsBatch(grid) {
       const img = p.imageUrl ? '&img=' + encodeURIComponent(p.imageUrl) : '';
       window.location.href = 'producto.html?id=' + p.id + img;
     });
+
+    // Hover-preload: si el usuario mantiene hover >150ms, preloadeamos la imagen del
+    // producto en baja prioridad para que ya esté en cache al hacer click. Hovers
+    // accidentales se cancelan; el browser maneja la limpieza del memory cache.
+    if (p.imageUrl && !hoverPreloaded.has(p.imageUrl)) {
+      let hoverTimer = null;
+      card.addEventListener('mouseenter', () => {
+        hoverTimer = setTimeout(() => {
+          if (hoverPreloaded.has(p.imageUrl)) return;
+          hoverPreloaded.add(p.imageUrl);
+          const link = document.createElement('link');
+          link.rel = 'preload';
+          link.as = 'image';
+          link.href = p.imageUrl;
+          link.fetchPriority = 'low';
+          document.head.appendChild(link);
+        }, 150);
+      });
+      card.addEventListener('mouseleave', () => {
+        if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
+      });
+    }
+
     fragment.appendChild(card);
   });
 

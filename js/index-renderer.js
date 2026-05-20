@@ -246,24 +246,28 @@ function renderFeaturedProducts(products) {
 
 // Promo banner
 function renderBanner(settings) {
-  const banner = settings.promoBanner || {};
-
   const img = $("#full-banner img");
   const overlay = $("#full-banner .sec-label");
   const title = $("#full-banner .full-banner-title");
   const subtitle = $("#full-banner .full-banner-sub");
   const cta = $("#full-banner .btn-primary");
-  const pill = $("#full-banner .pill-pct");
+  const pill = $("#full-banner .banner-pill");
 
-  if (img && banner.image) img.src = banner.image;
-  if (overlay && banner.eyebrow) overlay.textContent = banner.eyebrow;
-  if (title && banner.title) title.innerHTML = banner.title.replace(/(tu|de|del|y|con|un|una|el|la|los|las|en|para)\b/gi, "<em style=\"color:var(--copper-lt);font-style:italic\">$1</em>");
-  if (subtitle && banner.subtitle) subtitle.textContent = banner.subtitle;
-  if (cta && banner.ctaText) {
-    cta.childNodes[0].textContent = banner.ctaText + " ";
+  if (img && settings?.promoBanner?.image) img.src = settings.promoBanner.image;
+  
+  // HARDCODED TEXT FOR CREDIT
+  if (overlay) overlay.textContent = "Facilidades de pago";
+  if (title) title.innerHTML = "Accede a<br><em style=\"color:var(--copper-lt);font-style:italic\">Credito Directo</em>";
+  if (subtitle) subtitle.textContent = "Divide tus compras hasta en 12 meses sin intereses. Y si prefieres pagar en efectivo, disfruta de hasta 30% de descuento en categorias y productos seleccionados.";
+  
+  if (cta) {
+    cta.innerHTML = "Consultar financiamiento <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\" stroke-linecap=\"round\" width=\"16\" height=\"16\"><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/><polyline points=\"12 5 19 12 12 19\"/></svg>";
+    cta.href = "contacto.html";
   }
-  if (pill && banner.discountText) pill.textContent = banner.discountText;
-  else if (banner.discountPct && pill) pill.textContent = banner.discountPct + "%";
+  
+  if (pill) {
+    pill.innerHTML = "<span class=\"pill-pct\" style=\"font-size:32px;margin-bottom:2px\">12</span><span class=\"pill-off\" style=\"font-size:10px\">MESES SIN<br>INTERESES</span>";
+  }
 }
 
 // Lifestyle section — configurable
@@ -385,35 +389,34 @@ function renderWhatsApp(settings) {
 }
 
 // ═══════════════════════════════
-// COUNTER ANIMATION
-// ═══════════════════════════════
-function animateCounters() {
-  $$(".count-num").forEach(num => {
-    const target = parseInt(num.dataset.target);
-    if (!target) return;
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        let current = 0;
-        const increment = target / 40;
-        const timer = setInterval(() => {
-          current += increment;
-          if (current >= target) {
-            num.textContent = target;
-            clearInterval(timer);
-          } else {
-            num.textContent = Math.round(current);
-          }
-        }, 30);
-        observer.disconnect();
-      }
-    }, { threshold: 0.5 });
-    observer.observe(num);
-  });
-}
-
-// ═══════════════════════════════
 // MAIN INIT
 // ═══════════════════════════════
+// Expose a ready promise so the inline loader can await Firestore before
+// running entrance/scroll animations. Prevents the "render-twice" flash where
+// hardcoded HTML is animated by GSAP and then replaced by Firestore content.
+let _rendererResolve;
+window.__indexRendererReady = new Promise(r => { _rendererResolve = r; });
+
+// Wait for above-the-fold images to load (or timeout) so the loader does not
+// fade onto half-loaded image swaps. This kills the perceived "re-render".
+function waitAboveFoldImages(timeoutMs = 2500) {
+  const selectors = [
+    "#hero .hero-img-wrap img",
+    "#categories .cat-card img"
+  ];
+  const imgs = [];
+  selectors.forEach(sel => document.querySelectorAll(sel).forEach(i => imgs.push(i)));
+  const pending = imgs.filter(i => i && !(i.complete && i.naturalWidth > 0));
+  if (!pending.length) return Promise.resolve();
+  return Promise.race([
+    Promise.all(pending.map(i => new Promise(r => {
+      i.addEventListener("load", r, { once: true });
+      i.addEventListener("error", r, { once: true });
+    }))),
+    new Promise(r => setTimeout(r, timeoutMs))
+  ]);
+}
+
 async function init() {
   try {
     const [categories, products, settings] = await Promise.all([
@@ -428,22 +431,20 @@ async function init() {
     renderMarquee(categories);
     renderCategories(categories);
     renderFeaturedProducts(products);
-    renderBanner(settings);
+    // renderBanner(settings); // Disable JS rendering for this section, keep HTML
     renderLifestyle(settings);
     renderStats(settings);
     renderNewsletter(settings);
     renderFooter(settings);
     renderWhatsApp(settings);
-    animateCounters();
 
-    // Re-run GSAP animations on newly rendered content
-    if (window.gsap && window.ScrollTrigger) {
-      window.ScrollTrigger.refresh();
-    }
+    await waitAboveFoldImages();
 
   } catch (err) {
     console.error("[index-renderer] Error initializing:", err);
     // Page keeps hardcoded content as fallback
+  } finally {
+    _rendererResolve();
   }
 }
 

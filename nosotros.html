@@ -147,6 +147,11 @@
 
     @media(max-width:1024px){.story{grid-template-columns:1fr}.story-img{min-height:400px;position:relative}.story-img img{position:absolute}.timeline{grid-template-columns:1fr 1fr;gap:40px}.timeline::before{display:none}.cta-section{grid-template-columns:1fr}.cta-big-text{display:none}.values-grid{grid-template-columns:1fr 1fr}.numbers-strip{grid-template-columns:1fr 1fr}.footer-top{grid-template-columns:1fr 1fr}}
     @media(max-width:640px){.nav-links{display:none}.values-grid{grid-template-columns:1fr}.timeline{grid-template-columns:1fr}.numbers-strip{grid-template-columns:1fr 1fr}.footer-top{grid-template-columns:1fr;gap:32px}}
+    /* Pre-hide entrance-animated elements before first paint. GSAP animates them back in. */
+    .hero-eyebrow,.hero-title,.hero-sub,.num-cell,.story-content > *,.story-img img,
+    .quote-mark,.quote-text,.quote-author,.value-card,.tl-item,.cta-content > *{
+      opacity:0;visibility:hidden;
+    }
   </style>
 </head>
 <body>
@@ -303,12 +308,12 @@
         <div class="footer-socials">
           <a href="#" class="social-link" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
           <a href="#" class="social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/></svg></a>
-          <a href="#" class="social-link" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
+          <a target="_blank" href="https://wa.me/593989667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="social-link" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
         </div>
       </div>
       <div><div class="footer-col-title">Empresa</div><ul class="footer-links"><li><a href="nosotros.html">Nosotros</a></li><li><a href="#">Privacidad</a></li><li><a href="#">Terminos</a></li><li><a href="#">Devoluciones</a></li></ul></div>
       <div><div class="footer-col-title">Servicios</div><ul class="footer-links"><li><a href="#">Disenadores</a></li><li><a href="#">Hoteleros</a></li><li><a href="#">Garantia 60 noches</a></li></ul></div>
-      <div><div class="footer-col-title">Contacto</div><ul class="footer-links"><li><a href="contacto.html">Tiendas</a></li><li><a href="#">WhatsApp</a></li><li><a href="#">info@palito.com</a></li></ul></div>
+        <div><div class="footer-col-title">Contacto</div><ul class="footer-links"><li><a href="contacto.html">Tiendas</a></li><li><a href="https://wa.me/593989667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" target="_blank">WhatsApp</a></li><li><a href="#">info@palito.com</a></li></ul></div>
     </div>
     <div class="footer-bottom">
       <span class="footer-copy">2025 Muebleria Palito Outlet. Todos los derechos reservados.</span>
@@ -316,7 +321,7 @@
     </div>
   </footer>
 
-  <a href="#" class="wa-float" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
+  <a target="_blank" href="https://wa.me/593989667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="wa-float" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
 
   <script>
     gsap.registerPlugin(ScrollTrigger);

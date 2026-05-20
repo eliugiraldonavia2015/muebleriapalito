@@ -279,6 +279,8 @@
 
     @media(max-width:1024px){.catalog-layout{grid-template-columns:1fr}.sidebar{display:none}}
     @media(max-width:640px){.product-grid{grid-template-columns:1fr}.footer-top{grid-template-columns:1fr 1fr;gap:32px}.nav-links{display:none}}
+    /* Pre-hide entrance-animated elements before first paint. GSAP animates them back in. */
+    .breadcrumb,.cat-hero-title,.sidebar{opacity:0;visibility:hidden}
   </style>
 </head>
 <body>
@@ -555,7 +557,7 @@
         <div class="footer-socials">
           <a href="#" class="social-link" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
           <a href="#" class="social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor"/></svg></a>
-          <a href="#" class="social-link" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
+          <a target="_blank" href="https://wa.me/593989667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="social-link" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
         </div>
       </div>
       <div>
@@ -579,7 +581,7 @@
         <div class="footer-col-title">Contacto</div>
         <ul class="footer-links">
           <li><a href="contacto.html">Tiendas fisicas</a></li>
-          <li><a href="#">WhatsApp: 095 862 7206</a></li>
+          <li><a href="#">WhatsApp: 098 966 7093</a></li>
           <li><a href="#">info@palito.com</a></li>
         </ul>
       </div>
@@ -595,10 +597,15 @@
     </div>
   </footer>
 
-  <a href="#" class="wa-float" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
+  <a target="_blank" href="https://wa.me/593989667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="wa-float" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
 
   <script>
     gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+    // Pre-hide animated elements synchronously so they never paint visible and then jump
+    // to invisible when the entrance tween sets the initial state (perceived as "double load").
+    gsap.set(['.breadcrumb','.cat-hero-title'], { autoAlpha: 0, y: 30 });
+    gsap.set('.sidebar', { autoAlpha: 0, x: -24 });
 
     // Hero parallax
     gsap.to('.cat-hero-img img', { yPercent: 14, ease: 'none',
@@ -606,15 +613,15 @@
     });
 
     // Hero entrance — hero-count is populated dynamically, skip animation on it
-    gsap.from(['.breadcrumb','.cat-hero-title'], {
-      y: 30, autoAlpha: 0, stagger: .15, duration: .8, ease: 'power3.out', delay: .2
+    gsap.to(['.breadcrumb','.cat-hero-title'], {
+      autoAlpha: 1, y: 0, stagger: .15, duration: .8, ease: 'power3.out', delay: .2
     });
 
     // Cards reveal (re-initialized by renderer after product grid is populated)
     // ScrollTrigger.batch is called from catalogo-renderer.js after DOM is populated
 
     // Sidebar reveal
-    gsap.from('.sidebar', { x: -24, autoAlpha: 0, duration: .8, ease: 'power3.out', delay: .3 });
+    gsap.to('.sidebar', { x: 0, autoAlpha: 1, duration: .8, ease: 'power3.out', delay: .3 });
 
     // View toggle
     const grid = document.getElementById('product-grid');

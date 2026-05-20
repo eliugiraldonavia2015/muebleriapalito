@@ -475,7 +475,41 @@ function initOrderPanel(product) {
   });
 
   const waBtn = $("#btn-whatsapp");
-  if (waBtn) waBtn.addEventListener("click", () => sendWhatsApp(product));
+  const waHint = $("#wa-hint");
+  if (waBtn) {
+    var val = function(id) { var e = document.getElementById(id); return e ? e.value.trim() : ""; };
+    var checkOrder = function () {
+      var n = val("o-name"), p = val("o-phone");
+      if (n && p && /\d/.test(p)) {
+        waBtn.disabled = false;
+        if (waHint) waHint.style.opacity = "0";
+      } else {
+        waBtn.disabled = true;
+        if (waHint) waHint.style.opacity = "1";
+      }
+    };
+    // Check immediately
+    checkOrder();
+    // Listen on name + phone
+    ["o-name","o-phone"].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { el.addEventListener("input", checkOrder); el.addEventListener("change", checkOrder); }
+    });
+    setInterval(checkOrder, 500);
+
+    // Phone: strip non-numeric chars in real-time
+    var phoneEl = document.getElementById("o-phone");
+    if (phoneEl) {
+      phoneEl.addEventListener("input", function() {
+        phoneEl.value = phoneEl.value.replace(/[^\d\s\+\-\(\)]/g, "");
+      });
+    }
+
+    waBtn.addEventListener("click", function () {
+      if (waBtn.disabled) return;
+      sendWhatsApp(product);
+    });
+  }
 }
 
 function sendWhatsApp(product) {
@@ -483,22 +517,20 @@ function sendWhatsApp(product) {
   const parts = [
     "Hola! Quiero hacer un pedido:",
     "",
-    "*Producto:* " + product.name,
-    product.category ? "*Categoria:* " + product.category : "",
-    selectedColor ? "*Color:* " + selectedColor : "",
-    "*Cantidad:* " + qty,
-    "*Total estimado:* " + priceFmt(product.price * qty),
+    "Producto: " + product.name,
+    product.category ? "Categoria: " + product.category : "",
+    selectedColor ? "Color: " + selectedColor : "",
+    "Cantidad: " + qty,
+    "Total estimado: " + priceFmt(product.price * qty),
     "",
-    "*Pago:* " + selectedPayment,
-    "",
-    v("o-name") ? "*Nombre:* " + v("o-name") : "",
-    v("o-phone") ? "*Telefono:* " + v("o-phone") : "",
-    v("o-address") ? "*Entrega:* " + v("o-address") : "",
-    v("o-ref") ? "*Referencia:* " + v("o-ref") : "",
-    v("o-notes") ? "*Notas:* " + v("o-notes") : "",
+    v("o-name") ? "Nombre: " + v("o-name") : "",
+    v("o-phone") ? "Telefono: " + v("o-phone") : "",
+    v("o-address") ? "Entrega: " + v("o-address") : "",
+    v("o-ref") ? "Referencia: " + v("o-ref") : "",
+    v("o-notes") ? "Notas: " + v("o-notes") : "",
   ].filter(Boolean).join("\n");
 
-  const waNum = (window._storePhone || "50499999999").replace(/\D/g, "");
+  const waNum = (window._storePhone || "593959667093").replace(/\D/g, "");
   window.open("https://wa.me/" + waNum + "?text=" + encodeURIComponent(parts), "_blank");
 }
 
@@ -587,10 +619,12 @@ function playEntrance() {
     "#prod-desc","#prod-colors-wrap","#prod-qty-wrap","#prod-cta","#specs-section"];
 
   gsap.set(infoEls, { autoAlpha: 0, y: 24 });
+  // #img-panel is intentionally not animated here. It is left visible from first paint
+  // so the preloaded image bytes (from ?img= URL param / localStorage / manifest) can
+  // show up immediately, without waiting for Firestore + entrance animation.
 
   const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-  tl.from("#img-panel", { x: -50, autoAlpha: 0, duration: 0.85 }, 0)
-    .to("#prod-category",    { autoAlpha: 1, y: 0, duration: 0.5 }, 0.28)
+  tl.to("#prod-category",    { autoAlpha: 1, y: 0, duration: 0.5 }, 0.28)
     .to("#prod-name",        { autoAlpha: 1, y: 0, duration: 0.6 }, 0.38)
     .to("#prod-subcategory", { autoAlpha: 1, y: 0, duration: 0.5 }, 0.48)
     .to("#prod-price-row",   { autoAlpha: 1, y: 0, duration: 0.5 }, 0.56)
@@ -676,11 +710,102 @@ function showNotFound() {
   detail.appendChild(wrap);
 }
 
+// Populate every visible piece of the page from a product object. Used by both
+// the cache fast-path and the Firestore path. Idempotent — safe to call twice.
+function populateFromProduct(product) {
+  document.title = product.name + " — Muebleria Palito Outlet";
+  setText("#bc-name", product.name);
+  setText("#bc-cat", product.category || "Catalogo");
+
+  const bcCat = $("#bc-cat");
+  if (bcCat) bcCat.href = "catalogo.html?cat=" + slugify(product.category || "");
+
+  setText("#prod-category", product.category || "");
+  setText("#prod-name", product.name);
+  setText("#prod-subcategory", product.subcategory || "");
+  setText("#prod-price", priceFmt(product.price));
+
+  if (product.originalPrice) {
+    const orig = $("#prod-price-orig");
+    if (orig) { orig.textContent = priceFmt(product.originalPrice); orig.style.display = ""; }
+  }
+  if (product.discountPct) {
+    const disc = $("#prod-discount");
+    if (disc) { disc.textContent = "-" + Math.abs(product.discountPct) + "%"; disc.style.display = ""; }
+  }
+
+  setText("#prod-desc", product.description || "");
+
+  // Collect images
+  const images = [];
+  if (product.imageUrl) images.push(product.imageUrl);
+  if (product.primaryImage && product.primaryImage !== product.imageUrl) images.push(product.primaryImage);
+  if (Array.isArray(product.images)) {
+    product.images.forEach(u => { if (u && !images.includes(u)) images.push(u); });
+  }
+  if (!images.length) images.push("https://via.placeholder.com/800x900");
+
+  const mainImg = $("#main-img");
+  if (mainImg) {
+    const markLoaded = () => mainImg.classList.add('loaded');
+    if (!mainImg.getAttribute('src')) {
+      mainImg.src = images[0];
+      if (mainImg.complete) markLoaded();
+      else mainImg.addEventListener('load', markLoaded, { once: true });
+    }
+    mainImg.alt = product.name;
+  }
+
+  buildThumbs(images);
+  buildColors(product.colors);
+  initQty(product.price);
+  initPayment();
+  buildSpecs(product);
+  initOrderPanel(product);
+  initPayButton(product);
+
+  if (mainImg) {
+    const afterLoad = () => initLoupe(images[0]);
+    if (mainImg.complete) afterLoad();
+    else mainImg.addEventListener("load", afterLoad, { once: true });
+  }
+}
+
+// Override CSS pre-hide instantly (no animation). Used by the cache fast-path so
+// the page feels instant when product data is already in localStorage.
+function revealInfoInstantly() {
+  const sels = ['#prod-category','#prod-name','#prod-subcategory','#prod-price-row',
+    '#prod-desc','#prod-colors-wrap','#prod-qty-wrap','#prod-cta','#specs-section'];
+  sels.forEach(sel => {
+    const el = document.querySelector(sel);
+    if (el) { el.style.opacity = '1'; el.style.visibility = 'visible'; }
+  });
+}
+
 // ─── MAIN ───
 async function init() {
   gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
   if (!prodId) { showNotFound(); return; }
+
+  // Fast-path: cache populated by the catalog. The inline script at the end of
+  // producto.html already rendered text+image and revealed info elements before
+  // this module loaded — we just need to finish wiring up thumbs/colors/specs
+  // and attach event listeners against the same cached product.
+  let usedCache = false;
+  let cached = window.__cacheHitProduct || null;
+  if (!cached) {
+    try {
+      const raw = localStorage.getItem('product:' + prodId);
+      if (raw) cached = JSON.parse(raw);
+    } catch (_) {}
+  }
+  if (cached) {
+    currentProduct = cached;
+    populateFromProduct(cached);
+    revealInfoInstantly();
+    usedCache = true;
+  }
 
   try {
     // Fire both requests in parallel but don't wait for settings to render the product.
@@ -690,86 +815,40 @@ async function init() {
     settingsPromise.then(settingsSnap => {
       if (settingsSnap.exists()) {
         const s = settingsSnap.data();
-        window._storePhone = s.whatsappNumber || s.phone || "";
+        window._storePhone = "593959667093";
       }
     });
 
     const snap = await productPromise;
-    if (!snap.exists()) { showNotFound(); return; }
+    if (!snap.exists()) {
+      if (!usedCache) showNotFound();
+      return;
+    }
 
     const product = { id: snap.id, ...snap.data() };
     currentProduct = product;
 
-    // Keep cache fresh for next deep-link visit
+    // Keep cache fresh for next visit
+    try { localStorage.setItem('product:' + product.id, JSON.stringify(product)); } catch (_) {}
     if (product.imageUrl) {
       try { localStorage.setItem('img:' + product.id, product.imageUrl); } catch (_) {}
     }
 
-    // Populate page
-    document.title = product.name + " — Muebleria Palito Outlet";
-    setText("#bc-name", product.name);
-    setText("#bc-cat", product.category || "Catalogo");
-
-    const bcCat = $("#bc-cat");
-    if (bcCat) bcCat.href = "catalogo.html?cat=" + slugify(product.category || "");
-
-    setText("#prod-category", product.category || "");
-    setText("#prod-name", product.name);
-    setText("#prod-subcategory", product.subcategory || "");
-    setText("#prod-price", priceFmt(product.price));
-
-    if (product.originalPrice) {
-      const orig = $("#prod-price-orig");
-      if (orig) { orig.textContent = priceFmt(product.originalPrice); orig.style.display = ""; }
-    }
-    if (product.discountPct) {
-      const disc = $("#prod-discount");
-      if (disc) { disc.textContent = "-" + Math.abs(product.discountPct) + "%"; disc.style.display = ""; }
-    }
-
-    setText("#prod-desc", product.description || "");
-
-    // Collect images
-    const images = [];
-    if (product.imageUrl) images.push(product.imageUrl);
-    if (product.primaryImage && product.primaryImage !== product.imageUrl) images.push(product.primaryImage);
-    if (Array.isArray(product.images)) {
-      product.images.forEach(u => { if (u && !images.includes(u)) images.push(u); });
-    }
-    if (!images.length) images.push("https://via.placeholder.com/800x900");
-
-    const mainImg = $("#main-img");
-    if (mainImg) {
-      const markLoaded = () => mainImg.classList.add('loaded');
-      if (!mainImg.getAttribute('src')) {
-        mainImg.src = images[0];
-        if (mainImg.complete) markLoaded();
-        else mainImg.addEventListener('load', markLoaded, { once: true });
-      }
-      mainImg.alt = product.name;
-    }
-
-    buildThumbs(images);
-    buildColors(product.colors);
-    initQty(product.price);
-    initPayment();
-    buildSpecs(product);
-    initOrderPanel(product);
-    initPayButton(product);
-
-    const afterLoad = () => initLoupe(images[0]);
-    if (mainImg) {
-      if (mainImg.complete) afterLoad();
-      else mainImg.addEventListener("load", afterLoad, { once: true });
+    // On cache hit, the page is already fully populated and interactive. Skip
+    // re-population to avoid duplicating event listeners (initOrderPanel,
+    // initLoupe, etc. add handlers each time). The localStorage cache was just
+    // refreshed above, so the next visit will see any data changes.
+    if (!usedCache) {
+      populateFromProduct(product);
+      playEntrance();
     }
 
     await renderNav();
-    playEntrance();
     await loadRelated(product);
 
   } catch (err) {
     console.error("[producto-renderer]", err);
-    showNotFound();
+    if (!usedCache) showNotFound();
   }
 }
 

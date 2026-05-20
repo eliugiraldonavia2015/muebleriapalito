@@ -113,6 +113,9 @@
     .store-hours::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--copper);flex-shrink:0}
     .store-phone{font-size:13px;color:var(--copper)}
     .store-tag{display:inline-block;padding:4px 10px;border:1px solid rgba(58,140,92,.3);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);width:fit-content}
+    .store-maps-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:var(--bg2);border:1px solid var(--rule);color:var(--cream);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-top:auto;width:fit-content;transition:border-color .3s,color .3s}
+    .store-maps-btn:hover{border-color:var(--copper);color:var(--copper)}
+    .store-maps-btn svg{width:14px;height:14px;stroke:currentColor}
 
     /* BUTTONS */
     .btn-primary{display:inline-flex;align-items:center;gap:14px;padding:16px 32px;background:linear-gradient(105deg,#6b4f18 0%,#9e7e2a 45%,#7a6020 100%);background-size:200% 100%;background-position:100% 0;color:#f5e8c0;font-family:var(--f-body);font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;width:fit-content;position:relative;overflow:hidden;box-shadow:none;transition:background-position .55s var(--ease-silk),gap .4s var(--ease-silk),box-shadow .35s,transform .25s var(--ease-silk)}
@@ -121,6 +124,14 @@
     .btn-primary:hover::before{transform:translateX(110%)}
     .btn-primary svg{width:16px;height:16px;stroke:currentColor;transition:transform .35s}
     .btn-primary:hover svg{transform:translateX(4px)}
+
+    /* WHATSAPP LARGE CTA */
+    .wa-large-btn{display:inline-flex;align-items:center;gap:14px;padding:18px 36px;background:#25d366;color:#fff;font-family:var(--f-body);font-size:14px;letter-spacing:.05em;font-weight:500;width:fit-content;transition:transform .3s, box-shadow .3s;box-shadow:0 8px 24px rgba(37,211,102,.25);border-radius:2px;}
+    .wa-large-btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(37,211,102,.4)}
+    .wa-large-btn svg{width:22px;height:22px}
+    .wa-status{margin-top:24px;font-size:13px;color:var(--cream-dim);display:flex;align-items:center;gap:10px}
+    .pulse-dot{width:8px;height:8px;background:#25d366;border-radius:50%;box-shadow:0 0 0 0 rgba(37,211,102,.7);animation:pulse 2s infinite}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(37,211,102,.7)}70%{box-shadow:0 0 0 10px rgba(37,211,102,0)}100%{box-shadow:0 0 0 0 rgba(37,211,102,0)}}
 
     /* FOOTER */
     footer{border-top:1px solid var(--rule);padding:clamp(60px,8vw,100px) clamp(24px,5vw,80px) 40px}
@@ -167,6 +178,8 @@
     .form-note{color:#777775}
     .btn-primary{background:linear-gradient(105deg,#5a7a38 0%,#3a8c5c 45%,#2d7a4c 100%);color:#e8f5ec}
     .btn-primary:hover{box-shadow:0 8px 28px rgba(58,140,92,.4)}
+    .wa-desc{color:#5a5a58 !important}
+    .wa-status{color:#6a6a68}
 
     .info-side{background:#edeae4}
     .info-heading{color:#1a1a18}
@@ -198,6 +211,8 @@
     .store-hours::before{background:#3a8c5c}
     .store-phone{color:#3a8c5c}
     .store-tag{color:#3a8c5c;border-color:rgba(58,140,92,.3)}
+    .store-maps-btn{background:#ffffff;border-color:rgba(0,0,0,.15);color:#6a6a68}
+    .store-maps-btn:hover{border-color:#3a8c5c;color:#3a8c5c;background:#fafaf8}
 
     footer{background:#0c1f14;border-top-color:rgba(255,255,255,.06)}
   </style>
@@ -230,52 +245,22 @@
   </div>
 
   <div class="contact-split">
-    <!-- FORM -->
-    <div class="form-side">
-      <h2 class="form-title">Enviar <em>mensaje</em></h2>
-      <form onsubmit="return handleForm(event)">
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label" for="nombre">Nombre</label>
-            <input class="form-input" id="nombre" type="text" placeholder="Tu nombre" required/>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="apellido">Apellido</label>
-            <input class="form-input" id="apellido" type="text" placeholder="Tu apellido"/>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="email">Email</label>
-            <input class="form-input" id="email" type="email" placeholder="correo@email.com" required/>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="telefono">Telefono</label>
-            <input class="form-input" id="telefono" type="tel" placeholder="+593 00 000 0000"/>
-          </div>
-          <div class="form-group full">
-            <label class="form-label" for="asunto">Asunto</label>
-            <select class="form-select form-input" id="asunto">
-              <option value="">Selecciona un tema</option>
-              <option>Consulta de producto</option>
-              <option>Cotizacion para proyecto</option>
-              <option>Garantia o devolucion</option>
-              <option>Programa de disenadores</option>
-              <option>Proyectos hoteleros</option>
-              <option>Otro</option>
-            </select>
-          </div>
-          <div class="form-group full">
-            <label class="form-label" for="mensaje">Mensaje</label>
-            <textarea class="form-textarea" id="mensaje" placeholder="Cuentanos en que podemos ayudarte..." required></textarea>
-          </div>
-        </div>
-        <div class="form-footer">
-          <button type="submit" class="btn-primary" id="submit-btn">
-            Enviar mensaje
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </button>
-          <p class="form-note">Respondemos en menos<br>de 24 horas habiles.</p>
-        </div>
-      </form>
+    <!-- WA CTA -->
+    <div class="form-side" style="display:flex; flex-direction:column; justify-content:center;">
+      <h2 class="info-heading" style="margin-bottom:24px;">Atencion personalizada</h2>
+      <p style="font-size:15px; color:var(--cream-dim); line-height:1.7; margin-bottom:40px; max-width:440px;" class="wa-desc">
+        ¿Tienes dudas sobre algun mueble, necesitas medidas especiales o buscas asesoria para tu proyecto de interiores? Nuestro equipo de expertos esta listo para ayudarte.
+      </p>
+      
+      <a href="https://wa.me/593989667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="wa-large-btn" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        Escribenos por WhatsApp
+      </a>
+      
+      <div class="wa-status">
+        <span class="pulse-dot"></span>
+        098 966 7093 · Respuesta inmediata
+      </div>
     </div>
 
     <!-- INFO -->
@@ -288,8 +273,8 @@
           </div>
           <div>
             <div class="cc-label">Linea directa</div>
-            <div class="cc-value">1800 123 456</div>
-            <div class="cc-sub">Lunes a Sabado · 8:00 — 20:00</div>
+            <div class="cc-value">098 966 7093</div>
+            <div class="cc-sub">Lunes a Domingo</div>
           </div>
         </div>
         <div class="contact-card">
@@ -302,21 +287,12 @@
             <div class="cc-sub">Respuesta en menos de 24h habiles</div>
           </div>
         </div>
-        <a href="https://wa.me/593958627206" class="contact-card wa-banner" target="_blank" rel="noopener">
-          <div class="wa-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></div>
-          <div class="wa-text">
-            <strong>Escribenos por WhatsApp</strong>
-            <span>095 862 7206 · Respuesta inmediata</span>
-          </div>
-          <div class="wa-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-        </a>
       </div>
       <div>
         <div class="sec-label" style="margin-bottom:16px">Horario general</div>
         <div style="display:flex;flex-direction:column;gap:10px">
-          <div class="sched-row" style="display:flex;justify-content:space-between;font-size:13px;padding-bottom:10px;border-bottom:1px solid rgba(0,0,0,.08)"><span class="sched-dim" style="color:#6a6a68">Lunes — Viernes</span><span class="sched-val" style="color:#1a1a18">8:00 — 20:00</span></div>
-          <div class="sched-row" style="display:flex;justify-content:space-between;font-size:13px;padding-bottom:10px;border-bottom:1px solid rgba(0,0,0,.08)"><span class="sched-dim" style="color:#6a6a68">Sabado</span><span class="sched-val" style="color:#1a1a18">9:00 — 18:00</span></div>
-          <div class="sched-row" style="display:flex;justify-content:space-between;font-size:13px"><span class="sched-dim" style="color:#6a6a68">Domingo</span><span class="sched-val" style="color:#1a1a18">10:00 — 15:00</span></div>
+          <div class="sched-row" style="display:flex;justify-content:space-between;font-size:13px;padding-bottom:10px;border-bottom:1px solid rgba(0,0,0,.08)"><span class="sched-dim" style="color:#6a6a68">Lunes — Viernes</span><span class="sched-val" style="color:#1a1a18">10:00 — 18:00</span></div>
+          <div class="sched-row" style="display:flex;justify-content:space-between;font-size:13px"><span class="sched-dim" style="color:#6a6a68">Sabado — Domingo</span><span class="sched-val" style="color:#1a1a18">10:00 — 20:00</span></div>
         </div>
       </div>
     </div>
@@ -327,93 +303,41 @@
     <div class="stores-header">
       <div class="stores-header-left">
         <div class="sec-label">Tiendas fisicas</div>
-        <h2 class="stores-heading">Encontranos <em>cerca de ti</em></h2>
-      </div>
-      <div class="country-tabs">
-        <button class="tab-btn active" data-country="ecuador">Ecuador</button>
-        <button class="tab-btn" data-country="panama">Panama</button>
-        <button class="tab-btn" data-country="peru">Peru</button>
+        <h2 class="stores-heading">Encuentranos <em>cerca de ti</em></h2>
       </div>
     </div>
 
     <div class="stores-grid" id="stores-grid">
-      <!-- Ecuador stores (shown by default) -->
       <div class="store-card" data-country="ecuador">
-        <div class="store-tag">Flagship</div>
-        <div class="store-city">Guayaquil</div>
-        <div class="store-addr">Av. Francisco de Orellana y Justino Cornejo, CC. Policentro, Local 142</div>
-        <div class="store-hours">Lun–Sab 9:00–21:00 · Dom 10:00–18:00</div>
-        <div class="store-phone">04 268 1234</div>
-      </div>
-      <div class="store-card" data-country="ecuador">
-        <div class="store-city">Quito Norte</div>
-        <div class="store-addr">Av. Naciones Unidas E3-71 y Shyris, CC. Quicentro Shopping, L2-34</div>
-        <div class="store-hours">Lun–Sab 10:00–20:00 · Dom 10:00–17:00</div>
-        <div class="store-phone">02 246 5678</div>
+        <div class="store-tag">Principal</div>
+        <div class="store-city">Av. Las Aguas</div>
+        <div class="store-addr">Av. Las Aguas, Guayaquil, Guayas</div>
+        <div class="store-hours">Lun–Vie 10:00–18:00 · Sab–Dom 10:00–20:00</div>
+        <div class="store-phone">098 966 7093</div>
+        <a href="https://maps.app.goo.gl/DDSkH285NBq8PRv78?g_st=iwb" class="store-maps-btn" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Como llegar
+        </a>
       </div>
       <div class="store-card" data-country="ecuador">
-        <div class="store-city">Quito Sur</div>
-        <div class="store-addr">Av. Morán Valverde N65-48 y Rodrigo de Chavez, CC. El Recreo</div>
-        <div class="store-hours">Lun–Sab 10:00–20:00 · Dom 11:00–16:00</div>
-        <div class="store-phone">02 334 9012</div>
+        <div class="store-city">Avalon Plaza</div>
+        <div class="store-addr">Avalon Plaza, Guayaquil, Guayas</div>
+        <div class="store-hours">Lun–Vie 10:00–18:00 · Sab–Dom 10:00–20:00</div>
+        <div class="store-phone">098 966 7093</div>
+        <a href="https://maps.app.goo.gl/sfgPPTL4mBZUQk6G8?g_st=iwb" class="store-maps-btn" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Como llegar
+        </a>
       </div>
       <div class="store-card" data-country="ecuador">
-        <div class="store-city">Cuenca</div>
-        <div class="store-addr">Av. Ordoñez Lasso y Carlos Arizaga, CC. Milenium Plaza, L. 88</div>
-        <div class="store-hours">Lun–Sab 9:30–19:30 · Dom 10:00–15:00</div>
-        <div class="store-phone">07 285 3456</div>
-      </div>
-      <div class="store-card" data-country="ecuador">
-        <div class="store-city">Ambato</div>
-        <div class="store-addr">Av. Cevallos 1435 y Mera, CC. Caracol, Planta Baja</div>
-        <div class="store-hours">Lun–Sab 9:00–19:00</div>
-        <div class="store-phone">03 242 7890</div>
-      </div>
-      <div class="store-card" data-country="ecuador">
-        <div class="store-city">Manta</div>
-        <div class="store-addr">Av. 4 de Noviembre y Calle 24, CC. Paseo Shopping Manta</div>
-        <div class="store-hours">Lun–Sab 10:00–20:00 · Dom 10:00–16:00</div>
-        <div class="store-phone">05 292 1234</div>
-      </div>
-      <!-- Panama -->
-      <div class="store-card" data-country="panama" style="display:none">
-        <div class="store-tag">Flagship</div>
-        <div class="store-city">Panama City</div>
-        <div class="store-addr">Via Espana 99, CC. Multiplaza Pacific, Local 2-18</div>
-        <div class="store-hours">Lun–Sab 10:00–21:00 · Dom 11:00–19:00</div>
-        <div class="store-phone">+507 390 1234</div>
-      </div>
-      <div class="store-card" data-country="panama" style="display:none">
-        <div class="store-city">San Miguelito</div>
-        <div class="store-addr">Av. Ricardo J. Alfaro, CC. Metromall, Local B-24</div>
-        <div class="store-hours">Lun–Sab 10:00–20:00</div>
-        <div class="store-phone">+507 260 5678</div>
-      </div>
-      <div class="store-card" data-country="panama" style="display:none">
-        <div class="store-city">David</div>
-        <div class="store-addr">Av. Francisco Clark, CC. Chiriqui Mall, Piso 1</div>
-        <div class="store-hours">Lun–Sab 10:00–20:00 · Dom 11:00–18:00</div>
-        <div class="store-phone">+507 774 3456</div>
-      </div>
-      <!-- Peru -->
-      <div class="store-card" data-country="peru" style="display:none">
-        <div class="store-tag">Flagship</div>
-        <div class="store-city">Lima Miraflores</div>
-        <div class="store-addr">Av. Larco 1150, CC. Larcomar, Tienda 34</div>
-        <div class="store-hours">Lun–Dom 10:00–22:00</div>
-        <div class="store-phone">+51 1 445 7890</div>
-      </div>
-      <div class="store-card" data-country="peru" style="display:none">
-        <div class="store-city">Lima San Isidro</div>
-        <div class="store-addr">Calle Las Begonias 475, CC. El Polo, Tienda 18</div>
-        <div class="store-hours">Lun–Sab 10:00–21:00 · Dom 11:00–18:00</div>
-        <div class="store-phone">+51 1 222 3456</div>
-      </div>
-      <div class="store-card" data-country="peru" style="display:none">
-        <div class="store-city">Arequipa</div>
-        <div class="store-addr">Av. Ejercito 793, CC. Arequipa Center, L. 52</div>
-        <div class="store-hours">Lun–Sab 9:30–20:00 · Dom 10:00–16:00</div>
-        <div class="store-phone">+51 54 285 678</div>
+        <div class="store-city">Parque California</div>
+        <div class="store-addr">Parque California, Guayaquil, Guayas</div>
+        <div class="store-hours">Lun–Vie 10:00–18:00 · Sab–Dom 10:00–20:00</div>
+        <div class="store-phone">098 966 7093</div>
+        <a href="https://maps.app.goo.gl/bPXDdCTR4h2mbTMk8?g_st=iwb" class="store-maps-btn" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Como llegar
+        </a>
       </div>
     </div>
   </section>
@@ -426,12 +350,12 @@
         <div class="footer-socials">
           <a href="#" class="social-link" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
           <a href="#" class="social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/></svg></a>
-          <a href="#" class="social-link" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
+          <a target="_blank" href="https://wa.me/593989667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="social-link" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
         </div>
       </div>
       <div><div class="footer-col-title">Empresa</div><ul class="footer-links"><li><a href="nosotros.html">Nosotros</a></li><li><a href="#">Privacidad</a></li><li><a href="#">Terminos</a></li></ul></div>
       <div><div class="footer-col-title">Catalogo</div><ul class="footer-links"><li><a href="catalogo.html?cat=Salas">Salas</a></li><li><a href="catalogo.html?cat=Dormitorios">Dormitorios</a></li><li><a href="catalogo.html?cat=Decor">Decor</a></li></ul></div>
-      <div><div class="footer-col-title">Contacto</div><ul class="footer-links"><li><a href="contacto.html">Tiendas</a></li><li><a href="#">WhatsApp</a></li><li><a href="#">info@palito.com</a></li></ul></div>
+      <div><div class="footer-col-title">Contacto</div><ul class="footer-links"><li><a href="contacto.html">Tiendas</a></li><li><a href="https://wa.me/593989667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" target="_blank">WhatsApp</a></li><li><a href="#">info@palito.com</a></li></ul></div>
     </div>
     <div class="footer-bottom">
       <span class="footer-copy">2025 Muebleria Palito Outlet. Todos los derechos reservados.</span>
@@ -439,7 +363,7 @@
     </div>
   </footer>
 
-  <a href="#" class="wa-float" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
+  <a target="_blank" href="https://wa.me/593989667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="wa-float" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
 
   <script>
     gsap.registerPlugin(ScrollTrigger);
