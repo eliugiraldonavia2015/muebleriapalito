@@ -761,7 +761,7 @@ function populateFromProduct(product) {
   initQty(product.price);
   initPayment();
   buildSpecs(product);
-  initOrderPanel(product);
+  initAddToCart(product);
   initPayButton(product);
 
   if (mainImg) {

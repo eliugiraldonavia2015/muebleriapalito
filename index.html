@@ -109,7 +109,7 @@
 
     /* MARQUEE */
     .marquee-strip{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:18px 0;overflow:hidden;background:var(--bg2)}
-    .marquee-track{display:flex;gap:0;white-space:nowrap;animation:marquee 28s linear infinite}
+    .marquee-track{display:flex;gap:0;white-space:nowrap;animation:marquee 28s linear infinite;width:max-content}
     .marquee-item{display:inline-flex;align-items:center;gap:32px;padding:0 40px;font-family:var(--f-wide);font-size:13px;letter-spacing:.14em;color:var(--cream-dim)}
     .marquee-dot{width:4px;height:4px;border-radius:50%;background:var(--copper);flex-shrink:0;display:inline-block}
     @keyframes marquee{to{transform:translateX(-50%)}}
@@ -301,10 +301,33 @@
     .credito-cta:hover{background:rgba(58,140,92,.28);border-color:rgba(90,184,124,.65)}
     @media(max-width:768px){
       .credito-right{align-items:flex-start;width:100%}
-      .credito-methods{display:grid;grid-template-columns:1fr;width:100%}
-      .credito-method{flex-direction:row;justify-content:flex-start;border-right:none;border-bottom:1px solid rgba(90,184,124,.14);padding:16px;gap:12px}
-      .credito-method:last-child{border-bottom:none}
-      .credito-cta{width:100%;justify-content:center}
+      .credito-methods{
+        display:flex;
+        flex-wrap:nowrap;
+        overflow-x:auto;
+        scroll-snap-type:x mandatory;
+        scrollbar-width:none;
+        -ms-overflow-style:none;
+        width:calc(100% + clamp(24px,5vw,80px) * 2);
+        margin-left:calc(-1 * clamp(24px,5vw,80px));
+        padding:4px clamp(24px,5vw,80px);
+        border:none;
+        gap:12px;
+      }
+      .credito-methods::-webkit-scrollbar{display:none}
+      .credito-method{
+        flex:0 0 140px;
+        scroll-snap-align:start;
+        border:1px solid rgba(90,184,124,.3);
+        border-radius:2px;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        padding:20px 12px;
+      }
+      .credito-method-name{white-space:normal;text-align:center;line-height:1.4}
+      .credito-method:last-child{border-right:1px solid rgba(90,184,124,.3)}
+      .credito-cta{width:100%;justify-content:center;margin-top:8px}
     }
 
     /* ═══ LIGHT CONTENT SECTIONS ═══ */
@@ -517,7 +540,7 @@
       <a href="#" aria-label="Cuenta">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       </a>
-      <a href="#" style="display:flex;align-items:flex-start" aria-label="Carrito">
+      <a href="carrito.html" style="display:flex;align-items:flex-start" aria-label="Carrito">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
         <span class="nav-cart-count">0</span>
       </a>
@@ -552,6 +575,20 @@
 
   <div class="marquee-strip">
     <div class="marquee-track">
+      <span class="marquee-item">SALAS <span class="marquee-dot"></span></span>
+      <span class="marquee-item">COMEDORES <span class="marquee-dot"></span></span>
+      <span class="marquee-item">DORMITORIOS <span class="marquee-dot"></span></span>
+      <span class="marquee-item">OUTDOORS <span class="marquee-dot"></span></span>
+      <span class="marquee-item">COLCHONES <span class="marquee-dot"></span></span>
+      <span class="marquee-item">DECOR <span class="marquee-dot"></span></span>
+      <span class="marquee-item">HOGAR <span class="marquee-dot"></span></span>
+      <span class="marquee-item">SALAS <span class="marquee-dot"></span></span>
+      <span class="marquee-item">COMEDORES <span class="marquee-dot"></span></span>
+      <span class="marquee-item">DORMITORIOS <span class="marquee-dot"></span></span>
+      <span class="marquee-item">OUTDOORS <span class="marquee-dot"></span></span>
+      <span class="marquee-item">COLCHONES <span class="marquee-dot"></span></span>
+      <span class="marquee-item">DECOR <span class="marquee-dot"></span></span>
+      <span class="marquee-item">HOGAR <span class="marquee-dot"></span></span>
       <span class="marquee-item">SALAS <span class="marquee-dot"></span></span>
       <span class="marquee-item">COMEDORES <span class="marquee-dot"></span></span>
       <span class="marquee-item">DORMITORIOS <span class="marquee-dot"></span></span>
@@ -835,7 +872,7 @@
         <div class="lifestyle-feat"><span class="feat-num">02</span><p class="feat-text">Encontramos el <strong>estilo perfecto</strong> que se adapta a tu espacio y presupuesto.</p></div>
         <div class="lifestyle-feat"><span class="feat-num">03</span><p class="feat-text"><strong>Servicio VIP:</strong> Hacemos que el mueble llegue directo a la puerta de tu casa. Nos encargamos de todo, hasta de dejarlo dentro de tu casa.</p></div>
       </div>
-      <a target="_blank" href="https://wa.me/593989667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="btn-primary" style="margin-top:8px">Asesoría en WhatsApp
+      <a target="_blank" href="https://wa.me/593959667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="btn-primary" style="margin-top:8px">Asesoría en WhatsApp
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" width="16" height="16"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
     </div>
@@ -892,7 +929,7 @@
           <a href="#" class="social-link" aria-label="YouTube">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 00-1.95 1.96A29 29 0 001 12a29 29 0 00.46 5.58A2.78 2.78 0 003.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"/></svg>
           </a>
-          <a target="_blank" href="https://wa.me/593989667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="social-link" aria-label="WhatsApp">
+          <a target="_blank" href="https://wa.me/593959667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="social-link" aria-label="WhatsApp">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
           </a>
         </div>
@@ -921,7 +958,7 @@
         <div class="footer-col-title">Contacto</div>
         <ul class="footer-links">
           <li><a href="#">info@palito.com</a></li>
-          <li><a href="#">WhatsApp: 098 966 7093</a></li>
+          <li><a href="#">WhatsApp: 095 966 7093</a></li>
           <li><a href="#">1800 123 456</a></li>
           <li><a href="contacto.html">Tiendas fisicas</a></li>
           <li><a href="contacto.html">Ecuador - Panama - Peru</a></li>
@@ -939,7 +976,7 @@
     </div>
   </footer>
 
-  <a target="_blank" href="https://wa.me/593989667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="wa-float" aria-label="WhatsApp">
+  <a target="_blank" href="https://wa.me/593959667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="wa-float" aria-label="WhatsApp">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
   </a>
 
@@ -1164,5 +1201,8 @@
     // Signal that DOM manipulation is complete so GSAP can fade out loader.
     window.__indexRendererReady = true;
   </script>
-  <script type="module" src="js/index-renderer.js?v=2"></script></body>
+  <script type="module" src="js/index-renderer.js?v=2"></script>
+
+<script src="js/cart-system.js"></script>
+</body>
 </html>

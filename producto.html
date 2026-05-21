@@ -649,11 +649,11 @@
         </div>
       </div>
       <div class="prod-cta" id="prod-cta">
-        <button class="btn-order" id="btn-order">
-          <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-          Ir al formulario de pedido
+        <button class="btn-order" id="btn-add-cart">
+          <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          Añadir al carrito
         </button>
-        <a href="catalogo.html" class="btn-secondary">Ver mas productos</a>
+        <a href="carrito.html" class="btn-secondary">Ir al carrito</a>
       </div>
       <div class="specs-section" id="specs-section" style="display:none">
         <div class="specs-label">Especificaciones</div>
@@ -756,156 +756,6 @@
           Solicitar credito
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- ORDER PANEL — always visible -->
-  <div class="order-panel" id="order-panel">
-    <div class="order-inner">
-      <h2 class="order-title">Completa tu pedido</h2>
-      <p class="order-sub">Te contactaremos por WhatsApp para coordinar la entrega.</p>
-      <div class="order-grid">
-        <div>
-          <div class="form-group">
-            <label class="form-label">Nombre completo</label>
-            <input class="form-input" id="o-name" type="text" placeholder="Tu nombre"/>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Telefono / WhatsApp</label>
-            <input class="form-input" id="o-phone" type="tel" placeholder="+504 9999-9999"/>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Direccion de entrega</label>
-            <input class="form-input" id="o-address" type="text" placeholder="Calle, colonia, ciudad"/>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Referencias adicionales</label>
-            <input class="form-input" id="o-ref" type="text" placeholder="Punto de referencia, indicaciones..."/>
-          </div>
-          <div class="form-group">
-            <div class="pay-indicators-label">Metodos de pago aceptados</div>
-            <div class="pay-indicators">
-              <div class="pay-indicator">
-                <div class="pay-ind-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20"/><path d="M6 14h.01M10 14h4"/></svg>
-                </div>
-                <div class="pay-ind-text">
-                  <div class="pay-ind-name">Efectivo</div>
-                  <div class="pay-ind-desc">Al momento de la entrega</div>
-                </div>
-              </div>
-              <div class="pay-indicator">
-                <div class="pay-ind-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 8v4l3 3"/></svg>
-                </div>
-                <div class="pay-ind-text">
-                  <div class="pay-ind-name">Credito Directo</div>
-                  <div class="pay-ind-desc">Sin banco necesario</div>
-                </div>
-              </div>
-              <div class="pay-indicator">
-                <div class="pay-ind-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
-                </div>
-                <div class="pay-ind-text">
-                  <div class="pay-ind-name">Pagos Acumulativos</div>
-                  <div class="pay-ind-desc">Cuotas a tu medida</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- REMOVED: payment detail panels (handled via WhatsApp coordination) -->
-          <div id="pay-detail-wrap" style="display:none">
-            <div class="pay-panel" id="pay-card"></div>
-            <div class="pay-panel" id="pay-transfer">
-              <div class="bank-card">
-                <div class="bank-head">
-                  <div class="bank-ico">
-                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 10v11M12 10v11M16 10v11"/></svg>
-                  </div>
-                  <div>
-                    <div class="bank-name-top">Datos de transferencia</div>
-                    <div class="bank-name-main">Banco Atlantida</div>
-                  </div>
-                </div>
-                <div class="bank-rows">
-                  <div class="bank-row">
-                    <span class="bank-rlabel">Tipo de cuenta</span>
-                    <span class="bank-rval">Cuenta de Ahorro</span>
-                  </div>
-                  <div class="bank-row">
-                    <span class="bank-rlabel">Numero de cuenta</span>
-                    <div class="bank-rright">
-                      <span class="bank-acctnum" id="bank-acct">1001-2345-6789</span>
-                      <button class="copy-btn" id="copy-acct">
-                        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                        Copiar
-                      </button>
-                    </div>
-                  </div>
-                  <div class="bank-row">
-                    <span class="bank-rlabel">Titular</span>
-                    <span class="bank-rval">Muebleria Palito Outlet S.A.</span>
-                  </div>
-                  <div class="bank-row">
-                    <span class="bank-rlabel">RTN</span>
-                    <span class="bank-rval">0801-XXXX-XXXXX</span>
-                  </div>
-                </div>
-                <div class="bank-alert">
-                  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-                  <span>Envia el comprobante de transferencia por WhatsApp al finalizar. Tu pedido se procesa al confirmar el pago.</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- EFECTIVO -->
-            <div class="pay-panel" id="pay-cash" style="display:none">
-              <div class="cash-card">
-                <div class="cash-ico">
-                  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                </div>
-                <div>
-                  <div class="cash-title">Pago en efectivo</div>
-                  <div class="cash-desc">El cobro se realiza al momento de la entrega a domicilio. Ten el monto exacto listo para el repartidor.</div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Notas del pedido</label>
-            <input class="form-input" id="o-notes" type="text" placeholder="Color, medidas, preferencias..."/>
-          </div>
-        </div>
-        <div>
-          <div class="order-summary" id="order-summary">
-            <div class="summary-title">Resumen del pedido</div>
-            <div class="summary-row">
-              <span class="summary-label" id="s-prod-name">—</span>
-            </div>
-            <div class="summary-row">
-              <span class="summary-label">Cantidad</span>
-              <span class="summary-val" id="s-qty">1</span>
-            </div>
-            <div class="summary-row">
-              <span class="summary-label">Precio unitario</span>
-              <span class="summary-val" id="s-unit-price">—</span>
-            </div>
-            <div class="summary-row total">
-              <span class="summary-label">Total estimado</span>
-              <span class="summary-val big" id="s-total">—</span>
-            </div>
-          </div>
-          <button class="btn-whatsapp" id="btn-whatsapp" disabled>
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.133.558 4.133 1.535 5.867L.057 23.5l5.764-1.513A11.938 11.938 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818c-1.96 0-3.782-.537-5.337-1.47l-.383-.228-3.42.897.913-3.32-.25-.404A9.793 9.793 0 012.182 12C2.182 6.573 6.573 2.182 12 2.182c5.426 0 9.818 4.39 9.818 9.818 0 5.427-4.392 9.818-9.818 9.818z"/></svg>
-            Enviar pedido por WhatsApp
-          </button>
-          <p class="wa-hint-text" id="wa-hint">Ingresa tu nombre y telefono para continuar</p>
-        </div>
       </div>
     </div>
   </div>
@@ -1054,7 +904,7 @@
       var prodName = p.name;
       var prodId = p.id;
       var prodUrl = location.origin + '/producto.html?id=' + prodId;
-      var phone = '593989667093';
+      var phone = '593959667093';
       var waCreditMsg = 'Hola, vengo de la pagina web, me intereso este item: ' + prodName + ' con ID #' + prodId + ' y ya llene el formulario de credito.\n\nEste es el enlace del producto: ' + prodUrl;
       var waCreditUrl = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(waCreditMsg);
       var waShopBase = 'Hola, soy [NOMBRE], vengo de la pagina web, me interesa ' + prodName + ' con ID #' + prodId + ', me podrian dar mas informacion?\n\nEste es el URL: ' + prodUrl;
@@ -1137,7 +987,7 @@
       }
       var p = getProductInfo();
       var prodName = p.name;
-      var phone = '593989667093';
+      var phone = '593959667093';
       var prodUrl = location.origin + '/producto.html?id=' + p.id;
       var msg = 'Hola, soy ' + nameVal + ', vengo de la pagina web, me interesa ' + prodName + ' con ID #' + p.id + ', me podrian dar mas informacion?\n\nEste es el URL: ' + prodUrl;
       closeModal();
@@ -1234,5 +1084,7 @@
   </script>
 
   <script type="module" src="js/producto-renderer.js?v=20250724"></script>
+
+<script src="js/cart-system.js"></script>
 </body>
 </html>

@@ -249,8 +249,8 @@ function buildCardsBatch(grid) {
         <img src="${p.imageUrl || 'https://via.placeholder.com/500'}" alt="${p.name}"/>
         ${badgeHTML(p)}
         <div class="product-actions">
-          <button class="btn-cart">Agregar al carrito</button>
-          <button class="btn-wish" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>
+          <button class="btn-cart btn-add-cart-grid" data-id="${p.id}" data-name="${p.name.replace(/\"/g, '&quot;')}" data-price="${p.price}" data-image="${p.imageUrl || p.primaryImage || (p.images && p.images.length ? p.images[0] : '')}">Agregar al carrito</button>
+          <button class="btn-wish" data-id="${p.id}" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></button>
         </div>
       </div>
       <div class="product-info">
@@ -417,3 +417,59 @@ if (document.readyState === "loading") {
 } else {
   init();
 }
+
+// Add to cart delegation for catalog
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".btn-add-cart-grid");
+  if (!btn) return;
+  e.preventDefault();
+  e.stopPropagation();
+  
+  const id = btn.getAttribute("data-id");
+  const name = btn.getAttribute("data-name");
+  const price = parseFloat(btn.getAttribute("data-price")) || 0;
+  const image = btn.getAttribute("data-image") || "";
+  
+  console.log("Intentando añadir al carrito:", { id, name, price, image });
+  
+  if (!id || !name) {
+    console.error("Faltan datos en el boton:", btn);
+    return;
+  }
+  
+  if (typeof window.addToCart === "function") {
+    window.addToCart({
+      id: id,
+      name: name,
+      price: price,
+      qty: 1,
+      image: image
+    });
+    console.log("Añadido con exito via window.addToCart");
+  } else {
+    console.error("No se encontro window.addToCart. Verifica que cart-system.js este cargado.");
+  }
+});
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".btn-add-cart-grid");
+  if (!btn) return;
+  e.preventDefault();
+  e.stopPropagation();
+  
+  const id = btn.getAttribute("data-id");
+  if (!id) return;
+  
+  // Find product in ALL_PRODUCTS
+  const p = window.ALL_PRODUCTS ? window.ALL_PRODUCTS.find(x => x.id === id) : null;
+  if (!p) return;
+  
+  if (typeof addToCart === "function") {
+    addToCart({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      qty: 1,
+      image: p.images && p.images.length ? p.images[0] : ""
+    });
+  }
+});
