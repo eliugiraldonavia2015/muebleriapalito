@@ -7,19 +7,21 @@ import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260527c";
-import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260527c";
+import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260527d";
+import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260527d";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Diagnostic: surface the actual key being used so cache issues are obvious.
-// Shows enough chars to tell different keys apart, but not the full secret.
+// Diagnostic: surface non-sensitive metadata about the loaded config so cache
+// issues are obvious. We only print zone + key length (no key material).
+// The two key versions in flight have distinct lengths (39 vs 36), which is
+// enough to distinguish them without leaking any key bytes.
 console.log(
   "[BUNNY] config loaded · zone=" + BUNNY_CDN.zoneName +
-  " · key=" + (BUNNY_CDN.apiKey || "").slice(0, 25) + "..." +
-  " · len=" + (BUNNY_CDN.apiKey || "").length
+  " · keyPresent=" + Boolean(BUNNY_CDN.apiKey) +
+  " · keyLen=" + (BUNNY_CDN.apiKey || "").length
 );
 
 // Hardcoded admin credentials - change these if needed
@@ -366,7 +368,7 @@ async function toggleHomepage(catId, btn) {
   } catch (err) {
     cat.showOnHomepage = !newVal;
     btn.className = "home-btn " + (!newVal ? "on-home" : "off-home");
-    showAlert("Error: " + err.message, "error");
+    notifyError(firestoreCodeFromError(err, "E205"), err.message);
   }
 }
 
@@ -917,7 +919,7 @@ function renderDashHomeImgs() {
           if (def.key === "lifestyle") setHomeThumb("lifestyleImgThumb", cdnUrl);
           showAlert("Imagen de " + def.title + " actualizada.");
         } catch (err) {
-          showAlert("Error al guardar: " + err.message, "error");
+          notifyError(firestoreCodeFromError(err, "E210"), "Imagen subida pero settings no se guardo: " + err.message);
         }
       }
     });
@@ -1069,7 +1071,7 @@ function renderDashCatOrder() {
           if (local) { local.imageUrl = cdnUrl; local.coverImage = cdnUrl; }
           showAlert("Imagen de " + cat.name + " actualizada.");
         } catch (err) {
-          showAlert("Error al guardar: " + err.message, "error");
+          notifyError(firestoreCodeFromError(err, "E205"), "Imagen subida pero la categoria no se actualizo: " + err.message);
         }
       }
     });
@@ -1103,7 +1105,7 @@ async function moveCatInHomeDashboard(catId, dir) {
     });
     await b.commit();
   } catch (err) {
-    showAlert("Error al guardar orden: " + err.message, "error");
+    notifyError(firestoreCodeFromError(err, "E205"), "Reorden de categorias no se guardo: " + err.message);
   }
 }
 
@@ -1117,7 +1119,7 @@ async function saveCatDisplayOrder() {
     await b.commit();
     showAlert("Orden de categorias guardado.");
   } catch (err) {
-    showAlert("Error al guardar: " + err.message, "error");
+    notifyError(firestoreCodeFromError(err, "E205"), err.message);
   }
 }
 
@@ -1300,7 +1302,7 @@ async function moveFeaturedInHome(prodId, dir) {
     });
     await b.commit();
   } catch (err) {
-    showAlert("Error al guardar orden: " + err.message, "error");
+    notifyError(firestoreCodeFromError(err, "E211"), err.message);
   }
 }
 
@@ -1326,7 +1328,7 @@ async function toggleFeaturedProduct(prodId) {
     await updateDoc(doc(db, COL_PRODUCTS, prodId), updateData);
   } catch (err) {
     prod.featured = !willFeature;
-    showAlert("Error: " + err.message, "error");
+    notifyError(firestoreCodeFromError(err, "E211"), err.message);
   }
   renderDashboard();
 }
@@ -1335,15 +1337,20 @@ async function deleteImageFromBunny(imageUrl) {
   if (!imageUrl || !imageUrl.startsWith(BUNNY_CDN.cdnUrl)) return;
   const path = imageUrl.slice(BUNNY_CDN.cdnUrl.length);
   const storageUrl = BUNNY_CDN.apiUrl + "/" + BUNNY_CDN.zoneName + path;
+  const res = await fetch(storageUrl, { method: "DELETE", headers: { AccessKey: BUNNY_CDN.apiKey } });
+  if (!res.ok && res.status !== 404) {
+    // 404 = already gone, treat as success. Anything else surfaces.
+    setBunnyHealth(false, res.status);
+    throw new Error("Bunny DELETE " + res.status);
+  }
+  // Best-effort cache purge — don't fail the delete on purge errors
   try {
-    await fetch(storageUrl, { method: "DELETE", headers: { AccessKey: BUNNY_CDN.apiKey } });
-    // Purge CDN cache so the file stops being served immediately
     await fetch("https://api.bunny.net/purge?url=" + encodeURIComponent(imageUrl), {
       method: "POST",
       headers: { AccessKey: BUNNY_CDN.apiKey }
     });
   } catch (e) {
-    console.warn("[BUNNY] DELETE/purge failed:", e.message);
+    console.warn("[BUNNY] purge failed:", e.message);
   }
 }
 
@@ -1395,6 +1402,10 @@ function setBunnyHealth(healthy, status) {
     banner.classList.add("hidden");
     banner.replaceChildren();
     return;
+  }
+  // Also fire a push notification with the matched code
+  if (typeof notifyError === "function") {
+    notifyError(bunnyCodeFromStatus(status), "HTTP " + (status || "?"));
   }
   // Build the banner content (safe DOM only, no innerHTML)
   banner.replaceChildren();
@@ -1725,6 +1736,167 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+// ─── ERROR CODE CATALOG ───
+// Keep this object in sync with docs/error-codes.md
+const ERROR_CODES = {
+  // Bunny CDN
+  E101: { sev: "error", persist: true,  title: "API key de Bunny invalida",         msg: "Las subidas a Bunny CDN no funcionaran hasta que arregles la API key.",                fix: "Copia la FTP Password desde Bunny Dashboard → Storage Zone \"muebleria-palito\" → FTP & API Access. Pegala en js/firebase-config.js:30. Despues Cmd+Shift+R en el admin." },
+  E102: { sev: "error", persist: true,  title: "Cuenta de Bunny sin balance",       msg: "Bunny rechaza las requests porque la cuenta esta suspendida por falta de pago.",       fix: "Recarga balance en https://dash.bunny.net → Billing. El servicio reanuda al instante una vez con saldo." },
+  E103: { sev: "error", persist: true,  title: "Storage Zone no encontrada",        msg: "El zoneName no existe en tu cuenta de Bunny.",                                          fix: "Verifica BUNNY_CDN.zoneName en js/firebase-config.js. Debe coincidir con el nombre exacto del zone." },
+  E104: { sev: "error", persist: true,  title: "Cuota de Bunny excedida",           msg: "El storage zone esta lleno y no acepta uploads.",                                       fix: "Borra archivos viejos en Bunny File Manager o sube de plan." },
+  E105: { sev: "error", persist: false, title: "Sin conexion a Bunny",              msg: "No se pudo alcanzar el servidor de Bunny. Verifica tu conexion.",                       fix: "Prueba abrir https://br.storage.bunnycdn.com en otra pestana. Si falla, es red local." },
+  E106: { sev: "error", persist: false, title: "Bunny tuvo un error de servidor",   msg: "Bunny devolvio 5xx — su lado.",                                                         fix: "Esperá 1-2 min y reintenta. Si persiste: https://status.bunny.net" },
+  E107: { sev: "warn",  persist: false, title: "Imagen no se borro del CDN",        msg: "El item se elimino de Firestore pero la imagen quedo en Bunny.",                       fix: "Es solo espacio en disco. Borra manual desde Bunny → File Manager si te molesta." },
+  E108: { sev: "error", persist: true,  title: "Manifest de productos no se actualizo",  msg: "regenerateProductsManifest fallo. El catalogo sigue funcionando pero el manifest CDN no.", fix: "Mismo arreglo que E101. Verifica la API key." },
+  E109: { sev: "warn",  persist: false, title: "Purge de cache CDN fallo",          msg: "La imagen nueva podria tardar hasta 60s en propagarse.",                                fix: "Esperar o purgar manual desde Bunny Dashboard → Pull Zones → Purge." },
+  E110: { sev: "warn",  persist: false, title: "Upload cancelado",                  msg: "Se cerro el editor sin confirmar el recorte.",                                          fix: "Vuelve a clickear la imagen y completa el flujo de crop." },
+
+  // Firestore
+  E201: { sev: "error", persist: true,  title: "Firestore: permiso denegado",       msg: "Las reglas de seguridad rechazaron la operacion.",                                       fix: "Verifica que estas logueado. Revisar reglas en Firebase Console → Firestore → Rules." },
+  E202: { sev: "error", persist: false, title: "Documento no encontrado",           msg: "El item que intentabas modificar ya no existe en Firestore.",                            fix: "Recarga el admin para refrescar el cache local." },
+  E203: { sev: "error", persist: true,  title: "Cuota de Firestore excedida",       msg: "El proyecto excedio el limite de lecturas/escrituras del dia.",                          fix: "Esperar al reset (24h) o subir plan en Firebase Console." },
+  E204: { sev: "error", persist: false, title: "No se pudo crear la categoria",     msg: "Firestore rechazo la creacion.",                                                         fix: "Mira el detalle en consola. Posible: slug duplicado o campos invalidos." },
+  E205: { sev: "error", persist: false, title: "No se pudo actualizar la categoria",msg: "Firestore rechazo el update.",                                                           fix: "Reintenta. Si persiste, recargar admin." },
+  E206: { sev: "error", persist: false, title: "No se pudo borrar la categoria",    msg: "Algun producto hijo o regla bloqueo el delete.",                                         fix: "Verificar en seccion Categorias si hay productos huerfanos." },
+  E207: { sev: "error", persist: false, title: "No se pudo crear el producto",      msg: "Firestore rechazo la creacion del producto.",                                            fix: "Mira el detalle en consola. Verifica que la categoria existe." },
+  E208: { sev: "error", persist: false, title: "No se pudo actualizar el producto", msg: "Firestore rechazo el update.",                                                           fix: "Reintenta. Tu input se mantiene en el form." },
+  E209: { sev: "error", persist: false, title: "No se pudo borrar el producto",     msg: "Firestore rechazo el delete.",                                                           fix: "Reintenta. La imagen en Bunny puede quedar huerfana (ver E107)." },
+  E210: { sev: "error", persist: false, title: "Settings no se guardaron",          msg: "Firestore rechazo la escritura de settings.",                                            fix: "Reintenta. El form mantiene tus cambios." },
+  E211: { sev: "warn",  persist: false, title: "Orden de destacados no se guardo",  msg: "El reorden quedo local. La proxima vez que cargues el admin se pierde.",                fix: "Reintentar el reorden cuando la red este OK." },
+  E212: { sev: "error", persist: true,  title: "Seed inicial fallo",                msg: "No se pudo inicializar settings en Firestore.",                                          fix: "Recargar. Verifica firebase-config.js y reglas." },
+
+  // Validación / UI
+  E303: { sev: "warn",  persist: false, title: "Imagen demasiado grande",           msg: "El archivo supera el limite recomendado (10 MB).",                                       fix: "Comprimi/redimensiona antes de subir." },
+  E304: { sev: "warn",  persist: false, title: "Tipo de archivo no soportado",      msg: "Solo se aceptan imagenes JPG, PNG, WebP.",                                                fix: "Convertir a uno de esos formatos." },
+
+  // Auth
+  E401: { sev: "error", persist: false, title: "Login fallido",                     msg: "El email/password no son validos o la cuenta esta deshabilitada.",                       fix: "Verificar credenciales. Si la cuenta existe pero no entra, resetear desde Firebase Console." },
+  E402: { sev: "warn",  persist: true,  title: "Sesion expirada",                   msg: "Tu token de Firebase se vencio mientras editabas.",                                      fix: "Recargar el admin para re-autenticar." },
+
+  // App
+  E502: { sev: "warn",  persist: false, title: "Lista no se refresco",              msg: "Despues del cambio, la lista del dashboard quedo desactualizada.",                       fix: "Recargar el admin como workaround. Reportar como bug." },
+  E503: { sev: "warn",  persist: false, title: "Thumbnail vieja en cache",          msg: "El thumb sigue mostrando la imagen vieja por cache del CDN.",                            fix: "Esperar 60s o purgar manual (ver E109)." },
+};
+
+// Map HTTP status codes from Bunny → error code
+function bunnyCodeFromStatus(status) {
+  if (status === 401) return "E101";
+  if (status === 402) return "E102";
+  if (status === 404) return "E103";
+  if (status === 507) return "E104";
+  if (status >= 500) return "E106";
+  return "E106";
+}
+
+// Map Firestore error → error code (uses err.code from Firebase SDK)
+function firestoreCodeFromError(err, defaultCode) {
+  const c = err && err.code;
+  if (c === "permission-denied") return "E201";
+  if (c === "not-found")         return "E202";
+  if (c === "resource-exhausted")return "E203";
+  if (c === "unauthenticated")   return "E402";
+  return defaultCode;
+}
+
+// ─── NOTIFICATION SYSTEM ───
+const _notifIds = new Map();   // code → element (for dedupe on persistent codes)
+let _notifSeq = 0;
+
+function notify(code, detail) {
+  const def = ERROR_CODES[code];
+  if (!def) {
+    console.warn("[notify] unknown code:", code, detail);
+    return;
+  }
+  const stack = document.getElementById("notifStack");
+  if (!stack) return;
+
+  // Dedupe persistent notifications by code (don't pile up duplicates)
+  if (def.persist && _notifIds.has(code)) {
+    const existing = _notifIds.get(code);
+    if (existing && existing.isConnected) return; // already showing
+  }
+
+  const id = "notif-" + (++_notifSeq);
+  const root = document.createElement("div");
+  root.id = id;
+  root.className = "notif notif-" + (def.sev === "error" ? "error" : def.sev === "ok" ? "ok" : "warn");
+
+  // Head: code badge · title · close
+  const head = document.createElement("div");
+  head.className = "notif-head";
+
+  const codeEl = document.createElement("button");
+  codeEl.type = "button";
+  codeEl.className = "notif-code";
+  codeEl.textContent = code;
+  codeEl.title = "Click para copiar el codigo";
+  codeEl.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      codeEl.classList.add("copied");
+      const orig = codeEl.textContent;
+      codeEl.textContent = "✓ " + orig;
+      setTimeout(() => { codeEl.classList.remove("copied"); codeEl.textContent = orig; }, 1200);
+    } catch {}
+  });
+
+  const titleEl = document.createElement("div");
+  titleEl.className = "notif-title";
+  titleEl.textContent = def.title;
+
+  const closeBtn = document.createElement("button");
+  closeBtn.type = "button";
+  closeBtn.className = "notif-close";
+  closeBtn.setAttribute("aria-label", "Cerrar notificacion " + code);
+  closeBtn.textContent = "×";
+  closeBtn.addEventListener("click", () => dismissNotif(root));
+
+  head.append(codeEl, titleEl, closeBtn);
+
+  const msg = document.createElement("p");
+  msg.className = "notif-msg";
+  msg.textContent = def.msg + (detail ? "  ·  " + detail : "");
+
+  root.append(head, msg);
+
+  if (def.fix) {
+    const details = document.createElement("details");
+    details.className = "notif-fix";
+    const summary = document.createElement("summary");
+    summary.textContent = "Como arreglar";
+    const body = document.createElement("div");
+    body.className = "notif-fix-body";
+    body.textContent = def.fix;
+    details.append(summary, body);
+    root.appendChild(details);
+  }
+
+  stack.appendChild(root);
+  if (def.persist) _notifIds.set(code, root);
+
+  if (!def.persist) {
+    const ttl = def.sev === "error" ? 6500 : def.sev === "warn" ? 5500 : 3500;
+    setTimeout(() => dismissNotif(root), ttl);
+  }
+  console.log("[" + code + "] " + def.title + (detail ? " · " + detail : ""));
+}
+
+function dismissNotif(root) {
+  if (!root || !root.isConnected) return;
+  root.classList.add("leaving");
+  setTimeout(() => {
+    if (!root.isConnected) return;
+    // Clean dedupe entry if this was a persistent one
+    for (const [k, v] of _notifIds.entries()) { if (v === root) _notifIds.delete(k); }
+    root.remove();
+  }, 180);
+}
+
+// Shortcut for error paths
+function notifyError(code, detail) { notify(code, detail); }
+function notifyOk(code, detail)    { notify(code, detail); }
+
 // ─── FRIENDLY FORM VALIDATION ───
 // Renders inline error messages under fields and highlights the input.
 // Returns true when all checks pass.
@@ -1968,7 +2140,7 @@ function mountHomeImagesUploaders() {
         await saveHomeImage("heroSection.bgImage", url);
         showAlert("Imagen del Hero actualizada.");
       } catch (err) {
-        showAlert("Error al guardar: " + err.message, "error");
+        notifyError(firestoreCodeFromError(err, "E210"), "Hero subido pero settings no se guardo: " + err.message);
       }
     }
   });
@@ -1987,7 +2159,7 @@ function mountHomeImagesUploaders() {
         await saveHomeImage("promoBanner.image", url);
         showAlert("Imagen del banner actualizada.");
       } catch (err) {
-        showAlert("Error al guardar: " + err.message, "error");
+        notifyError(firestoreCodeFromError(err, "E210"), "Banner subido pero settings no se guardo: " + err.message);
       }
     }
   });
@@ -2006,7 +2178,7 @@ function mountHomeImagesUploaders() {
         await saveHomeImage("lifestyle.imageUrl", url);
         showAlert("Imagen de asesoria actualizada.");
       } catch (err) {
-        showAlert("Error al guardar: " + err.message, "error");
+        notifyError(firestoreCodeFromError(err, "E210"), "Lifestyle subido pero settings no se guardo: " + err.message);
       }
     }
   });
@@ -2206,7 +2378,7 @@ document.getElementById("settingsForm").addEventListener("submit", async e => {
     settings = data;
     showAlert("Configuracion guardada correctamente.");
   } catch (err) {
-    showAlert("Error al guardar: " + err.message, "error");
+    notifyError(firestoreCodeFromError(err, "E210"), err.message);
   }
 
   btn.disabled = false;
@@ -2228,7 +2400,7 @@ document.getElementById("hardResetCatalogBtn").addEventListener("click", async (
     renderCatCards();
     showAlert("Catalogo reseteado correctamente.");
   } catch (err) {
-    showAlert("Error: " + err.message, "error");
+    notifyError(firestoreCodeFromError(err, "E212"), err.message);
   }
   btn.disabled = false;
   btn.textContent = "Resetear catalogo";
@@ -2351,7 +2523,7 @@ document.getElementById("categoryForm").addEventListener("submit", async e => {
     renderCatCards();
     renderDashboard();
   } catch (err) {
-    showAlert("Error: " + err.message, "error");
+    notifyError(firestoreCodeFromError(err, editingCatId ? "E205" : "E204"), err.message);
   }
 });
 
@@ -2395,7 +2567,7 @@ async function deleteCategory(id) {
     renderCatCards();
     renderDashboard();
   } catch (err) {
-    showAlert("Error: " + err.message, "error");
+    notifyError(firestoreCodeFromError(err, "E206"), err.message);
   }
 }
 
@@ -2467,7 +2639,7 @@ function openProductDrawer(id = null, preCatId = null) {
     if (products.length) console.log("[DRAWER] sample IDs:", JSON.stringify(products.slice(0,5).map(function(x){return x.id})));
     if (!p) {
       console.error("[DRAWER] PRODUCT NOT FOUND");
-      showAlert("No se encontro el producto. Revisa la consola.", "error");
+      notifyError("E202", "Producto con id=" + id);
       console.groupEnd();
       return;
     }
@@ -2701,7 +2873,7 @@ document.getElementById("productForm").addEventListener("submit", async e => {
     renderDashboard();
     if (currentDetailCatId) await loadCategoryProducts(currentDetailCatId);
   } catch (err) {
-    showAlert("Error: " + err.message, "error");
+    notifyError(firestoreCodeFromError(err, editingProdId ? "E208" : "E207"), err.message);
   }
 });
 
@@ -2714,14 +2886,24 @@ async function deleteProduct(id) {
   if (!confirm("Eliminar este producto?")) return;
   try {
     await deleteDoc(doc(db, COL_PRODUCTS, id));
-    if (prod) await deleteImageFromBunny(prod.primaryImage || prod.imageUrl);
+    if (prod) {
+      const imgUrl = prod.primaryImage || prod.imageUrl;
+      if (imgUrl) {
+        try {
+          await deleteImageFromBunny(imgUrl);
+        } catch (imgErr) {
+          // Firestore delete succeeded but Bunny didn't — surface as warning
+          notifyError("E107", imgErr.message);
+        }
+      }
+    }
     products = products.filter(p => p.id !== id);
     regenerateProductsManifest(); // fire-and-forget
     showAlert("Producto eliminado.");
     renderDashboard();
     if (currentDetailCatId) await loadCategoryProducts(currentDetailCatId);
   } catch (err) {
-    showAlert("Error: " + err.message, "error");
+    notifyError(firestoreCodeFromError(err, "E209"), err.message);
   }
 }
 

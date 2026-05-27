@@ -558,6 +558,79 @@
       text-align:center;color:var(--gray);font-size:13px;
     }
 
+    /* ─── ERROR / EVENT NOTIFICATIONS (push) ─── */
+    .notif-stack{
+      position:fixed;top:20px;right:20px;z-index:1300;
+      display:flex;flex-direction:column;gap:10px;
+      width:380px;max-width:calc(100vw - 40px);pointer-events:none;
+    }
+    .notif{
+      pointer-events:auto;
+      background:var(--bg2);border:1px solid var(--rule);border-radius:10px;
+      padding:14px 16px;box-shadow:0 14px 40px rgba(0,0,0,.55);
+      animation:notifIn 240ms cubic-bezier(0.23,1,0.32,1) both;
+      display:flex;flex-direction:column;gap:8px;
+    }
+    .notif.leaving{
+      animation:notifOut 180ms cubic-bezier(0.23,1,0.32,1) both;
+    }
+    @keyframes notifIn{
+      from{opacity:0;transform:translateX(12px) scale(.98)}
+      to{opacity:1;transform:translateX(0) scale(1)}
+    }
+    @keyframes notifOut{
+      from{opacity:1;transform:translateX(0)}
+      to{opacity:0;transform:translateX(12px)}
+    }
+    .notif.notif-error{border-color:rgba(192,57,43,.4);background:linear-gradient(180deg,rgba(192,57,43,.10),rgba(192,57,43,.02))}
+    .notif.notif-warn{border-color:rgba(158,126,42,.4);background:linear-gradient(180deg,rgba(158,126,42,.10),rgba(158,126,42,.02))}
+    .notif.notif-ok{border-color:rgba(58,140,92,.4);background:linear-gradient(180deg,rgba(58,140,92,.10),rgba(58,140,92,.02))}
+    .notif-head{display:flex;align-items:center;gap:10px}
+    .notif-code{
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+      font-size:10px;letter-spacing:.06em;font-weight:700;
+      padding:3px 7px;border-radius:5px;
+      background:rgba(0,0,0,.32);color:var(--cream);cursor:pointer;
+      transition:background 160ms cubic-bezier(0.23,1,0.32,1);
+      flex-shrink:0;
+    }
+    .notif-code:hover{background:rgba(0,0,0,.5)}
+    .notif-code.copied{background:var(--copper);color:var(--bg)}
+    .notif-error .notif-code{background:rgba(192,57,43,.45);color:#ffdcd6}
+    .notif-warn  .notif-code{background:rgba(158,126,42,.45);color:#f5e2a8}
+    .notif-ok    .notif-code{background:rgba(58,140,92,.45);color:#c8f0d4}
+    .notif-title{
+      flex:1;font-size:13px;font-weight:600;color:var(--cream);
+      letter-spacing:.005em;line-height:1.35;
+    }
+    .notif-close{
+      width:24px;height:24px;border:none;background:none;color:var(--cream-dim);
+      font-size:18px;line-height:1;cursor:pointer;flex-shrink:0;border-radius:4px;
+      transition:all 150ms cubic-bezier(0.23,1,0.32,1);
+    }
+    .notif-close:hover{color:var(--cream);background:rgba(160,220,180,.08)}
+    .notif-msg{
+      font-size:12px;color:var(--cream-dim);line-height:1.55;letter-spacing:.01em;
+      margin-left:0;
+    }
+    .notif-msg code{
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;
+      background:rgba(0,0,0,.25);padding:1px 5px;border-radius:3px;
+    }
+    .notif-fix{margin-top:2px}
+    .notif-fix summary{
+      font-size:11px;letter-spacing:.05em;color:var(--copper-lt);cursor:pointer;
+      padding:5px 0;list-style:none;display:inline-flex;align-items:center;gap:4px;
+    }
+    .notif-fix summary::-webkit-details-marker{display:none}
+    .notif-fix summary::before{content:"▸";display:inline-block;transition:transform 160ms cubic-bezier(0.23,1,0.32,1);font-size:10px}
+    .notif-fix[open] summary::before{transform:rotate(90deg)}
+    .notif-fix-body{
+      font-size:11.5px;color:var(--cream-dim);line-height:1.55;
+      padding:7px 10px;margin-top:5px;
+      background:rgba(0,0,0,.22);border-radius:6px;border-left:2px solid var(--copper);
+    }
+
     /* ─── INLINE VALIDATION ─── */
     .field-error{
       display:block;font-size:11px;color:var(--red-lt);margin-top:5px;
@@ -867,6 +940,7 @@
     <div id="bunnyHealthBanner" class="bunny-health hidden" role="status" aria-live="polite"></div>
     <div id="alertBox"></div>
     <div id="uploadToast" class="upload-toast hidden" role="status" aria-live="polite"></div>
+    <div id="notifStack" class="notif-stack" role="region" aria-label="Notificaciones del admin" aria-live="polite"></div>
 
     <!-- ═══ DASHBOARD ═══ -->
     <div id="sec-dashboard" class="admin-section active">
@@ -1399,6 +1473,6 @@
   </div>
 </div>
 
-<script type="module" src="../js/admin.js?v=20260527c"></script>
+<script type="module" src="../js/admin.js?v=20260527d"></script>
 </body>
 </html>
