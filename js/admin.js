@@ -7,8 +7,8 @@ import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260527d";
-import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260527d";
+import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260527f";
+import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260527f";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -204,6 +204,11 @@ async function runLoader() {
   const app = document.getElementById("adminApp");
   app.classList.remove("hidden");
   gsap.fromTo(app, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" });
+
+  // Confirm to the user that everything loaded. The persistent error banner
+  // (setBunnyHealth(false, ...)) would override this if Bunny is actually down.
+  const detail = categories.length + " categorias · " + products.length + " productos";
+  notify("OK001", detail);
 }
 
 function setLoaderStatus(el, bar, gsap, text, pct) {
@@ -917,7 +922,7 @@ function renderDashHomeImgs() {
           if (def.key === "hero") setHomeThumb("heroImgThumb", cdnUrl);
           if (def.key === "banner") setHomeThumb("bannerImgThumb", cdnUrl);
           if (def.key === "lifestyle") setHomeThumb("lifestyleImgThumb", cdnUrl);
-          showAlert("Imagen de " + def.title + " actualizada.");
+          notify("OK002", def.title);
         } catch (err) {
           notifyError(firestoreCodeFromError(err, "E210"), "Imagen subida pero settings no se guardo: " + err.message);
         }
@@ -1069,7 +1074,7 @@ function renderDashCatOrder() {
           });
           const local = categories.find(c => c.id === cat.id);
           if (local) { local.imageUrl = cdnUrl; local.coverImage = cdnUrl; }
-          showAlert("Imagen de " + cat.name + " actualizada.");
+          notify("OK002", "Categoria: " + cat.name);
         } catch (err) {
           notifyError(firestoreCodeFromError(err, "E205"), "Imagen subida pero la categoria no se actualizo: " + err.message);
         }
@@ -1117,7 +1122,7 @@ async function saveCatDisplayOrder() {
       b.update(doc(db, COL_CATEGORIES, cat.id), { displayOrder: cat.displayOrder || 0, updatedAt: serverTimestamp() });
     });
     await b.commit();
-    showAlert("Orden de categorias guardado.");
+    notify("OK007", "Categorias del home");
   } catch (err) {
     notifyError(firestoreCodeFromError(err, "E205"), err.message);
   }
@@ -1343,14 +1348,16 @@ async function deleteImageFromBunny(imageUrl) {
     setBunnyHealth(false, res.status);
     throw new Error("Bunny DELETE " + res.status);
   }
-  // Best-effort cache purge — don't fail the delete on purge errors
-  try {
-    await fetch("https://api.bunny.net/purge?url=" + encodeURIComponent(imageUrl), {
-      method: "POST",
-      headers: { AccessKey: BUNNY_CDN.apiKey }
-    });
-  } catch (e) {
-    console.warn("[BUNNY] purge failed:", e.message);
+  // Best-effort cache purge using the Account API key. Skipped if not configured.
+  if (BUNNY_CDN.accountApiKey) {
+    try {
+      await fetch("https://api.bunny.net/purge?url=" + encodeURIComponent(imageUrl), {
+        method: "POST",
+        headers: { AccessKey: BUNNY_CDN.accountApiKey }
+      });
+    } catch (e) {
+      console.warn("[BUNNY] purge failed:", e.message);
+    }
   }
 }
 
@@ -1381,11 +1388,15 @@ async function regenerateProductsManifest() {
       setBunnyHealth(false, res.status);
       return;
     }
-    // Purge edge cache so subsequent fetches see the new version
-    fetch("https://api.bunny.net/purge?url=" + encodeURIComponent(cdnUrl), {
-      method: "POST",
-      headers: { AccessKey: BUNNY_CDN.apiKey }
-    }).catch(() => {});
+    // Purge edge cache so subsequent fetches see the new version.
+    // Uses the Account API key (different from the Storage Zone key). Skipped
+    // silently if not configured — edge will update naturally within ~60s.
+    if (BUNNY_CDN.accountApiKey) {
+      fetch("https://api.bunny.net/purge?url=" + encodeURIComponent(cdnUrl), {
+        method: "POST",
+        headers: { AccessKey: BUNNY_CDN.accountApiKey }
+      }).catch(() => {});
+    }
     setBunnyHealth(true);
     console.log("[manifest] regenerated:", Object.keys(manifest).length, "products");
   } catch (e) {
@@ -1736,9 +1747,20 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// ─── ERROR CODE CATALOG ───
+// ─── ERROR/EVENT CODE CATALOG ───
 // Keep this object in sync with docs/error-codes.md
 const ERROR_CODES = {
+  // Success codes — confirm to the user that things ARE working
+  OK001: { sev: "ok", persist: false, title: "Sistema cargado correctamente",  msg: "Bunny CDN conectado, Firestore conectado, catalogo listo.", fix: null },
+  OK002: { sev: "ok", persist: false, title: "Imagen subida y publicada",      msg: "El archivo esta en Bunny CDN y guardado en Firestore.",     fix: null },
+  OK003: { sev: "ok", persist: false, title: "Categoria guardada",             msg: "Cambios aplicados en Firestore.",                            fix: null },
+  OK004: { sev: "ok", persist: false, title: "Producto guardado",              msg: "Cambios aplicados en Firestore.",                            fix: null },
+  OK005: { sev: "ok", persist: false, title: "Producto eliminado",             msg: "Removido de Firestore. Imagen del CDN tambien borrada.",     fix: null },
+  OK006: { sev: "ok", persist: false, title: "Categoria eliminada",            msg: "Categoria y sus productos hijos removidos.",                 fix: null },
+  OK007: { sev: "ok", persist: false, title: "Orden actualizado",              msg: "Nuevo orden persistido en Firestore.",                       fix: null },
+  OK008: { sev: "ok", persist: false, title: "Configuracion guardada",         msg: "Settings actualizados en Firestore.",                        fix: null },
+
+
   // Bunny CDN
   E101: { sev: "error", persist: true,  title: "API key de Bunny invalida",         msg: "Las subidas a Bunny CDN no funcionaran hasta que arregles la API key.",                fix: "Copia la FTP Password desde Bunny Dashboard → Storage Zone \"muebleria-palito\" → FTP & API Access. Pegala en js/firebase-config.js:30. Despues Cmd+Shift+R en el admin." },
   E102: { sev: "error", persist: true,  title: "Cuenta de Bunny sin balance",       msg: "Bunny rechaza las requests porque la cuenta esta suspendida por falta de pago.",       fix: "Recarga balance en https://dash.bunny.net → Billing. El servicio reanuda al instante una vez con saldo." },
@@ -2138,7 +2160,7 @@ function mountHomeImagesUploaders() {
     onUploaded: async (url) => {
       try {
         await saveHomeImage("heroSection.bgImage", url);
-        showAlert("Imagen del Hero actualizada.");
+        notify("OK002", "Hero");
       } catch (err) {
         notifyError(firestoreCodeFromError(err, "E210"), "Hero subido pero settings no se guardo: " + err.message);
       }
@@ -2157,7 +2179,7 @@ function mountHomeImagesUploaders() {
     onUploaded: async (url) => {
       try {
         await saveHomeImage("promoBanner.image", url);
-        showAlert("Imagen del banner actualizada.");
+        notify("OK002", "Banner Credito Directo");
       } catch (err) {
         notifyError(firestoreCodeFromError(err, "E210"), "Banner subido pero settings no se guardo: " + err.message);
       }
@@ -2176,7 +2198,7 @@ function mountHomeImagesUploaders() {
     onUploaded: async (url) => {
       try {
         await saveHomeImage("lifestyle.imageUrl", url);
-        showAlert("Imagen de asesoria actualizada.");
+        notify("OK002", "Asesoria personalizada");
       } catch (err) {
         notifyError(firestoreCodeFromError(err, "E210"), "Lifestyle subido pero settings no se guardo: " + err.message);
       }
@@ -2376,7 +2398,7 @@ document.getElementById("settingsForm").addEventListener("submit", async e => {
   try {
     await setDoc(doc(db, COL_SETTINGS, "store"), data, { merge: true });
     settings = data;
-    showAlert("Configuracion guardada correctamente.");
+    notify("OK008");
   } catch (err) {
     notifyError(firestoreCodeFromError(err, "E210"), err.message);
   }
@@ -2512,11 +2534,11 @@ document.getElementById("categoryForm").addEventListener("submit", async e => {
   try {
     if (editingCatId) {
       await updateDoc(doc(db, COL_CATEGORIES, editingCatId), data);
-      showAlert("Categoria actualizada.");
+      notify("OK003", name);
     } else {
       data.createdAt = serverTimestamp();
       await addDoc(collection(db, COL_CATEGORIES), data);
-      showAlert("Categoria creada.");
+      notify("OK003", "Nueva: " + name);
     }
     closeModal("categoryModal");
     await loadCategories();
@@ -2562,7 +2584,7 @@ async function deleteCategory(id) {
     await Promise.allSettled(imageUrls.map(url => deleteImageFromBunny(url)));
     products = products.filter(p => !ids.includes(p.categoryId));
 
-    showAlert("Categoria eliminada. " + prodsSnap.size + " producto(s) eliminado(s).");
+    notify("OK006", prodsSnap.size + " producto(s) tambien eliminado(s)");
     await loadCategories();
     renderCatCards();
     renderDashboard();
@@ -2862,11 +2884,11 @@ document.getElementById("productForm").addEventListener("submit", async e => {
         local.featured = data.featured;
         if (data.featured && data.featuredOrder !== undefined) local.featuredOrder = data.featuredOrder;
       }
-      showAlert("Producto actualizado.");
+      notify("OK004", name);
     } else {
       data.createdAt = serverTimestamp();
       await addDoc(collection(db, COL_PRODUCTS), data);
-      showAlert("Producto creado.");
+      notify("OK004", "Nuevo: " + name);
     }
     regenerateProductsManifest(); // fire-and-forget, don't block UI
     closeProductDrawer();
@@ -2899,7 +2921,7 @@ async function deleteProduct(id) {
     }
     products = products.filter(p => p.id !== id);
     regenerateProductsManifest(); // fire-and-forget
-    showAlert("Producto eliminado.");
+    notify("OK005", prod ? prod.name : id);
     renderDashboard();
     if (currentDetailCatId) await loadCategoryProducts(currentDetailCatId);
   } catch (err) {

@@ -1,8 +1,28 @@
-# Códigos de error — Muebleria Palito Admin
+# Códigos del admin — Muebleria Palito
 
-Cada vez que algo falla en el admin, aparece una **notificación push** arriba a la derecha con un código (ej. `E101`). Buscá el código aquí para saber qué pasó y cómo arreglarlo.
+Cada vez que algo pasa en el admin (éxito **o** falla), aparece una **notificación push** arriba a la derecha con un código.
 
-Origen del catálogo: `js/error-codes.js` (debe estar en sync con este archivo).
+- Códigos `OK00x` → operación exitosa (badge verde, auto-dismiss ~3.5s)
+- Códigos `Exxx` → algo falló (badge rojo/amarillo según severidad)
+
+Catálogo en `js/admin.js` (constante `ERROR_CODES`) — debe estar en sync con este archivo.
+
+---
+
+## Confirmaciones de éxito — códigos OK00x
+
+| Código | Cuándo aparece | Significa |
+|---|---|---|
+| **OK001** | Al cargar el admin (después del loader) | Sistema OK: Bunny y Firestore respondieron, catálogo cargado. Muestra el conteo de categorias y productos. |
+| **OK002** | Cuando subes una imagen (Hero, Banner, Lifestyle, categoría, producto) | El archivo está en Bunny CDN **y** la URL fue guardada en Firestore. |
+| **OK003** | Crear/editar categoría | Cambios persistidos en Firestore. |
+| **OK004** | Crear/editar producto | Cambios persistidos en Firestore. |
+| **OK005** | Borrar producto | Producto borrado de Firestore + imagen del CDN borrada. |
+| **OK006** | Borrar categoría | Categoría + todos los productos hijos borrados. |
+| **OK007** | Reorden de categorías o destacados | Nuevo orden persistido. |
+| **OK008** | Guardar Configuración | Settings actualizados. |
+
+> Si haces una acción y **no ves** la notif verde con su código, eso indica que algo falló silenciosamente. Revisa la consola y reporta.
 
 ---
 

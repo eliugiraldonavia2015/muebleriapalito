@@ -27,11 +27,14 @@ export { firebaseConfig };
  */
 const BUNNY_CDN = {
   zoneName: "muebleria-palito",                       // Storage Zone name
-  // Storage Zone Password — copied verbatim from Bunny Dashboard →
-  // Storage Zone "muebleria-palito" → FTP & API Access → Password.
-  // Bunny may format this with 6 groups instead of the standard UUID 5,
-  // so it must be pasted exactly as shown in the dashboard.
+  // Storage Zone Password — for uploads/downloads on br.storage.bunnycdn.com.
+  // Bunny Dashboard → Storage Zone "muebleria-palito" → FTP & API Access → Password.
   apiKey: "63ab4787-ab96-43c4-86da7c32777c-8927-4afa",
+  // Account API Key — only used to purge edge cache via api.bunny.net.
+  // Optional. If empty, purge calls are skipped silently and the CDN edge
+  // updates naturally within ~60 seconds after an upload.
+  // To enable instant purges: Bunny Dashboard → Account Settings → API → API Key.
+  accountApiKey: "",
   cdnUrl: "https://muebleria-palito-cdn.b-cdn.net",   // Public CDN URL (read, no auth)
   apiUrl: "https://br.storage.bunnycdn.com",          // Storage API endpoint (São Paulo region)
 };
