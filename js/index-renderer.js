@@ -44,11 +44,16 @@ async function getAllCategories() {
 }
 
 async function getFeaturedProducts() {
-  const q = query(collection(db, "products"), orderBy("displayOrder", "asc"));
+  const q = query(collection(db, "products"), where("featured", "==", true));
   const snap = await getDocs(q);
   return snap.docs
     .map(d => ({ id: d.id, ...d.data() }))
-    .filter(p => p.featured === true);
+    .sort((a, b) => {
+      const ao = (a.featuredOrder ?? Number.MAX_SAFE_INTEGER);
+      const bo = (b.featuredOrder ?? Number.MAX_SAFE_INTEGER);
+      if (ao !== bo) return ao - bo;
+      return (a.displayOrder || 0) - (b.displayOrder || 0);
+    });
 }
 
 async function getSettings() {
@@ -209,11 +214,18 @@ function renderCategories(categories) {
   }
 }
 
-// Featured products
+// Featured products — hide entire section when admin hasn't selected any
 function renderFeaturedProducts(products) {
   const track = $("#productsTrack");
-  if (!track) return;
-  if (!products.length) return;
+  const section = $("#featured");
+  if (!track || !section) return;
+
+  if (!products.length) {
+    section.style.display = "none";
+    track.replaceChildren();
+    return;
+  }
+  section.style.display = "";
 
   // Map Firestore categoryId back to category name
   const categoryNames = {};

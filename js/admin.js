@@ -645,8 +645,123 @@ function renderDashboard() {
   document.getElementById("statProds").textContent = categories.reduce((s, c) => s + (c.productCount || 0), 0) || allProds.length;
   document.getElementById("statFeatured").textContent = allProds.filter(p => p.featured).length;
   document.getElementById("statOnSale").textContent = allProds.filter(p => p.originalPrice).length;
+  renderDashHomeImgs();
   renderDashCatOrder();
   renderDashFeatured();
+}
+
+// SVG factories using createElementNS to avoid innerHTML (XSS-safe).
+const SVG_NS = "http://www.w3.org/2000/svg";
+function makeSvg(viewBox, pathDefs) {
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("viewBox", viewBox);
+  pathDefs.forEach(([tag, attrs]) => {
+    const node = document.createElementNS(SVG_NS, tag);
+    for (const k in attrs) node.setAttribute(k, attrs[k]);
+    svg.appendChild(node);
+  });
+  return svg;
+}
+function dashIconUpload() {
+  return makeSvg("0 0 24 24", [
+    ["path",     { d: "M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" }],
+    ["polyline", { points: "17 8 12 3 7 8" }],
+    ["line",     { x1: "12", y1: "3", x2: "12", y2: "15" }],
+  ]);
+}
+function dashIconPencil() {
+  return makeSvg("0 0 24 24", [
+    ["path", { d: "M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" }],
+    ["path", { d: "M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" }],
+  ]);
+}
+
+// ─── DASH: Home Images strip ───
+const DASH_HOME_IMG_DEFS = [
+  { key: "hero",      title: "Hero",                    meta: "Imagen principal",      path: "heroSection.bgImage",  read: (s) => s?.heroSection?.bgImage,  anchor: "hero" },
+  { key: "banner",    title: "Banner Credito Directo",  meta: "Imagen del banner",     path: "promoBanner.image",    read: (s) => s?.promoBanner?.image,    anchor: "full-banner" },
+  { key: "lifestyle", title: "Asesoria personalizada",  meta: "Imagen del bloque",     path: "lifestyle.imageUrl",   read: (s) => s?.lifestyle?.imageUrl,   anchor: "lifestyle" },
+];
+
+function renderDashHomeImgs() {
+  const wrap = document.getElementById("dashboardHomeImgs");
+  if (!wrap) return;
+  wrap.replaceChildren();
+
+  DASH_HOME_IMG_DEFS.forEach(def => {
+    const url = def.read(settings);
+    const tile = document.createElement("button");
+    tile.type = "button";
+    tile.className = "dash-img-tile";
+    tile.setAttribute("aria-label", "Cambiar imagen de " + def.title);
+
+    const thumb = document.createElement("div");
+    thumb.className = "dash-img-tile-thumb";
+
+    const img = document.createElement("img");
+    img.src = url || PLACEHOLDER_IMG;
+    img.alt = "";
+    img.onerror = () => { img.src = PLACEHOLDER_IMG; img.onerror = null; };
+
+    const overlay = document.createElement("div");
+    overlay.className = "dash-img-tile-overlay";
+    const overlayAction = document.createElement("span");
+    overlayAction.className = "dash-img-tile-overlay-action";
+    overlayAction.appendChild(dashIconUpload());
+    overlayAction.appendChild(document.createTextNode(" Cambiar"));
+    overlay.appendChild(overlayAction);
+
+    const spinner = document.createElement("div");
+    spinner.className = "dash-img-tile-spinner hidden";
+    spinner.id = "dashHomeImgSpinner_" + def.key;
+    const spinnerInner = document.createElement("span");
+    spinnerInner.className = "spinner";
+    spinner.appendChild(spinnerInner);
+
+    thumb.append(img, overlay, spinner);
+
+    const body = document.createElement("div");
+    body.className = "dash-img-tile-body";
+    const titleEl = document.createElement("div");
+    titleEl.className = "dash-img-tile-title";
+    titleEl.textContent = def.title;
+    const metaEl = document.createElement("div");
+    metaEl.className = "dash-img-tile-meta";
+    metaEl.textContent = def.meta;
+    body.append(titleEl, metaEl);
+
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.hidden = true;
+    fileInput.id = "dashHomeImgFile_" + def.key;
+
+    tile.append(thumb, body, fileInput);
+    tile.addEventListener("click", () => fileInput.click());
+
+    wrap.appendChild(tile);
+
+    mountImageUploader({
+      fileInputId: fileInput.id,
+      previewId: null,
+      statusId: null,
+      spinnerId: spinner.id,
+      folder: "site",
+      onUploaded: async (cdnUrl) => {
+        img.src = cdnUrl;
+        try {
+          await saveHomeImage(def.path, cdnUrl);
+          // Reflect in main "Home Images" section if present
+          if (def.key === "hero") setHomeThumb("heroImgThumb", cdnUrl);
+          if (def.key === "banner") setHomeThumb("bannerImgThumb", cdnUrl);
+          if (def.key === "lifestyle") setHomeThumb("lifestyleImgThumb", cdnUrl);
+          showAlert("Imagen de " + def.title + " actualizada.");
+        } catch (err) {
+          showAlert("Error al guardar: " + err.message, "error");
+        }
+      }
+    });
+  });
 }
 
 function makeDirBtn(label, title, disabled) {
@@ -671,65 +786,137 @@ function renderDashCatOrder() {
     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
 
   if (!homeCats.length) {
-    const p = document.createElement("p");
-    p.style.cssText = "font-size:13px;color:var(--gray)";
-    p.textContent = "Sin categorias en home. Actívalas desde la sección Categorias.";
-    el.appendChild(p);
+    const empty = document.createElement("div");
+    empty.className = "dash-cat-empty";
+    const emptyMsg = document.createElement("p");
+    emptyMsg.textContent = "Sin categorias en home. Actualas desde la seccion Categorias.";
+    empty.appendChild(emptyMsg);
+    const linkRow = document.createElement("a");
+    linkRow.href = "#";
+    linkRow.dataset.goSection = "categories";
+    linkRow.style.cssText = "display:inline-block;margin-top:10px;font-size:11px;letter-spacing:.08em;color:var(--copper-lt)";
+    linkRow.textContent = "Ir a categorias →";
+    empty.appendChild(linkRow);
+    el.appendChild(empty);
     return;
   }
 
-  const list = document.createElement("div");
-  list.style.cssText = "display:flex;flex-direction:column;gap:5px";
-
   homeCats.forEach((cat, idx) => {
-    const row = document.createElement("div");
-    row.style.cssText = "display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;border:1px solid var(--rule);background:rgba(160,220,180,.04)";
+    const card = document.createElement("article");
+    card.className = "dash-cat-card";
 
-    const posEl = document.createElement("div");
-    posEl.style.cssText = "width:20px;text-align:center;font-size:13px;font-weight:700;flex-shrink:0;color:" + (idx === 0 ? "var(--copper-lt)" : "var(--gray)");
-    posEl.textContent = String(idx + 1);
+    // Thumb (click = upload)
+    const thumb = document.createElement("button");
+    thumb.type = "button";
+    thumb.className = "dash-cat-thumb";
+    thumb.setAttribute("aria-label", "Cambiar imagen de " + cat.name);
 
     const img = document.createElement("img");
     img.src = cat.imageUrl || cat.coverImage || PLACEHOLDER_IMG;
-    img.style.cssText = "width:34px;height:34px;border-radius:4px;object-fit:cover;flex-shrink:0";
+    img.alt = "";
     img.onerror = () => { img.src = PLACEHOLDER_IMG; img.onerror = null; };
+    thumb.appendChild(img);
 
-    const info = document.createElement("div");
-    info.style.cssText = "flex:1;min-width:0";
+    const overlay = document.createElement("div");
+    overlay.className = "dash-cat-thumb-overlay";
+    overlay.appendChild(dashIconUpload());
+    overlay.appendChild(document.createTextNode("Cambiar"));
+    thumb.appendChild(overlay);
+
+    const spinner = document.createElement("div");
+    spinner.className = "dash-cat-thumb-spinner hidden";
+    spinner.id = "dashCatSpinner_" + cat.id;
+    const sp = document.createElement("span");
+    sp.className = "spinner";
+    spinner.appendChild(sp);
+    thumb.appendChild(spinner);
+
+    const posEl = document.createElement("div");
+    posEl.className = "dash-cat-pos" + (idx === 0 ? " featured-pos" : "");
+    posEl.textContent = String(idx + 1);
+    posEl.title = idx === 0 ? "Posicion 1 · foto grande del home" : "Posicion " + (idx + 1);
+    thumb.appendChild(posEl);
+
+    // Hidden file input scoped to this card
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.hidden = true;
+    fileInput.id = "dashCatFile_" + cat.id;
+    thumb.addEventListener("click", () => fileInput.click());
+
+    // Body
+    const body = document.createElement("div");
+    body.className = "dash-cat-body";
     const nameEl = document.createElement("div");
-    nameEl.style.cssText = "font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+    nameEl.className = "dash-cat-name";
     nameEl.textContent = cat.name;
-    info.appendChild(nameEl);
-    if (idx === 0) {
-      const badge = document.createElement("div");
-      badge.style.cssText = "font-size:10px;color:var(--copper);margin-top:2px;letter-spacing:.04em";
-      badge.textContent = "★ Foto predominante";
-      info.appendChild(badge);
-    }
+    const metaEl = document.createElement("div");
+    metaEl.className = "dash-cat-meta";
+    metaEl.textContent = (cat.productCount || 0) + " productos";
+    body.append(nameEl, metaEl);
 
-    const arrows = document.createElement("div");
-    arrows.style.cssText = "display:flex;flex-direction:column;gap:2px;flex-shrink:0";
-    const upBtn = makeDirBtn("↑", "Subir", idx === 0);
-    const dnBtn = makeDirBtn("↓", "Bajar", idx === homeCats.length - 1);
+    // Actions: arrows
+    const actions = document.createElement("div");
+    actions.className = "dash-cat-actions";
+
+    const upBtn = document.createElement("button");
+    upBtn.type = "button";
+    upBtn.className = "dash-cat-arrow";
+    upBtn.textContent = "↑";
+    upBtn.title = "Subir";
+    upBtn.disabled = idx === 0;
     if (!upBtn.disabled) upBtn.addEventListener("click", () => moveCatInHomeDashboard(cat.id, -1));
-    if (!dnBtn.disabled) dnBtn.addEventListener("click", () => moveCatInHomeDashboard(cat.id, +1));
-    arrows.append(upBtn, dnBtn);
 
-    row.append(posEl, img, info, arrows);
-    list.appendChild(row);
+    const dnBtn = document.createElement("button");
+    dnBtn.type = "button";
+    dnBtn.className = "dash-cat-arrow";
+    dnBtn.textContent = "↓";
+    dnBtn.title = "Bajar";
+    dnBtn.disabled = idx === homeCats.length - 1;
+    if (!dnBtn.disabled) dnBtn.addEventListener("click", () => moveCatInHomeDashboard(cat.id, +1));
+
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "dash-cat-arrow";
+    editBtn.title = "Editar categoria";
+    editBtn.appendChild(dashIconPencil());
+    editBtn.addEventListener("click", () => editCategory(cat.id));
+
+    actions.append(upBtn, dnBtn, editBtn);
+
+    card.append(thumb, fileInput, body, actions);
+    el.appendChild(card);
+
+    // Wire the uploader: persist URL to Firestore directly, no separate save step.
+    mountImageUploader({
+      fileInputId: fileInput.id,
+      previewId: null,
+      statusId: null,
+      spinnerId: spinner.id,
+      folder: "categories",
+      onUploaded: async (cdnUrl) => {
+        img.src = cdnUrl;
+        try {
+          await updateDoc(doc(db, COL_CATEGORIES, cat.id), {
+            imageUrl: cdnUrl,
+            coverImage: cdnUrl,
+            updatedAt: serverTimestamp(),
+          });
+          const local = categories.find(c => c.id === cat.id);
+          if (local) { local.imageUrl = cdnUrl; local.coverImage = cdnUrl; }
+          showAlert("Imagen de " + cat.name + " actualizada.");
+        } catch (err) {
+          showAlert("Error al guardar: " + err.message, "error");
+        }
+      }
+    });
   });
 
-  el.appendChild(list);
-
-  const saveBtn = document.createElement("button");
-  saveBtn.className = "btn btn-primary btn-sm";
-  saveBtn.style.cssText = "margin-top:12px;width:100%;justify-content:center";
-  saveBtn.textContent = "Guardar orden";
-  saveBtn.addEventListener("click", saveCatDisplayOrder);
-  el.appendChild(saveBtn);
+  // Persist new order automatically on each ↑↓ click (handled in moveCatInHomeDashboard)
 }
 
-function moveCatInHomeDashboard(catId, dir) {
+async function moveCatInHomeDashboard(catId, dir) {
   const homeCats = [...categories]
     .filter(c => c.showOnHomepage)
     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
@@ -746,6 +933,16 @@ function moveCatInHomeDashboard(catId, dir) {
   });
 
   renderDashCatOrder();
+
+  try {
+    const b = writeBatch(db);
+    homeCats.forEach((hc, i) => {
+      b.update(doc(db, COL_CATEGORIES, hc.id), { displayOrder: i + 1, updatedAt: serverTimestamp() });
+    });
+    await b.commit();
+  } catch (err) {
+    showAlert("Error al guardar orden: " + err.message, "error");
+  }
 }
 
 async function saveCatDisplayOrder() {
@@ -776,42 +973,115 @@ function renderDashFeatured() {
     return;
   }
 
-  // Category filter tabs
+  // ─── ACTIVE FEATURED (with reorder + remove) ───
+  const featured = allProds.filter(p => p.featured)
+    .sort((a, b) => (a.featuredOrder ?? Number.MAX_SAFE_INTEGER) - (b.featuredOrder ?? Number.MAX_SAFE_INTEGER));
+
+  const activeTitle = document.createElement("div");
+  activeTitle.style.cssText = "display:flex;align-items:center;justify-content:space-between;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);margin-bottom:8px;font-weight:600";
+  const activeLabel = document.createElement("span");
+  activeLabel.textContent = "En home";
+  const activeCount = document.createElement("span");
+  activeCount.style.cssText = "color:var(--copper-lt);letter-spacing:.06em";
+  activeCount.textContent = featured.length + (featured.length === 1 ? " producto" : " productos");
+  activeTitle.append(activeLabel, activeCount);
+  el.appendChild(activeTitle);
+
+  if (!featured.length) {
+    const empty = document.createElement("p");
+    empty.style.cssText = "font-size:12px;color:var(--gray);padding:10px 12px;border:1px dashed var(--rule);border-radius:6px;font-style:italic;margin-bottom:14px";
+    empty.textContent = "Aun no hay destacados. La seccion \"Lo mas deseado\" estara oculta en el home hasta que selecciones al menos uno.";
+    el.appendChild(empty);
+  } else {
+    const list = document.createElement("div");
+    list.style.cssText = "display:flex;flex-direction:column;gap:5px;margin-bottom:14px";
+    featured.forEach((p, idx) => {
+      const row = document.createElement("div");
+      row.style.cssText = "display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;border:1px solid rgba(58,140,92,.25);background:rgba(58,140,92,.06)";
+
+      const posEl = document.createElement("div");
+      posEl.style.cssText = "width:20px;text-align:center;font-size:13px;font-weight:700;flex-shrink:0;color:var(--copper-lt)";
+      posEl.textContent = String(idx + 1);
+
+      const img = document.createElement("img");
+      img.src = p.primaryImage || p.imageUrl || PLACEHOLDER_IMG;
+      img.style.cssText = "width:30px;height:30px;border-radius:3px;object-fit:cover;flex-shrink:0";
+      img.onerror = () => { img.src = PLACEHOLDER_IMG; img.onerror = null; };
+
+      const info = document.createElement("div");
+      info.style.cssText = "flex:1;min-width:0";
+      const nameEl = document.createElement("div");
+      nameEl.style.cssText = "font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+      nameEl.textContent = p.name;
+      const catEl = document.createElement("div");
+      catEl.style.cssText = "font-size:10px;color:var(--gray);margin-top:1px";
+      catEl.textContent = p.category + (p.subcategory ? " · " + p.subcategory : "");
+      info.append(nameEl, catEl);
+
+      const arrows = document.createElement("div");
+      arrows.style.cssText = "display:flex;gap:2px;flex-shrink:0";
+      const upBtn = makeDirBtn("↑", "Subir", idx === 0);
+      const dnBtn = makeDirBtn("↓", "Bajar", idx === featured.length - 1);
+      if (!upBtn.disabled) upBtn.addEventListener("click", () => moveFeaturedInHome(p.id, -1));
+      if (!dnBtn.disabled) dnBtn.addEventListener("click", () => moveFeaturedInHome(p.id, +1));
+      arrows.append(upBtn, dnBtn);
+
+      const removeBtn = document.createElement("button");
+      removeBtn.style.cssText = "flex-shrink:0;width:24px;height:24px;border-radius:4px;font-size:13px;line-height:1;cursor:pointer;border:1px solid var(--rule);background:none;color:var(--gray);transition:all .15s ease-out";
+      removeBtn.textContent = "×";
+      removeBtn.title = "Quitar de destacados";
+      removeBtn.addEventListener("mouseenter", () => { removeBtn.style.borderColor = "var(--red)"; removeBtn.style.color = "var(--red-lt)"; });
+      removeBtn.addEventListener("mouseleave", () => { removeBtn.style.borderColor = "var(--rule)"; removeBtn.style.color = "var(--gray)"; });
+      removeBtn.addEventListener("click", () => toggleFeaturedProduct(p.id));
+
+      row.append(posEl, img, info, arrows, removeBtn);
+      list.appendChild(row);
+    });
+    el.appendChild(list);
+  }
+
+  // ─── ADD MORE ───
+  const addTitle = document.createElement("div");
+  addTitle.style.cssText = "font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);margin-bottom:8px;font-weight:600;padding-top:6px;border-top:1px solid var(--rule)";
+  addTitle.textContent = "Agregar a destacados";
+  addTitle.style.paddingTop = "12px";
+  el.appendChild(addTitle);
+
   const tabs = document.createElement("div");
   tabs.style.cssText = "display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px";
   const catNames = [...new Set(allProds.map(p => p.category).filter(Boolean))].sort();
-
   ["all", ...catNames].forEach(cname => {
     const btn = document.createElement("button");
     const isActive = cname === dashFeaturedCatFilter;
     btn.textContent = cname === "all" ? "Todas" : cname;
-    btn.style.cssText = "padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500;letter-spacing:.04em;cursor:pointer;transition:all .2s;border:1px solid;" +
+    btn.style.cssText = "padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500;letter-spacing:.04em;cursor:pointer;transition:all .15s ease-out;border:1px solid;" +
       (isActive ? "background:var(--copper);color:var(--bg);border-color:var(--copper);" : "background:none;color:var(--cream-dim);border-color:var(--rule);");
     btn.addEventListener("click", () => { dashFeaturedCatFilter = cname; renderDashFeatured(); });
     tabs.appendChild(btn);
   });
   el.appendChild(tabs);
 
-  const filtered = (dashFeaturedCatFilter === "all"
-    ? [...allProds]
-    : allProds.filter(p => p.category === dashFeaturedCatFilter)
-  ).sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0) || (a.name || "").localeCompare(b.name || ""));
+  const available = (dashFeaturedCatFilter === "all"
+    ? allProds.filter(p => !p.featured)
+    : allProds.filter(p => p.category === dashFeaturedCatFilter && !p.featured)
+  ).sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
-  if (!filtered.length) {
+  if (!available.length) {
     const p = document.createElement("p");
-    p.style.cssText = "font-size:13px;color:var(--gray)";
-    p.textContent = "No hay productos en esta categoría.";
+    p.style.cssText = "font-size:12px;color:var(--gray);padding:10px 0;font-style:italic";
+    p.textContent = featured.length
+      ? "Todos los productos de esta categoria ya estan destacados."
+      : "No hay productos en esta categoria.";
     el.appendChild(p);
     return;
   }
 
-  const list = document.createElement("div");
-  list.style.cssText = "display:flex;flex-direction:column;gap:4px;max-height:300px;overflow-y:auto;padding-right:2px";
+  const availList = document.createElement("div");
+  availList.style.cssText = "display:flex;flex-direction:column;gap:4px;max-height:240px;overflow-y:auto;padding-right:2px";
 
-  filtered.forEach(p => {
+  available.forEach(p => {
     const row = document.createElement("div");
-    row.style.cssText = "display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:5px;border:1px solid;" +
-      (p.featured ? "rgba(58,140,92,.25);background:rgba(58,140,92,.06);" : "var(--rule);background:transparent;");
+    row.style.cssText = "display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:5px;border:1px solid var(--rule);background:transparent";
 
     const img = document.createElement("img");
     img.src = p.primaryImage || p.imageUrl || PLACEHOLDER_IMG;
@@ -828,32 +1098,72 @@ function renderDashFeatured() {
     catEl.textContent = p.category + (p.subcategory ? " · " + p.subcategory : "");
     info.append(nameEl, catEl);
 
-    const toggleBtn = document.createElement("button");
-    toggleBtn.style.cssText = "flex-shrink:0;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.05em;cursor:pointer;transition:all .2s;border:1px solid;" +
-      (p.featured ? "background:rgba(58,140,92,.18);color:var(--copper-lt);border-color:rgba(58,140,92,.35);" : "background:none;color:var(--gray);border-color:var(--rule);");
-    toggleBtn.textContent = p.featured ? "★ Dest." : "Destacar";
-    toggleBtn.addEventListener("click", () => toggleFeaturedProduct(p.id));
+    const addBtn = document.createElement("button");
+    addBtn.style.cssText = "flex-shrink:0;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.05em;cursor:pointer;transition:all .15s ease-out;border:1px solid var(--rule);background:none;color:var(--cream-dim)";
+    addBtn.textContent = "+ Destacar";
+    addBtn.addEventListener("mouseenter", () => { addBtn.style.borderColor = "var(--copper)"; addBtn.style.color = "var(--copper-lt)"; });
+    addBtn.addEventListener("mouseleave", () => { addBtn.style.borderColor = "var(--rule)"; addBtn.style.color = "var(--cream-dim)"; });
+    addBtn.addEventListener("click", () => toggleFeaturedProduct(p.id));
 
-    row.append(img, info, toggleBtn);
-    list.appendChild(row);
+    row.append(img, info, addBtn);
+    availList.appendChild(row);
   });
-  el.appendChild(list);
+  el.appendChild(availList);
+}
 
-  const featCount = allProds.filter(p => p.featured).length;
-  const countEl = document.createElement("div");
-  countEl.style.cssText = "font-size:11px;color:var(--gray);margin-top:8px;text-align:right";
-  countEl.textContent = featCount + " producto" + (featCount !== 1 ? "s" : "") + " destacado" + (featCount !== 1 ? "s" : "");
-  el.appendChild(countEl);
+async function moveFeaturedInHome(prodId, dir) {
+  const featured = products.filter(p => p.featured)
+    .sort((a, b) => (a.featuredOrder ?? Number.MAX_SAFE_INTEGER) - (b.featuredOrder ?? Number.MAX_SAFE_INTEGER));
+
+  const idx = featured.findIndex(p => p.id === prodId);
+  if (idx < 0) return;
+  const target = idx + dir;
+  if (target < 0 || target >= featured.length) return;
+
+  [featured[idx], featured[target]] = [featured[target], featured[idx]];
+
+  // Update local order
+  featured.forEach((p, i) => {
+    const g = products.find(x => x.id === p.id);
+    if (g) g.featuredOrder = i + 1;
+  });
+
+  renderDashboard();
+
+  // Persist all featured products' new order in a single batch
+  try {
+    const b = writeBatch(db);
+    featured.forEach((p, i) => {
+      b.update(doc(db, COL_PRODUCTS, p.id), { featuredOrder: i + 1, updatedAt: serverTimestamp() });
+    });
+    await b.commit();
+  } catch (err) {
+    showAlert("Error al guardar orden: " + err.message, "error");
+  }
 }
 
 async function toggleFeaturedProduct(prodId) {
   const prod = products.find(p => p.id === prodId);
   if (!prod) return;
-  prod.featured = !prod.featured;
+  const willFeature = !prod.featured;
+
+  const updateData = { featured: willFeature, updatedAt: serverTimestamp() };
+
+  if (willFeature) {
+    // Append to end of featured list
+    const currentMaxOrder = products
+      .filter(p => p.featured && p.id !== prodId)
+      .reduce((m, p) => Math.max(m, p.featuredOrder ?? 0), 0);
+    prod.featuredOrder = currentMaxOrder + 1;
+    updateData.featuredOrder = prod.featuredOrder;
+  }
+
+  prod.featured = willFeature;
+
   try {
-    await updateDoc(doc(db, COL_PRODUCTS, prodId), { featured: prod.featured, updatedAt: serverTimestamp() });
+    await updateDoc(doc(db, COL_PRODUCTS, prodId), updateData);
   } catch (err) {
-    prod.featured = !prod.featured;
+    prod.featured = !willFeature;
     showAlert("Error: " + err.message, "error");
   }
   renderDashboard();
@@ -1725,9 +2035,27 @@ document.getElementById("productForm").addEventListener("submit", async e => {
     updatedAt: serverTimestamp(),
   };
 
+  // If toggled to featured and has no featuredOrder yet, append to end of list.
+  const existingProd = editingProdId ? products.find(p => p.id === editingProdId) : null;
+  if (data.featured) {
+    const hasOrder = existingProd && typeof existingProd.featuredOrder === "number";
+    if (!hasOrder) {
+      const currentMax = products
+        .filter(p => p.featured && p.id !== editingProdId)
+        .reduce((m, p) => Math.max(m, p.featuredOrder ?? 0), 0);
+      data.featuredOrder = currentMax + 1;
+    }
+  }
+
   try {
     if (editingProdId) {
       await updateDoc(doc(db, COL_PRODUCTS, editingProdId), data);
+      // Reflect change in local cache so dashboard reorder works without a reload
+      const local = products.find(p => p.id === editingProdId);
+      if (local) {
+        local.featured = data.featured;
+        if (data.featured && data.featuredOrder !== undefined) local.featuredOrder = data.featuredOrder;
+      }
       showAlert("Producto actualizado.");
     } else {
       data.createdAt = serverTimestamp();
