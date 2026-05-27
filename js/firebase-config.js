@@ -27,10 +27,11 @@ export { firebaseConfig };
  */
 const BUNNY_CDN = {
   zoneName: "muebleria-palito",                       // Storage Zone name
-  // Storage Zone Password (standard UUID format: 8-4-4-4-12 hex groups).
-  // If uploads fail with 401, copy a fresh key from Bunny Dashboard →
+  // Storage Zone Password — copied verbatim from Bunny Dashboard →
   // Storage Zone "muebleria-palito" → FTP & API Access → Password.
-  apiKey: "63ab4787-ab96-43c4-86da-7c32777c8927",
+  // Bunny may format this with 6 groups instead of the standard UUID 5,
+  // so it must be pasted exactly as shown in the dashboard.
+  apiKey: "63ab4787-ab96-43c4-86da7c32777c-8927-4afa",
   cdnUrl: "https://muebleria-palito-cdn.b-cdn.net",   // Public CDN URL (read, no auth)
   apiUrl: "https://br.storage.bunnycdn.com",          // Storage API endpoint (São Paulo region)
 };

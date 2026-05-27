@@ -7,12 +7,20 @@ import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js";
-import { CATEGORIES, SETTINGS } from "./seed-data.js";
+import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260527c";
+import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260527c";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+// Diagnostic: surface the actual key being used so cache issues are obvious.
+// Shows enough chars to tell different keys apart, but not the full secret.
+console.log(
+  "[BUNNY] config loaded · zone=" + BUNNY_CDN.zoneName +
+  " · key=" + (BUNNY_CDN.apiKey || "").slice(0, 25) + "..." +
+  " · len=" + (BUNNY_CDN.apiKey || "").length
+);
 
 // Hardcoded admin credentials - change these if needed
 const ADMIN_EMAIL = "admin@palito.com";
@@ -1422,11 +1430,6 @@ function setBunnyHealth(healthy, status) {
 }
 
 // ─── BUNNY CDN UPLOAD ───
-function isLikelyValidBunnyKey(k) {
-  // Bunny Storage Zone passwords are standard UUIDs: 8-4-4-4-12 hex groups.
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(k || "");
-}
-
 async function uploadImageToBunny(file, subFolder) {
   if (subFolder === void 0) { subFolder = 'products'; }
   console.group('[BUNNY] uploadImageToBunny');
@@ -1435,9 +1438,6 @@ async function uploadImageToBunny(file, subFolder) {
     console.error('[BUNNY] ERROR API key not configured — edit firebase-config.js');
     console.groupEnd();
     throw new Error('Bunny CDN API key no configurada. Edita js/firebase-config.js');
-  }
-  if (!isLikelyValidBunnyKey(BUNNY_CDN.apiKey)) {
-    console.warn('[BUNNY] API key has unusual format — expected UUID 8-4-4-4-12 hex. Got:', BUNNY_CDN.apiKey);
   }
   var ext = file.name.indexOf('.') !== -1 ? file.name.split('.').pop() : 'jpg';
   var base = file.name.replace(/.[^.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase() || 'img';
@@ -1724,6 +1724,44 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+// ─── FRIENDLY FORM VALIDATION ───
+// Renders inline error messages under fields and highlights the input.
+// Returns true when all checks pass.
+function validateFields(checks) {
+  // Clear previous errors
+  document.querySelectorAll(".field-error").forEach(n => n.remove());
+  document.querySelectorAll(".form-group.field-invalid").forEach(n => n.classList.remove("field-invalid"));
+
+  let firstInvalid = null;
+  for (const c of checks) {
+    if (c.valid) continue;
+    const el = document.getElementById(c.id);
+    if (!el) continue;
+    const group = el.closest(".form-group") || el.parentElement;
+    if (group) group.classList.add("field-invalid");
+    const msg = document.createElement("span");
+    msg.className = "field-error";
+    msg.textContent = c.msg;
+    (group || el.parentElement).appendChild(msg);
+    if (!firstInvalid) firstInvalid = el;
+  }
+  if (firstInvalid) {
+    firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
+    setTimeout(() => firstInvalid.focus({ preventScroll: true }), 200);
+  }
+  return !firstInvalid;
+}
+
+function clearFieldErrors(formEl) {
+  if (!formEl) {
+    document.querySelectorAll(".field-error").forEach(n => n.remove());
+    document.querySelectorAll(".form-group.field-invalid").forEach(n => n.classList.remove("field-invalid"));
+    return;
+  }
+  formEl.querySelectorAll(".field-error").forEach(n => n.remove());
+  formEl.querySelectorAll(".form-group.field-invalid").forEach(n => n.classList.remove("field-invalid"));
+}
 
 // ─── UPLOAD TOAST (visible upload state) ───
 let _uploadToastTimer = null;
@@ -2238,6 +2276,7 @@ document.getElementById("addCategoryBtn").addEventListener("click", () => {
   document.getElementById("catEditId").value = "";
   document.getElementById("catSubTags").replaceChildren();
   setCategoryImagePreview("");
+  clearFieldErrors(document.getElementById("categoryForm"));
   openModal("categoryModal");
 });
 
@@ -2275,6 +2314,16 @@ document.getElementById("categoryForm").addEventListener("submit", async e => {
   e.preventDefault();
   const name = document.getElementById("catName").value.trim();
   const imageUrl = document.getElementById("catImageUrl").value.trim();
+
+  // Friendly validation — block save if required fields are missing
+  const okValid = validateFields([
+    { id: "catName",     valid: name.length >= 2,
+      msg: "Pon un nombre de al menos 2 letras (ej. \"Comedores\")." },
+    { id: "catImageUrl", valid: imageUrl.length > 0,
+      msg: "Sube una imagen para la categoria o pega un link. No puede ir vacia." },
+  ]);
+  if (!okValid) return;
+
   const data = {
     name,
     slug: slugify(name),
@@ -2394,6 +2443,7 @@ document.getElementById("prodCategory").addEventListener("change", e => {
 function openProductDrawer(id = null, preCatId = null) {
   console.group("[DRAWER] openProductDrawer");
   console.log("[DRAWER] id:", id, "| typeof:", typeof id, "| preCatId:", preCatId);
+  clearFieldErrors(document.getElementById("productForm"));
   var overlay = document.getElementById("productDrawerOverlay");
   var drawer = document.getElementById("productDrawer");
   console.log("[DRAWER] overlay:", overlay ? "FOUND" : "MISSING");
@@ -2573,15 +2623,32 @@ function renderColorSwatches() {
 
 document.getElementById("productForm").addEventListener("submit", async e => {
   e.preventDefault();
+  const name = document.getElementById("prodName").value.trim();
   const origPrice = document.getElementById("prodOriginalPrice").value;
   var imageUrl = document.getElementById("prodImage").value.trim();
   const catId = document.getElementById("prodCategory").value;
   const catName = categories.find(c => c.id === catId)?.name || catId;
-  const price = parseFloat(document.getElementById("prodPrice").value) || 0;
+  const priceRaw = document.getElementById("prodPrice").value;
+  const price = parseFloat(priceRaw) || 0;
   const originalPrice = origPrice ? parseFloat(origPrice) : null;
 
+  // Friendly validation — block save if required fields are missing
+  const okValid = validateFields([
+    { id: "prodName",     valid: name.length >= 2,
+      msg: "Pon un nombre para el producto (ej. \"Sofa Lineal Berlin\")." },
+    { id: "prodCategory", valid: !!catId,
+      msg: "Selecciona una categoria para el producto." },
+    { id: "prodPrice",    valid: priceRaw !== "" && price > 0,
+      msg: "Ingresa un precio mayor a 0." },
+    { id: "prodOriginalPrice", valid: !originalPrice || originalPrice > price,
+      msg: "El precio original debe ser mayor que el precio actual (o dejalo vacio si no esta en oferta)." },
+    { id: "prodImageFile", valid: imageUrl.length > 0,
+      msg: "Sube una imagen para el producto. No puede ir vacio." },
+  ]);
+  if (!okValid) return;
+
   const data = {
-    name: document.getElementById("prodName").value.trim(),
+    name,
     description: document.getElementById("prodDesc").value.trim(),
     categoryId: catId.toLowerCase(), // normalizado lowercase para consistencia con seed-data
     category: catName,

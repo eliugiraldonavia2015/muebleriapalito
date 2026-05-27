@@ -160,10 +160,15 @@ function renderCategories(categories) {
   const section = $("#categories");
   if (!section) return;
   const homeCats = categories.filter(c => c.showOnHomepage);
-  if (!homeCats.length) return;
-
   const grid = $(".cat-grid");
   if (!grid) return;
+  if (!homeCats.length) {
+    // No data → hide the whole section (don't leave an empty grid behind)
+    section.style.display = "none";
+    grid.replaceChildren();
+    return;
+  }
+  section.style.display = "";
 
   grid.innerHTML = homeCats.map(c => `
     <a href="catalogo.html?cat=${slugify(c.name)}" class="cat-card">
