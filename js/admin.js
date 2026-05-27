@@ -1355,20 +1355,70 @@ async function regenerateProductsManifest() {
     const path = "/" + BUNNY_CDN.zoneName + "/manifests/products.json";
     const cdnUrl = BUNNY_CDN.cdnUrl + "/manifests/products.json";
     const apiUrl = BUNNY_CDN.apiUrl + path;
-    await fetch(apiUrl, {
+    const res = await fetch(apiUrl, {
       method: "PUT",
       headers: { AccessKey: BUNNY_CDN.apiKey, "Content-Type": "application/json" },
       body: json
     });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      console.warn("[manifest] PUT failed:", res.status, text);
+      setBunnyHealth(false, res.status);
+      return;
+    }
     // Purge edge cache so subsequent fetches see the new version
     fetch("https://api.bunny.net/purge?url=" + encodeURIComponent(cdnUrl), {
       method: "POST",
       headers: { AccessKey: BUNNY_CDN.apiKey }
     }).catch(() => {});
+    setBunnyHealth(true);
     console.log("[manifest] regenerated:", Object.keys(manifest).length, "products");
   } catch (e) {
     console.warn("[manifest] regenerate failed:", e.message);
+    setBunnyHealth(false);
   }
+}
+
+// ─── BUNNY HEALTH BANNER ───
+function setBunnyHealth(healthy, status) {
+  const banner = document.getElementById("bunnyHealthBanner");
+  if (!banner) return;
+  if (healthy) {
+    banner.classList.add("hidden");
+    banner.replaceChildren();
+    return;
+  }
+  // Build the banner content (safe DOM only, no innerHTML)
+  banner.replaceChildren();
+  banner.classList.remove("hidden");
+
+  const dot = document.createElement("div");
+  dot.className = "bunny-health-dot";
+
+  const body = document.createElement("div");
+  body.className = "bunny-health-body";
+  const title = document.createElement("div");
+  title.className = "bunny-health-title";
+  title.textContent = status === 401
+    ? "Bunny CDN: API key invalida (HTTP 401)"
+    : "Bunny CDN inaccesible";
+  const sub = document.createElement("div");
+  sub.className = "bunny-health-sub";
+  const subText1 = document.createTextNode("Las subidas de imagenes van a fallar hasta que arregles la API key. Verifica en ");
+  const code = document.createElement("code");
+  code.textContent = "js/firebase-config.js → BUNNY_CDN.apiKey";
+  const subText2 = document.createTextNode(". Pega la Password actual desde Bunny Dashboard → Storage Zone \"" + BUNNY_CDN.zoneName + "\" → FTP & API Access.");
+  sub.append(subText1, code, subText2);
+  body.append(title, sub);
+
+  const dismiss = document.createElement("button");
+  dismiss.className = "bunny-health-dismiss";
+  dismiss.textContent = "Ocultar";
+  dismiss.addEventListener("click", () => {
+    banner.classList.add("hidden");
+  });
+
+  banner.append(dot, body, dismiss);
 }
 
 // ─── BUNNY CDN UPLOAD ───
@@ -1413,8 +1463,12 @@ async function uploadImageToBunny(file, subFolder) {
         let msg = 'Bunny upload failed (' + xhr.status + ')';
         if (xhr.status === 401) {
           msg = 'API key de Bunny invalida o expirada. Verifica js/firebase-config.js (Storage Zone Password).';
+          setBunnyHealth(false, 401);
         } else if (xhr.status === 404) {
           msg = 'Storage Zone no encontrada. Verifica zoneName en js/firebase-config.js.';
+          setBunnyHealth(false, 404);
+        } else {
+          setBunnyHealth(false, xhr.status);
         }
         reject(new Error(msg));
       }
@@ -1671,6 +1725,62 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+// ─── UPLOAD TOAST (visible upload state) ───
+let _uploadToastTimer = null;
+function showUploadToast(state, title, sub) {
+  const toast = document.getElementById("uploadToast");
+  if (!toast) return;
+  if (_uploadToastTimer) { clearTimeout(_uploadToastTimer); _uploadToastTimer = null; }
+
+  toast.classList.remove("hidden", "ok", "err");
+  if (state === "ok") toast.classList.add("ok");
+  if (state === "err") toast.classList.add("err");
+
+  toast.replaceChildren();
+  const icon = document.createElement("div");
+  icon.className = "upload-toast-icon";
+  if (state === "busy") {
+    const sp = document.createElement("div");
+    sp.className = "upload-toast-spinner";
+    icon.appendChild(sp);
+  } else if (state === "ok") {
+    icon.appendChild(makeSvg("0 0 24 24", [["polyline", { points: "20 6 9 17 4 12" }]]));
+  } else if (state === "err") {
+    icon.appendChild(makeSvg("0 0 24 24", [
+      ["circle", { cx: "12", cy: "12", r: "10" }],
+      ["line",   { x1: "12", y1: "8",  x2: "12", y2: "12" }],
+      ["line",   { x1: "12", y1: "16", x2: "12.01", y2: "16" }],
+    ]));
+  }
+  const body = document.createElement("div");
+  body.className = "upload-toast-body";
+  const t = document.createElement("div");
+  t.className = "upload-toast-title";
+  t.textContent = title;
+  body.appendChild(t);
+  if (sub) {
+    const s = document.createElement("div");
+    s.className = "upload-toast-sub";
+    s.textContent = sub;
+    body.appendChild(s);
+  }
+  toast.append(icon, body);
+
+  if (state === "ok") {
+    _uploadToastTimer = setTimeout(() => hideUploadToast(), 2400);
+  } else if (state === "err") {
+    _uploadToastTimer = setTimeout(() => hideUploadToast(), 5500);
+  }
+}
+function hideUploadToast() {
+  const toast = document.getElementById("uploadToast");
+  if (toast) {
+    toast.classList.add("hidden");
+    toast.replaceChildren();
+  }
+  if (_uploadToastTimer) { clearTimeout(_uploadToastTimer); _uploadToastTimer = null; }
+}
+
 // ─── REUSABLE IMAGE UPLOADER ───
 // Wires a file input to upload to Bunny CDN and update preview + hidden URL field.
 // onUploaded(cdnUrl) is invoked after the upload succeeds, e.g. to persist the URL
@@ -1707,6 +1817,7 @@ function mountImageUploader(opts) {
   fileEl.addEventListener("change", async function(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
+    const label = opts.cropLabel || "imagen";
 
     // Step 1: optional crop step before upload
     let toUpload = file;
@@ -1718,7 +1829,6 @@ function mountImageUploader(opts) {
         fileEl.value = "";
         return; // user cancelled
       }
-      // Wrap blob as a File so the existing uploader code can read .name/.type
       const baseName = file.name.replace(/\.[^.]+$/, "");
       toUpload = new File([blob], baseName + ".jpg", { type: "image/jpeg" });
     }
@@ -1731,17 +1841,20 @@ function mountImageUploader(opts) {
     }
     setStatus("Subiendo imagen...", "busy");
     if (spinnerEl) spinnerEl.classList.remove("hidden");
+    showUploadToast("busy", "Subiendo a Bunny CDN...", Math.round(toUpload.size / 1024) + " KB · " + label);
     try {
       const cdnUrl = await uploadImageToBunny(toUpload, folder);
       if (urlEl) urlEl.value = cdnUrl;
       if (previewEl) previewEl.src = cdnUrl;
       setStatus("Imagen subida correctamente", "ok");
+      showUploadToast("ok", "Imagen subida", label.charAt(0).toUpperCase() + label.slice(1) + " actualizada en el sitio.");
       if (typeof opts.onUploaded === "function") {
         await opts.onUploaded(cdnUrl);
       }
     } catch (err) {
       console.error("[uploader] failed:", err);
-      setStatus("Error al subir: " + err.message, "err");
+      setStatus("Error al subir", "err");
+      showUploadToast("err", "Subida fallida", err.message);
     } finally {
       if (spinnerEl) spinnerEl.classList.add("hidden");
       fileEl.value = "";
@@ -2393,16 +2506,19 @@ document.getElementById("prodImageFile").addEventListener("change", async functi
   prev.style.display = "block";
   st.textContent = "Subiendo a Bunny CDN...";
   st.style.color = "var(--copper-lt)";
+  showUploadToast("busy", "Subiendo a Bunny CDN...", Math.round(toUpload.size / 1024) + " KB · producto");
   try {
     var cdnUrl = await uploadImageToBunny(toUpload, "products");
     document.getElementById("prodImage").value = cdnUrl;
     prev.src = cdnUrl;
     st.textContent = "OK Imagen subida";
     st.style.color = "var(--copper-lt)";
+    showUploadToast("ok", "Imagen subida", "Imagen del producto guardada en el CDN.");
     console.log("[IMG] uploaded:", cdnUrl);
   } catch (err) {
     st.textContent = "ERROR " + err.message;
     st.style.color = "var(--red-lt)";
+    showUploadToast("err", "Subida fallida", err.message);
     console.error("[IMG] upload failed:", err);
   } finally {
     fileInput.value = "";
