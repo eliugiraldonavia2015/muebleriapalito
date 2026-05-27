@@ -23,6 +23,16 @@ const COL_PRODUCTS = "products";
 const COL_SETTINGS = "settings";
 const PLACEHOLDER_IMG = "../assets/placeholder.svg";
 
+// Target crop aspect ratios per home container (width / height).
+// These match the actual layout slots so the image lands without surprise cropping.
+const CROP_RATIO = {
+  hero:      4 / 3,   // hero-img-wrap on the right column
+  banner:    21 / 9,  // full-banner is extra wide
+  lifestyle: 4 / 5,   // lifestyle-img on the left column
+  category:  3 / 4,   // .cat-card aspect-ratio:3/4
+  product:   3 / 4,   // .product-img-wrap aspect-ratio:3/4
+};
+
 let categories = [];
 let products = [];
 let settings = {};
@@ -645,10 +655,150 @@ function renderDashboard() {
   document.getElementById("statProds").textContent = categories.reduce((s, c) => s + (c.productCount || 0), 0) || allProds.length;
   document.getElementById("statFeatured").textContent = allProds.filter(p => p.featured).length;
   document.getElementById("statOnSale").textContent = allProds.filter(p => p.originalPrice).length;
+  renderDashAudit();
   renderDashHomeImgs();
   renderDashCatOrder();
   renderDashFeatured();
 }
+
+// ─── CATALOG AUDIT ───
+// Walks every product in the DB and reports records missing required fields.
+// Required per DATA-MODEL.md: name, categoryId, price. categoryId must resolve
+// to a real category. Optional but flagged when missing: image, displayOrder.
+function auditCatalog() {
+  const issues = {
+    noName: [],
+    noCategoryId: [],
+    orphanCategory: [],     // categoryId set but doesn't match any category
+    noPrice: [],
+    noImage: [],
+    duplicateNames: [],
+  };
+
+  const validCatIds = new Set();
+  categories.forEach(c => {
+    validCatIds.add(c.id);
+    if (c.id) validCatIds.add(c.id.toLowerCase());
+  });
+
+  const nameSeen = new Map();
+
+  products.forEach(p => {
+    const name = (p.name || "").trim();
+    if (!name) issues.noName.push(p);
+    if (!p.categoryId) {
+      issues.noCategoryId.push(p);
+    } else {
+      const cid = String(p.categoryId).toLowerCase();
+      if (!validCatIds.has(p.categoryId) && !validCatIds.has(cid)) {
+        issues.orphanCategory.push(p);
+      }
+    }
+    if (p.price == null || isNaN(Number(p.price)) || Number(p.price) <= 0) {
+      issues.noPrice.push(p);
+    }
+    if (!p.primaryImage && !p.imageUrl) {
+      issues.noImage.push(p);
+    }
+    if (name) {
+      const key = name.toLowerCase();
+      nameSeen.set(key, (nameSeen.get(key) || 0) + 1);
+    }
+  });
+
+  const dupNames = [...nameSeen.entries()].filter(([_, n]) => n > 1).map(([k]) => k);
+  if (dupNames.length) {
+    issues.duplicateNames = products.filter(p => dupNames.includes((p.name || "").toLowerCase()));
+  }
+
+  const total = Object.values(issues).reduce((s, arr) => s + arr.length, 0);
+  return { issues, total, productCount: products.length, categoryCount: categories.length };
+}
+
+function renderDashAudit() {
+  const banner = document.getElementById("dashAuditBanner");
+  const summary = document.getElementById("dashAuditSummary");
+  const detail = document.getElementById("dashAuditDetail");
+  const toggle = document.getElementById("dashAuditToggle");
+  if (!banner) return;
+
+  const report = auditCatalog();
+  const { issues, total, productCount } = report;
+
+  // Always show the banner: green when clean, red when issues
+  banner.classList.remove("hidden");
+  banner.classList.toggle("ok", total === 0);
+
+  if (total === 0) {
+    summary.textContent = `Catalogo OK: ${productCount} productos verificados, todos con categoria, titulo, precio e imagen.`;
+    detail.classList.add("hidden");
+    toggle.style.display = "none";
+    return;
+  }
+
+  summary.textContent = `${total} producto${total !== 1 ? "s" : ""} con campos incompletos de ${productCount}. Click en "Ver detalle" para revisarlos.`;
+  toggle.style.display = "";
+  toggle.textContent = detail.classList.contains("hidden") ? "Ver detalle →" : "Ocultar ↑";
+
+  // Build detail panel
+  detail.replaceChildren();
+  const groups = [
+    ["Sin titulo (name)",         issues.noName],
+    ["Sin categoria (categoryId)",issues.noCategoryId],
+    ["Categoria invalida (no existe en DB)", issues.orphanCategory],
+    ["Sin precio o precio invalido", issues.noPrice],
+    ["Sin imagen",                issues.noImage],
+    ["Nombres duplicados",        issues.duplicateNames],
+  ];
+
+  groups.forEach(([title, list]) => {
+    if (!list.length) return;
+    const g = document.createElement("div");
+    g.className = "dash-audit-group";
+    const h4 = document.createElement("h4");
+    h4.textContent = `${title} · ${list.length}`;
+    g.appendChild(h4);
+    const ul = document.createElement("ul");
+    list.slice(0, 20).forEach(p => {
+      const li = document.createElement("li");
+      li.className = "dash-audit-item";
+      const idEl = document.createElement("span");
+      idEl.className = "dash-audit-item-id";
+      idEl.textContent = (p.id || "").slice(0, 8);
+      const nameEl = document.createElement("span");
+      nameEl.className = "dash-audit-item-name";
+      nameEl.textContent = p.name || "(sin nombre) · cat: " + (p.categoryId || "—");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "dash-audit-item-action";
+      btn.textContent = "Abrir";
+      btn.addEventListener("click", () => openProductDrawer(p.id));
+      li.append(idEl, nameEl, btn);
+      ul.appendChild(li);
+    });
+    if (list.length > 20) {
+      const more = document.createElement("li");
+      more.style.cssText = "font-size:11px;color:var(--gray);text-align:center;padding:4px";
+      more.textContent = `... y ${list.length - 20} más`;
+      ul.appendChild(more);
+    }
+    g.appendChild(ul);
+    detail.appendChild(g);
+  });
+}
+
+// Wire toggle once on first render — guarded by dataset flag
+function wireDashAuditToggle() {
+  const toggle = document.getElementById("dashAuditToggle");
+  const detail = document.getElementById("dashAuditDetail");
+  if (!toggle || !detail || toggle.dataset.wired === "1") return;
+  toggle.dataset.wired = "1";
+  toggle.addEventListener("click", () => {
+    const hidden = detail.classList.toggle("hidden");
+    toggle.textContent = hidden ? "Ver detalle →" : "Ocultar ↑";
+  });
+}
+document.addEventListener("DOMContentLoaded", wireDashAuditToggle);
 
 // SVG factories using createElementNS to avoid innerHTML (XSS-safe).
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -678,9 +828,9 @@ function dashIconPencil() {
 
 // ─── DASH: Home Images strip ───
 const DASH_HOME_IMG_DEFS = [
-  { key: "hero",      title: "Hero",                    meta: "Imagen principal",      path: "heroSection.bgImage",  read: (s) => s?.heroSection?.bgImage,  anchor: "hero" },
-  { key: "banner",    title: "Banner Credito Directo",  meta: "Imagen del banner",     path: "promoBanner.image",    read: (s) => s?.promoBanner?.image,    anchor: "full-banner" },
-  { key: "lifestyle", title: "Asesoria personalizada",  meta: "Imagen del bloque",     path: "lifestyle.imageUrl",   read: (s) => s?.lifestyle?.imageUrl,   anchor: "lifestyle" },
+  { key: "hero",      title: "Hero",                    meta: "Imagen principal",      path: "heroSection.bgImage",  read: (s) => s?.heroSection?.bgImage,  ratio: CROP_RATIO.hero,      label: "el Hero" },
+  { key: "banner",    title: "Banner Credito Directo",  meta: "Imagen del banner",     path: "promoBanner.image",    read: (s) => s?.promoBanner?.image,    ratio: CROP_RATIO.banner,    label: "el Banner" },
+  { key: "lifestyle", title: "Asesoria personalizada",  meta: "Imagen del bloque",     path: "lifestyle.imageUrl",   read: (s) => s?.lifestyle?.imageUrl,   ratio: CROP_RATIO.lifestyle, label: "el bloque de Asesoria" },
 ];
 
 function renderDashHomeImgs() {
@@ -747,6 +897,8 @@ function renderDashHomeImgs() {
       statusId: null,
       spinnerId: spinner.id,
       folder: "site",
+      cropAspectRatio: def.ratio,
+      cropLabel: def.label,
       onUploaded: async (cdnUrl) => {
         img.src = cdnUrl;
         try {
@@ -895,6 +1047,8 @@ function renderDashCatOrder() {
       statusId: null,
       spinnerId: spinner.id,
       folder: "categories",
+      cropAspectRatio: CROP_RATIO.category,
+      cropLabel: cat.name,
       onUploaded: async (cdnUrl) => {
         img.src = cdnUrl;
         try {
@@ -1218,6 +1372,11 @@ async function regenerateProductsManifest() {
 }
 
 // ─── BUNNY CDN UPLOAD ───
+function isLikelyValidBunnyKey(k) {
+  // Bunny Storage Zone passwords are standard UUIDs: 8-4-4-4-12 hex groups.
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(k || "");
+}
+
 async function uploadImageToBunny(file, subFolder) {
   if (subFolder === void 0) { subFolder = 'products'; }
   console.group('[BUNNY] uploadImageToBunny');
@@ -1225,7 +1384,10 @@ async function uploadImageToBunny(file, subFolder) {
   if (!BUNNY_CDN.apiKey || BUNNY_CDN.apiKey.indexOf('PASTE_YOUR') !== -1) {
     console.error('[BUNNY] ERROR API key not configured — edit firebase-config.js');
     console.groupEnd();
-    throw new Error('Bunny CDN API key not configured');
+    throw new Error('Bunny CDN API key no configurada. Edita js/firebase-config.js');
+  }
+  if (!isLikelyValidBunnyKey(BUNNY_CDN.apiKey)) {
+    console.warn('[BUNNY] API key has unusual format — expected UUID 8-4-4-4-12 hex. Got:', BUNNY_CDN.apiKey);
   }
   var ext = file.name.indexOf('.') !== -1 ? file.name.split('.').pop() : 'jpg';
   var base = file.name.replace(/.[^.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase() || 'img';
@@ -1248,7 +1410,13 @@ async function uploadImageToBunny(file, subFolder) {
       } else {
         console.error('[BUNNY] ERROR status:', xhr.status, xhr.responseText);
         console.groupEnd();
-        reject(new Error('Bunny upload failed: ' + xhr.status + ' ' + xhr.responseText));
+        let msg = 'Bunny upload failed (' + xhr.status + ')';
+        if (xhr.status === 401) {
+          msg = 'API key de Bunny invalida o expirada. Verifica js/firebase-config.js (Storage Zone Password).';
+        } else if (xhr.status === 404) {
+          msg = 'Storage Zone no encontrada. Verifica zoneName en js/firebase-config.js.';
+        }
+        reject(new Error(msg));
       }
     };
     xhr.onerror = function() {
@@ -1259,6 +1427,249 @@ async function uploadImageToBunny(file, subFolder) {
     xhr.send(file);
   });
 }
+
+// ─── CROP MODAL ───
+// Native (no library) image cropper. Opens with a file + target aspect ratio,
+// resolves with a Blob containing the cropped JPEG, or null if cancelled.
+const cropState = {
+  resolve: null,
+  ratio: null,
+  natural: { w: 0, h: 0 },
+  displayed: { w: 0, h: 0 },
+  scale: 1,
+  box: { x: 0, y: 0, w: 0, h: 0 }, // in displayed pixels
+  drag: null,
+};
+
+function openCropModal(file, aspectRatio, label) {
+  return new Promise((resolve) => {
+    cropState.resolve = resolve;
+    cropState.ratio = aspectRatio || null;
+
+    const overlay = document.getElementById("cropOverlay");
+    const img = document.getElementById("cropImg");
+    const subtitle = document.getElementById("cropSubtitle");
+    const ratioLabel = document.getElementById("cropRatioLabel");
+
+    subtitle.textContent = label
+      ? `Define la zona visible para ${label}. Arrastra el recuadro o las esquinas.`
+      : "Arrastra el recuadro o las esquinas para definir la zona visible.";
+    ratioLabel.textContent = aspectRatio
+      ? aspectRatioToLabel(aspectRatio)
+      : "Libre";
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      img.onload = () => {
+        cropState.natural = { w: img.naturalWidth, h: img.naturalHeight };
+        // Wait next frame so layout settles before measuring
+        requestAnimationFrame(() => {
+          cropState.displayed = { w: img.clientWidth, h: img.clientHeight };
+          cropState.scale = cropState.natural.w / cropState.displayed.w;
+          initCropBox();
+          overlay.classList.add("active");
+        });
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function aspectRatioToLabel(r) {
+  if (!r) return "Libre";
+  // Try to match common ratios
+  const ratios = [
+    [16, 9], [4, 3], [3, 2], [1, 1], [4, 5], [3, 4], [21, 9], [2, 3],
+  ];
+  for (const [a, b] of ratios) {
+    if (Math.abs(r - a / b) < 0.005) return `${a}:${b}`;
+  }
+  return r.toFixed(2);
+}
+
+function initCropBox() {
+  const { displayed, ratio } = cropState;
+  let w, h;
+  if (ratio) {
+    // Fit largest box inside the displayed image at the target ratio
+    if (displayed.w / displayed.h > ratio) {
+      h = displayed.h;
+      w = h * ratio;
+    } else {
+      w = displayed.w;
+      h = w / ratio;
+    }
+  } else {
+    w = displayed.w;
+    h = displayed.h;
+  }
+  cropState.box = {
+    x: (displayed.w - w) / 2,
+    y: (displayed.h - h) / 2,
+    w, h,
+  };
+  applyCropBox();
+}
+
+function applyCropBox() {
+  const boxEl = document.getElementById("cropBox");
+  const { box, natural, displayed } = cropState;
+  boxEl.style.left = box.x + "px";
+  boxEl.style.top = box.y + "px";
+  boxEl.style.width = box.w + "px";
+  boxEl.style.height = box.h + "px";
+  // Final size label (natural pixels)
+  const finalW = Math.round(box.w * (natural.w / displayed.w));
+  const finalH = Math.round(box.h * (natural.h / displayed.h));
+  const sizeEl = document.getElementById("cropSizeLabel");
+  if (sizeEl) sizeEl.textContent = finalW + "×" + finalH + " px";
+}
+
+function clampBox() {
+  const { box, displayed, ratio } = cropState;
+  // Clamp size
+  if (box.w < 24) box.w = 24;
+  if (box.h < 24) box.h = 24;
+  if (ratio) {
+    box.h = box.w / ratio;
+  }
+  if (box.w > displayed.w) { box.w = displayed.w; if (ratio) box.h = box.w / ratio; }
+  if (box.h > displayed.h) { box.h = displayed.h; if (ratio) box.w = box.h * ratio; }
+  // Clamp position
+  if (box.x < 0) box.x = 0;
+  if (box.y < 0) box.y = 0;
+  if (box.x + box.w > displayed.w) box.x = displayed.w - box.w;
+  if (box.y + box.h > displayed.h) box.y = displayed.h - box.h;
+}
+
+function onCropPointerDown(e) {
+  const target = e.target.closest(".crop-handle, .crop-box");
+  if (!target) return;
+  e.preventDefault();
+  const handle = target.dataset.handle || null;
+  cropState.drag = {
+    mode: handle ? "resize" : "move",
+    handle,
+    startX: e.clientX,
+    startY: e.clientY,
+    startBox: { ...cropState.box },
+  };
+  document.addEventListener("pointermove", onCropPointerMove);
+  document.addEventListener("pointerup", onCropPointerUp, { once: true });
+}
+
+function onCropPointerMove(e) {
+  const d = cropState.drag;
+  if (!d) return;
+  const dx = e.clientX - d.startX;
+  const dy = e.clientY - d.startY;
+  const b = { ...d.startBox };
+  const { ratio } = cropState;
+
+  if (d.mode === "move") {
+    b.x += dx;
+    b.y += dy;
+  } else {
+    // Resize from a corner. For aspect-locked, the dominant axis drives the size.
+    let newW = b.w, newH = b.h, newX = b.x, newY = b.y;
+    if (d.handle === "br") {
+      newW = b.w + dx; newH = ratio ? newW / ratio : b.h + dy;
+    } else if (d.handle === "tr") {
+      newW = b.w + dx;
+      newH = ratio ? newW / ratio : b.h - dy;
+      newY = b.y + (b.h - newH);
+    } else if (d.handle === "bl") {
+      newW = b.w - dx;
+      newX = b.x + (b.w - newW);
+      newH = ratio ? newW / ratio : b.h + dy;
+    } else if (d.handle === "tl") {
+      newW = b.w - dx;
+      newX = b.x + (b.w - newW);
+      newH = ratio ? newW / ratio : b.h - dy;
+      newY = b.y + (b.h - newH);
+    }
+    b.w = newW; b.h = newH; b.x = newX; b.y = newY;
+  }
+  cropState.box = b;
+  clampBox();
+  applyCropBox();
+}
+
+function onCropPointerUp() {
+  cropState.drag = null;
+  document.removeEventListener("pointermove", onCropPointerMove);
+}
+
+async function commitCrop() {
+  const img = document.getElementById("cropImg");
+  const { box, displayed, natural } = cropState;
+  // Map displayed box back to natural pixels
+  const sx = box.x * (natural.w / displayed.w);
+  const sy = box.y * (natural.h / displayed.h);
+  const sw = box.w * (natural.w / displayed.w);
+  const sh = box.h * (natural.h / displayed.h);
+
+  // Cap output to a reasonable maximum dimension to keep file size sane
+  const MAX_W = 2400;
+  let outW = Math.round(sw);
+  let outH = Math.round(sh);
+  if (outW > MAX_W) {
+    const r = MAX_W / outW;
+    outW = MAX_W;
+    outH = Math.round(outH * r);
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = outW;
+  canvas.height = outH;
+  const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, outW, outH);
+
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.9);
+  });
+}
+
+function closeCropModal(blob) {
+  const overlay = document.getElementById("cropOverlay");
+  overlay.classList.remove("active");
+  const r = cropState.resolve;
+  cropState.resolve = null;
+  cropState.drag = null;
+  document.removeEventListener("pointermove", onCropPointerMove);
+  if (r) r(blob || null);
+}
+
+// Wire crop modal once the DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+  const box = document.getElementById("cropBox");
+  const stage = document.getElementById("cropStage");
+  const closeBtn = document.getElementById("cropCloseBtn");
+  const cancelBtn = document.getElementById("cropCancelBtn");
+  const confirmBtn = document.getElementById("cropConfirmBtn");
+  const overlay = document.getElementById("cropOverlay");
+  if (!box || !confirmBtn) return;
+
+  box.addEventListener("pointerdown", onCropPointerDown);
+  if (closeBtn) closeBtn.addEventListener("click", () => closeCropModal(null));
+  if (cancelBtn) cancelBtn.addEventListener("click", () => closeCropModal(null));
+  if (overlay) overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeCropModal(null);
+  });
+  confirmBtn.addEventListener("click", async () => {
+    confirmBtn.disabled = true;
+    confirmBtn.style.opacity = "0.7";
+    try {
+      const blob = await commitCrop();
+      closeCropModal(blob);
+    } finally {
+      confirmBtn.disabled = false;
+      confirmBtn.style.opacity = "";
+    }
+  });
+});
 
 // ─── REUSABLE IMAGE UPLOADER ───
 // Wires a file input to upload to Bunny CDN and update preview + hidden URL field.
@@ -1296,7 +1707,23 @@ function mountImageUploader(opts) {
   fileEl.addEventListener("change", async function(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
-    const localUrl = URL.createObjectURL(file);
+
+    // Step 1: optional crop step before upload
+    let toUpload = file;
+    if (opts.cropAspectRatio) {
+      setStatus("Abre el editor de recorte...", "busy");
+      const blob = await openCropModal(file, opts.cropAspectRatio, opts.cropLabel);
+      if (!blob) {
+        setStatus("", null);
+        fileEl.value = "";
+        return; // user cancelled
+      }
+      // Wrap blob as a File so the existing uploader code can read .name/.type
+      const baseName = file.name.replace(/\.[^.]+$/, "");
+      toUpload = new File([blob], baseName + ".jpg", { type: "image/jpeg" });
+    }
+
+    const localUrl = URL.createObjectURL(toUpload);
     if (previewEl) {
       previewEl.src = localUrl;
       previewEl.style.display = "block";
@@ -1305,7 +1732,7 @@ function mountImageUploader(opts) {
     setStatus("Subiendo imagen...", "busy");
     if (spinnerEl) spinnerEl.classList.remove("hidden");
     try {
-      const cdnUrl = await uploadImageToBunny(file, folder);
+      const cdnUrl = await uploadImageToBunny(toUpload, folder);
       if (urlEl) urlEl.value = cdnUrl;
       if (previewEl) previewEl.src = cdnUrl;
       setStatus("Imagen subida correctamente", "ok");
@@ -1383,6 +1810,8 @@ function mountHomeImagesUploaders() {
     spinnerId: "heroImgSpinner",
     statusClass: "home-img-status",
     folder: "site",
+    cropAspectRatio: CROP_RATIO.hero,
+    cropLabel: "el Hero",
     onUploaded: async (url) => {
       try {
         await saveHomeImage("heroSection.bgImage", url);
@@ -1400,6 +1829,8 @@ function mountHomeImagesUploaders() {
     spinnerId: "bannerImgSpinner",
     statusClass: "home-img-status",
     folder: "site",
+    cropAspectRatio: CROP_RATIO.banner,
+    cropLabel: "el Banner",
     onUploaded: async (url) => {
       try {
         await saveHomeImage("promoBanner.image", url);
@@ -1417,6 +1848,8 @@ function mountHomeImagesUploaders() {
     spinnerId: "lifestyleImgSpinner",
     statusClass: "home-img-status",
     folder: "site",
+    cropAspectRatio: CROP_RATIO.lifestyle,
+    cropLabel: "el bloque de Asesoria",
     onUploaded: async (url) => {
       try {
         await saveHomeImage("lifestyle.imageUrl", url);
@@ -1672,7 +2105,9 @@ function mountCategoryImageUploader() {
     previewWrapId: "catImagePreviewWrap",
     statusId: "catImageStatus",
     statusClass: "cat-image-status",
-    folder: "categories"
+    folder: "categories",
+    cropAspectRatio: CROP_RATIO.category,
+    cropLabel: "la categoria",
   });
   // Update preview when user pastes a URL manually
   const urlInput = document.getElementById("catImageUrl");
@@ -1940,21 +2375,37 @@ document.getElementById("prodImageFile").addEventListener("change", async functi
   console.log("[IMG] selected:", file.name, Math.round(file.size / 1024) + "KB");
   var prev = document.getElementById("prodImagePreview");
   var st = document.getElementById("prodImageStatus");
-  prev.src = URL.createObjectURL(file);
+  var fileInput = e.target;
+
+  // Open crop modal so the image fits the product card (3:4)
+  st.textContent = "Abre el editor de recorte...";
+  st.style.color = "var(--copper-lt)";
+  const blob = await openCropModal(file, CROP_RATIO.product, "el producto");
+  if (!blob) {
+    st.textContent = "";
+    fileInput.value = "";
+    return;
+  }
+  const baseName = file.name.replace(/\.[^.]+$/, "");
+  const toUpload = new File([blob], baseName + ".jpg", { type: "image/jpeg" });
+
+  prev.src = URL.createObjectURL(toUpload);
   prev.style.display = "block";
   st.textContent = "Subiendo a Bunny CDN...";
   st.style.color = "var(--copper-lt)";
   try {
-    var cdnUrl = await uploadImageToBunny(file, "products");
+    var cdnUrl = await uploadImageToBunny(toUpload, "products");
     document.getElementById("prodImage").value = cdnUrl;
     prev.src = cdnUrl;
     st.textContent = "OK Imagen subida";
-    st.style.color = "var(--green-ok)";
+    st.style.color = "var(--copper-lt)";
     console.log("[IMG] uploaded:", cdnUrl);
   } catch (err) {
     st.textContent = "ERROR " + err.message;
-    st.style.color = "var(--red-fail)";
+    st.style.color = "var(--red-lt)";
     console.error("[IMG] upload failed:", err);
+  } finally {
+    fileInput.value = "";
   }
 });
 

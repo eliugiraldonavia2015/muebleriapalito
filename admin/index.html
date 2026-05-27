@@ -558,12 +558,125 @@
       text-align:center;color:var(--gray);font-size:13px;
     }
 
+    /* AUDIT BANNER */
+    .dash-audit{
+      background:linear-gradient(180deg,rgba(192,57,43,.08),rgba(192,57,43,.02));
+      border:1px solid rgba(192,57,43,.28);border-radius:12px;
+      padding:16px 20px;margin-bottom:22px;
+    }
+    .dash-audit.ok{
+      background:linear-gradient(180deg,rgba(58,140,92,.06),rgba(58,140,92,.02));
+      border-color:rgba(58,140,92,.28);
+    }
+    .dash-audit-title{display:inline-flex;align-items:center;gap:8px}
+    .dash-audit-title::before{
+      content:"";width:8px;height:8px;border-radius:50%;background:var(--red-lt);
+    }
+    .dash-audit.ok .dash-audit-title::before{background:var(--copper-lt)}
+    .dash-audit-toggle{background:none;border:none;cursor:pointer;padding:0}
+    .dash-audit-detail{margin-top:14px;border-top:1px solid var(--rule);padding-top:14px;display:flex;flex-direction:column;gap:14px}
+    .dash-audit-group h4{
+      font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+      color:var(--red-lt);margin-bottom:8px;
+    }
+    .dash-audit-group ul{list-style:none;display:flex;flex-direction:column;gap:5px}
+    .dash-audit-item{
+      display:flex;align-items:center;gap:10px;padding:6px 10px;
+      border:1px solid var(--rule);border-radius:6px;background:rgba(192,57,43,.04);
+      font-size:12px;
+    }
+    .dash-audit-item-id{
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;
+      color:var(--gray);background:rgba(0,0,0,.25);padding:2px 6px;border-radius:4px;
+    }
+    .dash-audit-item-name{flex:1;color:var(--cream);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dash-audit-item-action{
+      font-size:10px;letter-spacing:.06em;color:var(--copper-lt);
+      background:none;border:1px solid rgba(58,140,92,.35);border-radius:4px;
+      padding:3px 8px;cursor:pointer;transition:all 150ms cubic-bezier(0.23,1,0.32,1);
+    }
+    .dash-audit-item-action:hover{background:rgba(58,140,92,.12)}
+
     @media(max-width:640px){
       .dash-title{font-size:24px}
       .dash-metrics{gap:14px;padding:14px 16px}
       .dash-metric-value{font-size:20px}
       .dash-metric-sep{height:22px}
       .dash-cat-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+    }
+
+    /* ─── CROP MODAL ─── */
+    .crop-overlay{
+      position:fixed;inset:0;background:rgba(0,0,0,.78);
+      z-index:1100;display:none;align-items:center;justify-content:center;
+      padding:24px;backdrop-filter:blur(6px);
+    }
+    .crop-overlay.active{display:flex}
+    .crop-modal{
+      background:var(--bg2);border:1px solid var(--rule);border-radius:14px;
+      width:100%;max-width:760px;max-height:92vh;overflow:hidden;
+      display:flex;flex-direction:column;
+    }
+    .crop-head{
+      padding:18px 22px;border-bottom:1px solid var(--rule);
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;
+    }
+    .crop-head h3{font-size:15px;font-weight:600;color:var(--cream);letter-spacing:.01em}
+    .crop-head p{font-size:11px;color:var(--gray);margin-top:3px;letter-spacing:.04em}
+    .crop-close{
+      width:30px;height:30px;border-radius:6px;border:1px solid var(--rule);
+      background:none;color:var(--cream-dim);font-size:18px;line-height:1;cursor:pointer;
+      transition:all 150ms cubic-bezier(0.23,1,0.32,1);
+    }
+    .crop-close:hover{border-color:var(--red);color:var(--red-lt)}
+    .crop-stage{
+      flex:1;position:relative;background:repeating-conic-gradient(#0a160e 0 25%,#0e1f15 0 50%) 50% / 16px 16px;
+      overflow:hidden;min-height:300px;display:flex;align-items:center;justify-content:center;
+      user-select:none;
+    }
+    .crop-canvas-wrap{position:relative;display:inline-block;line-height:0}
+    .crop-img{display:block;max-width:100%;max-height:60vh;pointer-events:none;-webkit-user-drag:none}
+    .crop-mask{
+      position:absolute;inset:0;pointer-events:none;
+      box-shadow:0 0 0 9999px rgba(8,16,11,.62);
+    }
+    .crop-box{
+      position:absolute;border:2px solid var(--copper-lt);
+      box-shadow:0 0 0 1px rgba(8,16,11,.5);
+      cursor:move;
+    }
+    .crop-box::before,.crop-box::after{
+      content:"";position:absolute;left:0;right:0;height:1px;background:rgba(232,245,236,.25);
+      pointer-events:none;
+    }
+    .crop-box::before{top:33.33%}
+    .crop-box::after{top:66.66%}
+    .crop-box-v::before,.crop-box-v::after{
+      content:"";position:absolute;top:0;bottom:0;width:1px;background:rgba(232,245,236,.25);
+      pointer-events:none;
+    }
+    .crop-box-v::before{left:33.33%}
+    .crop-box-v::after{left:66.66%}
+    .crop-handle{
+      position:absolute;width:14px;height:14px;background:var(--copper-lt);border:2px solid var(--bg2);
+      border-radius:3px;
+    }
+    .crop-handle.tl{top:-8px;left:-8px;cursor:nwse-resize}
+    .crop-handle.tr{top:-8px;right:-8px;cursor:nesw-resize}
+    .crop-handle.bl{bottom:-8px;left:-8px;cursor:nesw-resize}
+    .crop-handle.br{bottom:-8px;right:-8px;cursor:nwse-resize}
+    .crop-foot{
+      padding:14px 22px;border-top:1px solid var(--rule);
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;
+      background:var(--bg2);
+    }
+    .crop-foot-info{font-size:11px;color:var(--gray);letter-spacing:.04em}
+    .crop-foot-info b{color:var(--cream);font-weight:600;font-variant-numeric:tabular-nums}
+    .crop-foot-actions{display:flex;gap:10px}
+    @media(max-width:560px){
+      .crop-foot{flex-direction:column;align-items:stretch}
+      .crop-foot-actions{flex-direction:row-reverse;justify-content:stretch}
+      .crop-foot-actions .btn{flex:1;justify-content:center}
     }
 
     /* ─── CATEGORY MODAL IMAGE UPLOADER ─── */
@@ -701,6 +814,18 @@
           <span class="dash-metric-label">En oferta</span>
         </div>
       </div>
+
+      <!-- HEALTH CHECK BANNER (only shows when issues exist) -->
+      <section class="dash-block dash-audit hidden" id="dashAuditBanner">
+        <header class="dash-block-head">
+          <div>
+            <h3 class="dash-block-title dash-audit-title">Revision del catalogo</h3>
+            <p class="dash-block-sub" id="dashAuditSummary"></p>
+          </div>
+          <button type="button" class="dash-block-link dash-audit-toggle" id="dashAuditToggle">Ver detalle →</button>
+        </header>
+        <div class="dash-audit-detail hidden" id="dashAuditDetail"></div>
+      </section>
 
       <!-- HOME IMAGES STRIP -->
       <section class="dash-block">
@@ -1147,6 +1272,43 @@
     <button type="button" class="btn btn-danger btn-sm" id="deleteProductBtn" style="display:none;margin-right:auto">Eliminar producto</button>
     <button type="button" class="btn btn-ghost" id="cancelProductDrawerBtn">Cancelar</button>
     <button type="submit" form="productForm" class="btn btn-primary">Guardar</button>
+  </div>
+</div>
+
+<!-- CROP MODAL -->
+<div class="crop-overlay" id="cropOverlay" role="dialog" aria-modal="true" aria-labelledby="cropTitle">
+  <div class="crop-modal">
+    <div class="crop-head">
+      <div>
+        <h3 id="cropTitle">Recortar imagen</h3>
+        <p id="cropSubtitle">Arrastra para mover, las esquinas para redimensionar.</p>
+      </div>
+      <button class="crop-close" id="cropCloseBtn" aria-label="Cancelar">&times;</button>
+    </div>
+    <div class="crop-stage" id="cropStage">
+      <div class="crop-canvas-wrap" id="cropCanvasWrap">
+        <img class="crop-img" id="cropImg" alt=""/>
+        <div class="crop-box" id="cropBox">
+          <div class="crop-box-v"></div>
+          <div class="crop-handle tl" data-handle="tl"></div>
+          <div class="crop-handle tr" data-handle="tr"></div>
+          <div class="crop-handle bl" data-handle="bl"></div>
+          <div class="crop-handle br" data-handle="br"></div>
+        </div>
+      </div>
+    </div>
+    <div class="crop-foot">
+      <div class="crop-foot-info">
+        Proporcion <b id="cropRatioLabel">—</b>  ·  Recorte final <b id="cropSizeLabel">—</b>
+      </div>
+      <div class="crop-foot-actions">
+        <button type="button" class="btn btn-ghost" id="cropCancelBtn">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="cropConfirmBtn">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Recortar y subir
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 

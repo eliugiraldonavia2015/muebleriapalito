@@ -27,10 +27,16 @@ const $$ = (sel) => document.querySelectorAll(sel);
 
 const PLACEHOLDER_IMG = "assets/placeholder.svg";
 
-// Set an <img> src with placeholder fallback if URL is empty OR fails to load.
+// Set <img> src ONLY if a real URL is provided. If url is empty, leave the
+// element untouched — preserving whatever the HTML already shipped with.
+// The placeholder is only used as a last-resort fallback when an actual load fails.
 function setImageWithFallback(imgEl, url) {
   if (!imgEl) return;
-  imgEl.src = (url && url.trim()) ? url : PLACEHOLDER_IMG;
+  if (url && url.trim()) {
+    imgEl.src = url.trim();
+  }
+  // Always wire onerror so a broken URL (Bunny down, dead link) shows the
+  // branded placeholder instead of a busted img icon.
   imgEl.onerror = () => { imgEl.src = PLACEHOLDER_IMG; imgEl.onerror = null; };
 }
 
