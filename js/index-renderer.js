@@ -104,18 +104,23 @@ function renderNav(categories) {
   navList.appendChild(liLoc);
 }
 
-// Hero
+// Hero — image only (texts stay hardcoded in HTML)
 function renderHero(settings) {
   const hero = settings.heroSection || {};
-  const eyebrow = $(".hero-eyebrow");
-  const title = $(".hero-title");
-  const subtitle = $(".hero-subtitle");
   const heroImg = $("#hero .hero-img-wrap img");
-
-  if (eyebrow && hero.eyebrow) eyebrow.textContent = hero.eyebrow;
-  if (title && hero.title) title.innerHTML = hero.title.replace(/(que|hablan|de|para|tu|con|un|una|el|la|los|las)\b/gi, "<em>$1</em>");
-  if (subtitle && hero.description) subtitle.textContent = hero.description;
   if (heroImg && hero.bgImage) heroImg.src = hero.bgImage;
+}
+
+// Preload the hero image as soon as we know its URL so it overlaps with the JS
+// boot and renderer; keeps perceived load time identical even after the swap.
+function preloadHeroImage(url) {
+  if (!url) return;
+  if (document.head.querySelector(`link[rel="preload"][href="${url}"]`)) return;
+  const link = document.createElement("link");
+  link.rel = "preload";
+  link.as = "image";
+  link.href = url;
+  document.head.appendChild(link);
 }
 
 // Marquee — show homepage category names
@@ -244,67 +249,18 @@ function renderFeaturedProducts(products) {
   }).join("");
 }
 
-// Promo banner
+// Promo banner — image only (texts stay hardcoded in HTML)
 function renderBanner(settings) {
   const img = $("#full-banner img");
-  const overlay = $("#full-banner .sec-label");
-  const title = $("#full-banner .full-banner-title");
-  const subtitle = $("#full-banner .full-banner-sub");
-  const cta = $("#full-banner .btn-primary");
-  const pill = $("#full-banner .banner-pill");
-
   if (img && settings?.promoBanner?.image) img.src = settings.promoBanner.image;
-  
-  // HARDCODED TEXT FOR CREDIT
-  if (overlay) overlay.textContent = "Facilidades de pago";
-  if (title) title.innerHTML = "Accede a<br><em style=\"color:var(--copper-lt);font-style:italic\">Credito Directo</em>";
-  if (subtitle) subtitle.textContent = "Divide tus compras hasta en 12 meses sin intereses. Y si prefieres pagar en efectivo, disfruta de hasta 30% de descuento en categorias y productos seleccionados.";
-  
-  if (cta) {
-    cta.innerHTML = "Consultar financiamiento <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\" stroke-linecap=\"round\" width=\"16\" height=\"16\"><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/><polyline points=\"12 5 19 12 12 19\"/></svg>";
-    cta.href = "contacto.html";
-  }
-  
-  if (pill) {
-    pill.innerHTML = "<span class=\"pill-pct\" style=\"font-size:32px;margin-bottom:2px\">12</span><span class=\"pill-off\" style=\"font-size:10px\">MESES SIN<br>INTERESES</span>";
-  }
 }
 
-// Lifestyle section — configurable
+// Lifestyle section — image only (texts stay hardcoded in HTML)
 function renderLifestyle(settings) {
   const lifestyle = settings.lifestyle;
-  if (!lifestyle) return; // keep hardcoded defaults
-
+  if (!lifestyle) return;
   const img = $("#lifestyle .lifestyle-img img");
-  const bigNum = $(".lifestyle-big-num");
-  const title = $("#lifestyle .sec-heading");
-  const desc = $("#lifestyle p");
-  const cta = $("#lifestyle .btn-primary");
-
   if (img && lifestyle.imageUrl) img.src = lifestyle.imageUrl;
-  if (bigNum && lifestyle.highlightNumber) bigNum.textContent = lifestyle.highlightNumber;
-  if (title && lifestyle.heading) {
-    const eyebrow = $("#lifestyle .sec-label");
-    if (lifestyle.eyebrow && eyebrow) eyebrow.textContent = lifestyle.eyebrow;
-    title.innerHTML = lifestyle.heading.replace(/(para|noches|decidir)\b/gi, "<em>$1</em>");
-  }
-  if (desc && lifestyle.description) desc.textContent = lifestyle.description;
-
-  if (lifestyle.features && lifestyle.features.length) {
-    const featuresEl = $(".lifestyle-features");
-    if (featuresEl) {
-      featuresEl.innerHTML = lifestyle.features.map((f, i) => `
-        <div class="lifestyle-feat">
-          <span class="feat-num">${String(i + 1).padStart(2, "0")}</span>
-          <p class="feat-text">${f.text}</p>
-        </div>
-      `).join("");
-    }
-  }
-
-  if (cta && lifestyle.ctaText) {
-    cta.childNodes[0].textContent = lifestyle.ctaText + " ";
-  }
 }
 
 // Stats
@@ -427,11 +383,12 @@ async function init() {
 
     // Nav stays as the static HTML so it doesn't flicker on page nav (matches catalogo.html).
     // renderNav(categories);
+    preloadHeroImage(settings?.heroSection?.bgImage);
     renderHero(settings);
     renderMarquee(categories);
     renderCategories(categories);
     renderFeaturedProducts(products);
-    // renderBanner(settings); // Disable JS rendering for this section, keep HTML
+    renderBanner(settings);
     renderLifestyle(settings);
     renderStats(settings);
     renderNewsletter(settings);

@@ -165,6 +165,9 @@ async function runLoader() {
   renderDashboard();
   renderCatCards();
   populateSettingsForm();
+  mountHomeImagesUploaders();
+  populateHomeImagesSection();
+  mountCategoryImageUploader();
   document.getElementById("lastSync").textContent = "Sincronizado: " + new Date().toLocaleTimeString("es-EC");
 
   // Keep CDN manifest in sync on every admin session login (covers cases where products
@@ -188,19 +191,34 @@ function setLoaderStatus(el, bar, gsap, text, pct) {
 }
 
 // ─── NAVIGATION ───
-document.getElementById("adminNav").addEventListener("click", e => {
-  const btn = e.target.closest("[data-section]");
-  if (!btn) return;
+function goToSection(section) {
   document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
-  btn.classList.add("active");
+  const navBtn = document.querySelector('.nav-item[data-section="' + section + '"]');
+  if (navBtn) navBtn.classList.add("active");
   document.querySelectorAll(".admin-section").forEach(s => s.classList.remove("active"));
-  const section = btn.dataset.section;
-  document.getElementById("sec-" + section).classList.add("active");
-  // When returning to categories, ensure list view is visible
+  const target = document.getElementById("sec-" + section);
+  if (target) target.classList.add("active");
   if (section === "categories" && !currentDetailCatId) {
     document.getElementById("catListView").style.display = "block";
     document.getElementById("catDetailView").style.display = "none";
   }
+  if (section === "home-images") {
+    populateHomeImagesSection();
+  }
+}
+
+document.getElementById("adminNav").addEventListener("click", e => {
+  const btn = e.target.closest("[data-section]");
+  if (!btn) return;
+  goToSection(btn.dataset.section);
+});
+
+// Allow inline links (e.g. "Gestionar en Imagenes del home") to switch sections
+document.addEventListener("click", e => {
+  const link = e.target.closest("[data-go-section]");
+  if (!link) return;
+  e.preventDefault();
+  goToSection(link.dataset.goSection);
 });
 
 // ─── ALERT ───
@@ -929,6 +947,178 @@ async function uploadImageToBunny(file, subFolder) {
   });
 }
 
+// ─── REUSABLE IMAGE UPLOADER ───
+// Wires a file input to upload to Bunny CDN and update preview + hidden URL field.
+// onUploaded(cdnUrl) is invoked after the upload succeeds, e.g. to persist the URL
+// directly to Firestore for sections that don't have a separate Save button.
+function mountImageUploader(opts) {
+  const fileEl = document.getElementById(opts.fileInputId);
+  if (!fileEl) { console.warn("[uploader] missing file input:", opts.fileInputId); return; }
+  if (fileEl.dataset.uploaderMounted === "1") return;
+  fileEl.dataset.uploaderMounted = "1";
+
+  const urlEl = opts.urlInputId ? document.getElementById(opts.urlInputId) : null;
+  const previewEl = opts.previewId ? document.getElementById(opts.previewId) : null;
+  const previewWrap = opts.previewWrapId ? document.getElementById(opts.previewWrapId) : null;
+  const statusEl = opts.statusId ? document.getElementById(opts.statusId) : null;
+  const spinnerEl = opts.spinnerId ? document.getElementById(opts.spinnerId) : null;
+  const statusClass = opts.statusClass || "";
+  const folder = opts.folder || "site";
+
+  function setStatus(text, mode) {
+    if (!statusEl) return;
+    statusEl.textContent = text || "";
+    if (statusClass) {
+      ["ok", "err", "busy"].forEach(c => statusEl.classList.remove(statusClass + " " + c, c));
+      statusEl.classList.remove("ok", "err", "busy");
+      if (mode) statusEl.classList.add(mode);
+    } else {
+      statusEl.style.color = mode === "ok" ? "var(--copper-lt)"
+        : mode === "err" ? "var(--red-lt)"
+        : mode === "busy" ? "var(--copper-lt)"
+        : "var(--gray)";
+    }
+  }
+
+  fileEl.addEventListener("change", async function(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const localUrl = URL.createObjectURL(file);
+    if (previewEl) {
+      previewEl.src = localUrl;
+      previewEl.style.display = "block";
+      if (previewWrap) previewWrap.classList.remove("empty");
+    }
+    setStatus("Subiendo imagen...", "busy");
+    if (spinnerEl) spinnerEl.classList.remove("hidden");
+    try {
+      const cdnUrl = await uploadImageToBunny(file, folder);
+      if (urlEl) urlEl.value = cdnUrl;
+      if (previewEl) previewEl.src = cdnUrl;
+      setStatus("Imagen subida correctamente", "ok");
+      if (typeof opts.onUploaded === "function") {
+        await opts.onUploaded(cdnUrl);
+      }
+    } catch (err) {
+      console.error("[uploader] failed:", err);
+      setStatus("Error al subir: " + err.message, "err");
+    } finally {
+      if (spinnerEl) spinnerEl.classList.add("hidden");
+      fileEl.value = "";
+    }
+  });
+}
+
+// ─── HOME IMAGES SECTION ───
+async function saveHomeImage(path, url) {
+  // path is a dot-path like "heroSection.bgImage". Builds a nested object for merge.
+  const parts = path.split(".");
+  const payload = {};
+  let cur = payload;
+  for (let i = 0; i < parts.length - 1; i++) {
+    cur[parts[i]] = {};
+    cur = cur[parts[i]];
+  }
+  cur[parts[parts.length - 1]] = url;
+  payload.updatedAt = serverTimestamp();
+  await setDoc(doc(db, COL_SETTINGS, "store"), payload, { merge: true });
+
+  // Update local cache so re-renders stay in sync
+  let dest = settings;
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (!dest[parts[i]] || typeof dest[parts[i]] !== "object") dest[parts[i]] = {};
+    dest = dest[parts[i]];
+  }
+  dest[parts[parts.length - 1]] = url;
+}
+
+function setHomeThumb(thumbId, url) {
+  const el = document.getElementById(thumbId);
+  if (!el) return;
+  if (url) {
+    el.src = url;
+    el.style.display = "block";
+  } else {
+    el.removeAttribute("src");
+    el.style.display = "none";
+  }
+}
+
+function populateHomeImagesSection() {
+  const s = settings || {};
+  setHomeThumb("heroImgThumb", s.heroSection?.bgImage || "");
+  setHomeThumb("bannerImgThumb", s.promoBanner?.image || "");
+  setHomeThumb("lifestyleImgThumb", s.lifestyle?.imageUrl || "");
+  ["heroImgStatus", "bannerImgStatus", "lifestyleImgStatus"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = ""; el.classList.remove("ok", "err", "busy"); }
+  });
+}
+
+function mountHomeImagesUploaders() {
+  function wire(thumbBtnSelector, cfg) {
+    const btn = document.querySelector(thumbBtnSelector);
+    if (btn) {
+      btn.addEventListener("click", () => {
+        const fi = document.getElementById(btn.dataset.trigger);
+        if (fi) fi.click();
+      });
+    }
+    mountImageUploader(cfg);
+  }
+
+  wire('[data-trigger="heroImgFile"]', {
+    fileInputId: "heroImgFile",
+    previewId: "heroImgThumb",
+    statusId: "heroImgStatus",
+    spinnerId: "heroImgSpinner",
+    statusClass: "home-img-status",
+    folder: "site",
+    onUploaded: async (url) => {
+      try {
+        await saveHomeImage("heroSection.bgImage", url);
+        showAlert("Imagen del Hero actualizada.");
+      } catch (err) {
+        showAlert("Error al guardar: " + err.message, "error");
+      }
+    }
+  });
+
+  wire('[data-trigger="bannerImgFile"]', {
+    fileInputId: "bannerImgFile",
+    previewId: "bannerImgThumb",
+    statusId: "bannerImgStatus",
+    spinnerId: "bannerImgSpinner",
+    statusClass: "home-img-status",
+    folder: "site",
+    onUploaded: async (url) => {
+      try {
+        await saveHomeImage("promoBanner.image", url);
+        showAlert("Imagen del banner actualizada.");
+      } catch (err) {
+        showAlert("Error al guardar: " + err.message, "error");
+      }
+    }
+  });
+
+  wire('[data-trigger="lifestyleImgFile"]', {
+    fileInputId: "lifestyleImgFile",
+    previewId: "lifestyleImgThumb",
+    statusId: "lifestyleImgStatus",
+    spinnerId: "lifestyleImgSpinner",
+    statusClass: "home-img-status",
+    folder: "site",
+    onUploaded: async (url) => {
+      try {
+        await saveHomeImage("lifestyle.imageUrl", url);
+        showAlert("Imagen de asesoria actualizada.");
+      } catch (err) {
+        showAlert("Error al guardar: " + err.message, "error");
+      }
+    }
+  });
+}
+
 // ─── SEED ───
 async function runSeedIfNeeded() {
   try {
@@ -1003,18 +1193,16 @@ function populateSettingsForm() {
     setIg: s.socialLinks?.instagram,
     setYt: s.socialLinks?.youtube,
     setWaSocial: s.socialLinks?.whatsapp,
-    // Hero
+    // Hero (image is managed from Home Images section)
     setHeroEyebrow: s.heroSection?.eyebrow,
     setHeroTitle: s.heroSection?.title,
     setHeroSubtitle: s.heroSection?.description,
-    setHeroImage: s.heroSection?.bgImage,
-    // Banner
+    // Banner (image is managed from Home Images section)
     setBannerTitle: s.promoBanner?.title,
     setBannerDiscountPct: s.promoBanner?.discountPct,
     setBannerDiscountText: s.promoBanner?.discountText,
     setBannerCta: s.promoBanner?.ctaText,
     setBannerSubtitle: s.promoBanner?.subtitle,
-    setBannerImage: s.promoBanner?.image,
   };
   for (const [id, val] of Object.entries(fields)) {
     const el = document.getElementById(id);
@@ -1100,21 +1288,21 @@ document.getElementById("settingsForm").addEventListener("submit", async e => {
       youtube: document.getElementById("setYt").value,
       whatsapp: document.getElementById("setWaSocial").value,
     },
-    // heroSection (DATA-MODEL spec)
+    // heroSection (DATA-MODEL spec) — bgImage preserved (managed in Home Images section)
     heroSection: {
+      ...(settings.heroSection || {}),
       eyebrow: document.getElementById("setHeroEyebrow").value,
       title: document.getElementById("setHeroTitle").value,
       description: document.getElementById("setHeroSubtitle").value,
-      bgImage: document.getElementById("setHeroImage").value,
     },
-    // promoBanner (DATA-MODEL spec)
+    // promoBanner (DATA-MODEL spec) — image preserved (managed in Home Images section)
     promoBanner: {
+      ...(settings.promoBanner || {}),
       title: document.getElementById("setBannerTitle").value,
       discountPct: Number(document.getElementById("setBannerDiscountPct").value) || 0,
       discountText: document.getElementById("setBannerDiscountText").value,
       ctaText: document.getElementById("setBannerCta").value,
       subtitle: document.getElementById("setBannerSubtitle").value,
-      image: document.getElementById("setBannerImage").value,
     },
     storeLocations,
     updatedAt: serverTimestamp(),
@@ -1154,6 +1342,41 @@ document.getElementById("hardResetCatalogBtn").addEventListener("click", async (
 });
 
 // ─── CATEGORY MODAL ───
+function setCategoryImagePreview(url) {
+  const prev = document.getElementById("catImagePreview");
+  const wrap = document.getElementById("catImagePreviewWrap");
+  const st = document.getElementById("catImageStatus");
+  if (!prev || !wrap) return;
+  if (url && url.trim()) {
+    prev.src = url;
+    prev.style.display = "block";
+    wrap.classList.remove("empty");
+  } else {
+    prev.style.display = "none";
+    prev.removeAttribute("src");
+    wrap.classList.add("empty");
+  }
+  if (st) { st.textContent = ""; st.classList.remove("ok", "err", "busy"); }
+}
+
+function mountCategoryImageUploader() {
+  mountImageUploader({
+    fileInputId: "catImageFile",
+    urlInputId: "catImageUrl",
+    previewId: "catImagePreview",
+    previewWrapId: "catImagePreviewWrap",
+    statusId: "catImageStatus",
+    statusClass: "cat-image-status",
+    folder: "categories"
+  });
+  // Update preview when user pastes a URL manually
+  const urlInput = document.getElementById("catImageUrl");
+  if (urlInput && !urlInput.dataset.previewWired) {
+    urlInput.dataset.previewWired = "1";
+    urlInput.addEventListener("input", () => setCategoryImagePreview(urlInput.value.trim()));
+  }
+}
+
 document.getElementById("addCategoryBtn").addEventListener("click", () => {
   editingCatId = null;
   editingCatSubs = [];
@@ -1161,6 +1384,7 @@ document.getElementById("addCategoryBtn").addEventListener("click", () => {
   document.getElementById("categoryForm").reset();
   document.getElementById("catEditId").value = "";
   document.getElementById("catSubTags").replaceChildren();
+  setCategoryImagePreview("");
   openModal("categoryModal");
 });
 
@@ -1238,7 +1462,9 @@ function editCategory(id) {
   document.getElementById("catModalTitle").textContent = "Editar categoria";
   document.getElementById("catEditId").value = id;
   document.getElementById("catName").value = cat.name || "";
-  document.getElementById("catImageUrl").value = cat.imageUrl || cat.coverImage || "";
+  const currentImg = cat.imageUrl || cat.coverImage || "";
+  document.getElementById("catImageUrl").value = currentImg;
+  setCategoryImagePreview(currentImg);
   document.getElementById("catProductCount").value = cat.productCount || "";
   document.getElementById("catDisplayOrder").value = cat.displayOrder ?? "";
   document.getElementById("catShowOnHomepage").checked = cat.showOnHomepage !== false;

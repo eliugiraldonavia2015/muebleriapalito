@@ -305,6 +305,84 @@
     .drawer-close:hover{border-color:var(--red);color:var(--red)}
     .drawer-body{flex:1;overflow-y:auto;padding:24px 26px}
     .drawer-footer{padding:18px 26px;border-top:1px solid var(--rule);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0;background:var(--bg2)}
+
+    /* ─── HOME IMAGES SECTION ─── */
+    .home-img-intro{font-size:13px;color:var(--cream-dim);margin-top:6px;letter-spacing:.02em;max-width:560px;line-height:1.55}
+    .home-img-list{display:flex;flex-direction:column;gap:14px;max-width:880px}
+    .home-img-card{
+      display:grid;grid-template-columns:140px 1fr;gap:22px;align-items:center;
+      background:var(--bg2);border:1px solid var(--rule);border-radius:12px;
+      padding:16px;
+      transition:border-color 200ms cubic-bezier(0.23,1,0.32,1);
+    }
+    .home-img-card:hover{border-color:rgba(160,220,180,.22)}
+    .home-img-thumb{
+      position:relative;width:140px;height:96px;border-radius:8px;overflow:hidden;
+      border:1px solid var(--rule);cursor:pointer;padding:0;
+      background:var(--bg3) linear-gradient(135deg,var(--bg3) 25%,rgba(160,220,180,.04) 25%,rgba(160,220,180,.04) 50%,var(--bg3) 50%,var(--bg3) 75%,rgba(160,220,180,.04) 75%);
+      background-size:14px 14px;
+      transition:transform 160ms cubic-bezier(0.23,1,0.32,1);
+      display:block;
+    }
+    .home-img-thumb:active{transform:scale(0.97)}
+    .home-img-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 240ms cubic-bezier(0.23,1,0.32,1)}
+    .home-img-thumb:hover img{transform:scale(1.04)}
+    .home-img-thumb-overlay{
+      position:absolute;inset:0;background:linear-gradient(to top,rgba(8,16,11,.88),rgba(8,16,11,.35));
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+      color:var(--cream);font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;
+      opacity:0;transition:opacity 180ms cubic-bezier(0.23,1,0.32,1);
+      pointer-events:none;
+    }
+    .home-img-thumb:hover .home-img-thumb-overlay,
+    .home-img-thumb:focus-visible .home-img-thumb-overlay{opacity:1}
+    .home-img-thumb-overlay svg{width:22px;height:22px;stroke:currentColor;stroke-width:1.6;fill:none}
+    .home-img-spinner{
+      position:absolute;inset:0;background:rgba(8,16,11,.78);
+      display:flex;align-items:center;justify-content:center;
+      transition:opacity 180ms ease;
+    }
+    .home-img-meta h3{font-size:15px;font-weight:600;color:var(--cream);margin-bottom:4px;letter-spacing:.01em}
+    .home-img-meta p{font-size:12.5px;color:var(--gray);margin-bottom:12px;line-height:1.55}
+    .home-img-meta-row{display:flex;align-items:center;gap:14px;justify-content:space-between;flex-wrap:wrap}
+    .home-img-status{
+      font-size:11px;color:var(--gray);min-height:14px;letter-spacing:.04em;
+      transition:color 200ms ease,opacity 200ms ease;
+    }
+    .home-img-status.ok{color:var(--copper-lt)}
+    .home-img-status.err{color:var(--red-lt)}
+    .home-img-status.busy{color:var(--copper-lt)}
+    .home-img-view{
+      font-size:11px;color:var(--cream-dim);display:inline-flex;align-items:center;gap:6px;
+      letter-spacing:.06em;transition:color 180ms ease;
+    }
+    .home-img-view:hover{color:var(--copper-lt)}
+    .home-img-view svg{width:11px;height:11px;stroke:currentColor;stroke-width:1.8;fill:none}
+
+    @media(max-width:560px){
+      .home-img-card{grid-template-columns:1fr;text-align:left}
+      .home-img-thumb{width:100%;height:160px}
+    }
+
+    /* ─── CATEGORY MODAL IMAGE UPLOADER ─── */
+    .cat-image-uploader{display:flex;gap:14px;align-items:flex-start}
+    .cat-image-preview-wrap{
+      position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;
+      border:1px solid var(--rule);background:var(--bg3);flex-shrink:0;
+    }
+    .cat-image-preview-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+    .cat-image-preview-wrap.empty::after{
+      content:"";position:absolute;inset:0;
+      background:linear-gradient(135deg,var(--bg3) 25%,transparent 25%,transparent 50%,var(--bg3) 50%,var(--bg3) 75%,transparent 75%);
+      background-size:8px 8px;opacity:.4;
+    }
+    .cat-image-fields{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0}
+    .cat-image-fields input[type="file"]{font-size:12.5px;color:var(--cream);cursor:pointer;padding:0}
+    .cat-image-fields input[type="url"]{font-size:12.5px;padding:8px 12px}
+    .cat-image-fields .cat-image-status{font-size:11px;color:var(--gray);margin:0;letter-spacing:.02em;transition:color 200ms ease}
+    .cat-image-fields .cat-image-status.ok{color:var(--copper-lt)}
+    .cat-image-fields .cat-image-status.err{color:var(--red-lt)}
+    .cat-image-fields .cat-image-status.busy{color:var(--copper-lt)}
   </style>
 </head>
 <body>
@@ -360,6 +438,10 @@
       <button class="nav-item" data-section="categories">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="4"/></svg>
         Categorias
+      </button>
+      <button class="nav-item" data-section="home-images">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Imagenes del home
       </button>
       <button class="nav-item" data-section="settings">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -477,6 +559,83 @@
 
     </div>
 
+    <!-- ═══ HOME IMAGES ═══ -->
+    <div id="sec-home-images" class="admin-section">
+      <div class="admin-header" style="align-items:flex-start;flex-direction:column;gap:6px">
+        <h2>Imagenes <em>del home</em></h2>
+        <p class="home-img-intro">Sube nuevas imagenes para las secciones del home. Al subir el archivo, se publica automaticamente — no hace falta guardar.</p>
+      </div>
+      <div class="home-img-list">
+        <article class="home-img-card">
+          <button type="button" class="home-img-thumb" data-trigger="heroImgFile" aria-label="Cambiar imagen del Hero">
+            <img id="heroImgThumb" src="" alt=""/>
+            <div class="home-img-thumb-overlay">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>Cambiar</span>
+            </div>
+            <div class="home-img-spinner hidden" id="heroImgSpinner"><span class="spinner"></span></div>
+          </button>
+          <div class="home-img-meta">
+            <h3>Hero</h3>
+            <p>Imagen grande del lado derecho, junto al titulo de bienvenida.</p>
+            <div class="home-img-meta-row">
+              <span class="home-img-status" id="heroImgStatus"></span>
+              <a class="home-img-view" href="../index.html#hero" target="_blank" rel="noopener">
+                Ver en home
+                <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+            </div>
+          </div>
+          <input type="file" id="heroImgFile" accept="image/*" hidden/>
+        </article>
+
+        <article class="home-img-card">
+          <button type="button" class="home-img-thumb" data-trigger="bannerImgFile" aria-label="Cambiar imagen del banner de credito">
+            <img id="bannerImgThumb" src="" alt=""/>
+            <div class="home-img-thumb-overlay">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>Cambiar</span>
+            </div>
+            <div class="home-img-spinner hidden" id="bannerImgSpinner"><span class="spinner"></span></div>
+          </button>
+          <div class="home-img-meta">
+            <h3>Banner Credito Directo</h3>
+            <p>Imagen de fondo del bloque "Accede a Credito Directo".</p>
+            <div class="home-img-meta-row">
+              <span class="home-img-status" id="bannerImgStatus"></span>
+              <a class="home-img-view" href="../index.html#full-banner" target="_blank" rel="noopener">
+                Ver en home
+                <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+            </div>
+          </div>
+          <input type="file" id="bannerImgFile" accept="image/*" hidden/>
+        </article>
+
+        <article class="home-img-card">
+          <button type="button" class="home-img-thumb" data-trigger="lifestyleImgFile" aria-label="Cambiar imagen de asesoria personalizada">
+            <img id="lifestyleImgThumb" src="" alt=""/>
+            <div class="home-img-thumb-overlay">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>Cambiar</span>
+            </div>
+            <div class="home-img-spinner hidden" id="lifestyleImgSpinner"><span class="spinner"></span></div>
+          </button>
+          <div class="home-img-meta">
+            <h3>Asesoria personalizada</h3>
+            <p>Imagen del bloque "¿No sabes que pedir aun?".</p>
+            <div class="home-img-meta-row">
+              <span class="home-img-status" id="lifestyleImgStatus"></span>
+              <a class="home-img-view" href="../index.html#lifestyle" target="_blank" rel="noopener">
+                Ver en home
+                <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+            </div>
+          </div>
+          <input type="file" id="lifestyleImgFile" accept="image/*" hidden/>
+        </article>
+      </div>
+    </div>
 
     <!-- ═══ SETTINGS ═══ -->
     <div id="sec-settings" class="admin-section">
@@ -561,8 +720,7 @@
               <textarea id="setHeroSubtitle" rows="2" placeholder="Muebles de autor para quienes entienden que cada rincon..." style="min-height:64px"></textarea>
             </div>
             <div class="form-group full">
-              <label for="setHeroImage">Imagen hero URL (o subir en Storage)</label>
-              <input type="url" id="setHeroImage" placeholder="https://...",/>
+              <p style="font-size:11px;color:var(--gray);letter-spacing:.04em;margin:4px 0 0;line-height:1.55">La imagen del Hero se gestiona desde <a href="#" data-go-section="home-images" style="color:var(--copper-lt)">Imagenes del home</a>.</p>
             </div>
           </div>
         </div>
@@ -592,8 +750,7 @@
               <textarea id="setBannerSubtitle" rows="2" style="min-height:64px"></textarea>
             </div>
             <div class="form-group full">
-              <label for="setBannerImage">Imagen banner URL</label>
-              <input type="url" id="setBannerImage" placeholder="https://..."/>
+              <p style="font-size:11px;color:var(--gray);letter-spacing:.04em;margin:4px 0 0;line-height:1.55">La imagen del banner se gestiona desde <a href="#" data-go-section="home-images" style="color:var(--copper-lt)">Imagenes del home</a>.</p>
             </div>
           </div>
         </div>
@@ -642,8 +799,17 @@
           <input type="text" id="catName" placeholder="Comedores" required/>
         </div>
         <div class="form-group full">
-          <label for="catImageUrl">URL imagen portada</label>
-          <input type="url" id="catImageUrl" placeholder="https://images.unsplash.com/..."/>
+          <label>Imagen de portada</label>
+          <div class="cat-image-uploader">
+            <div class="cat-image-preview-wrap empty" id="catImagePreviewWrap">
+              <img id="catImagePreview" src="" alt="" style="display:none"/>
+            </div>
+            <div class="cat-image-fields">
+              <input type="file" id="catImageFile" accept="image/*"/>
+              <input type="url" id="catImageUrl" placeholder="o pega un link de imagen aqui"/>
+              <p class="cat-image-status" id="catImageStatus"></p>
+            </div>
+          </div>
         </div>
         <div class="form-group">
           <label for="catProductCount">Cuenta de productos</label>
