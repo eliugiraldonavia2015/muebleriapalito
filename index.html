@@ -509,6 +509,20 @@
       .banner-pill{display:none}
     }
   </style>
+  <script>
+    // Global image fallback: if any <img> on the page fails to load, swap to
+    // the Muebleria Palito branded placeholder. error events don't bubble, so
+    // we use the capture phase to catch them at the document level.
+    (function(){
+      var PH = "assets/placeholder.svg";
+      document.addEventListener("error", function(e){
+        var t = e.target;
+        if (t && t.tagName === "IMG" && t.src.indexOf(PH) === -1) {
+          t.src = PH;
+        }
+      }, true);
+    })();
+  </script>
 </head>
 <body>
   <div id="loader">

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Muebleria Palito">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0e2517"/>
+      <stop offset="55%" stop-color="#0c1f14"/>
+      <stop offset="100%" stop-color="#091610"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="42%" r="55%">
+      <stop offset="0%" stop-color="#3a8c5c" stop-opacity="0.18"/>
+      <stop offset="60%" stop-color="#3a8c5c" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#3a8c5c" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="11" cy="11" r="1" fill="#5ab87c" fill-opacity="0.08"/>
+    </pattern>
+  </defs>
+
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <rect width="800" height="600" fill="url(#dots)"/>
+  <rect width="800" height="600" fill="url(#glow)"/>
+
+  <g stroke="#3a8c5c" stroke-opacity="0.18" fill="none" stroke-width="1">
+    <line x1="40" y1="40" x2="80" y2="40"/>
+    <line x1="40" y1="40" x2="40" y2="80"/>
+    <line x1="760" y1="40" x2="720" y2="40"/>
+    <line x1="760" y1="40" x2="760" y2="80"/>
+    <line x1="40" y1="560" x2="80" y2="560"/>
+    <line x1="40" y1="560" x2="40" y2="520"/>
+    <line x1="760" y1="560" x2="720" y2="560"/>
+    <line x1="760" y1="560" x2="760" y2="520"/>
+  </g>
+
+  <g transform="translate(400 240)" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif">
+    <g stroke="#5ab87c" stroke-opacity="0.55" fill="none" stroke-width="1.2" stroke-linecap="round">
+      <path d="M -34 -8 C -34 -22, -22 -32, -8 -32 L 8 -32 C 22 -32, 34 -22, 34 -8 L 34 8 C 34 22, 22 32, 8 32 L -8 32 C -22 32, -34 22, -34 8 Z"/>
+      <path d="M -22 -8 L 22 -8 M -22 8 L 22 8" stroke-opacity="0.35"/>
+      <circle cx="0" cy="0" r="3" fill="#5ab87c" fill-opacity="0.7" stroke="none"/>
+    </g>
+  </g>
+
+  <g transform="translate(400 360)" text-anchor="middle">
+    <text font-family="Georgia, 'Times New Roman', serif" font-size="14" letter-spacing="8" fill="#5ab87c" fill-opacity="0.75" y="-14">MUEBLERIA</text>
+    <text font-family="Georgia, 'Times New Roman', serif" font-size="58" font-weight="700" letter-spacing="14" fill="#e8f5ec" y="36">PALITO</text>
+    <line x1="-30" y1="58" x2="30" y2="58" stroke="#3a8c5c" stroke-opacity="0.55" stroke-width="1"/>
+    <text font-family="Georgia, 'Times New Roman', serif" font-size="11" letter-spacing="6" fill="#9dc4aa" fill-opacity="0.55" y="80">OUTLET DE MUEBLES</text>
+  </g>
+</svg>

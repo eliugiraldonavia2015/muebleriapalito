@@ -21,6 +21,7 @@ const ADMIN_PASSWORD = "admin2025";
 const COL_CATEGORIES = "categories";
 const COL_PRODUCTS = "products";
 const COL_SETTINGS = "settings";
+const PLACEHOLDER_IMG = "../assets/placeholder.svg";
 
 let categories = [];
 let products = [];
@@ -268,8 +269,8 @@ function renderCatCards() {
 
     const imgEl = document.createElement("img");
     imgEl.className = "cat-card-img";
-    imgEl.src = imgSrc;
-    imgEl.onerror = () => { imgEl.style.background = "#1a2e1e"; imgEl.removeAttribute("src"); };
+    imgEl.src = imgSrc || PLACEHOLDER_IMG;
+    imgEl.onerror = () => { imgEl.src = PLACEHOLDER_IMG; imgEl.onerror = null; };
 
     const overlay = document.createElement("div");
     overlay.className = "cat-card-overlay";
@@ -361,7 +362,9 @@ async function openCategoryDetail(catId) {
   catProductsShown = 0;
 
   const img = cat.imageUrl || cat.coverImage || "";
-  document.getElementById("detailCatImg").src = img;
+  const detailImg = document.getElementById("detailCatImg");
+  detailImg.src = img || PLACEHOLDER_IMG;
+  detailImg.onerror = () => { detailImg.src = PLACEHOLDER_IMG; detailImg.onerror = null; };
   document.getElementById("detailCatName").textContent = cat.name;
   const subs = cat.subcategoryList || cat.subcategories || [];
   document.getElementById("detailCatMeta").textContent = subs.length + " subcategorias";
@@ -489,9 +492,9 @@ function buildProdMiniCard(p) {
 
   const img = document.createElement("img");
   img.className = "prod-mini-img";
-  img.src = p.primaryImage || p.imageUrl || "";
+  img.src = p.primaryImage || p.imageUrl || PLACEHOLDER_IMG;
   img.loading = "lazy";
-  img.onerror = () => { img.style.background = "#1a2e1e"; };
+  img.onerror = () => { img.src = PLACEHOLDER_IMG; img.onerror = null; };
 
   // badges — float top-left
   const badges = document.createElement("div");
@@ -687,9 +690,9 @@ function renderDashCatOrder() {
     posEl.textContent = String(idx + 1);
 
     const img = document.createElement("img");
-    img.src = cat.imageUrl || cat.coverImage || "";
+    img.src = cat.imageUrl || cat.coverImage || PLACEHOLDER_IMG;
     img.style.cssText = "width:34px;height:34px;border-radius:4px;object-fit:cover;flex-shrink:0";
-    img.onerror = () => { img.style.background = "#1a2e1e"; };
+    img.onerror = () => { img.src = PLACEHOLDER_IMG; img.onerror = null; };
 
     const info = document.createElement("div");
     info.style.cssText = "flex:1;min-width:0";
@@ -811,9 +814,9 @@ function renderDashFeatured() {
       (p.featured ? "rgba(58,140,92,.25);background:rgba(58,140,92,.06);" : "var(--rule);background:transparent;");
 
     const img = document.createElement("img");
-    img.src = p.primaryImage || p.imageUrl || "";
+    img.src = p.primaryImage || p.imageUrl || PLACEHOLDER_IMG;
     img.style.cssText = "width:30px;height:30px;border-radius:3px;object-fit:cover;flex-shrink:0";
-    img.onerror = () => { img.style.background = "#1a2e1e"; };
+    img.onerror = () => { img.src = PLACEHOLDER_IMG; img.onerror = null; };
 
     const info = document.createElement("div");
     info.style.cssText = "flex:1;min-width:0";
@@ -1035,13 +1038,9 @@ async function saveHomeImage(path, url) {
 function setHomeThumb(thumbId, url) {
   const el = document.getElementById(thumbId);
   if (!el) return;
-  if (url) {
-    el.src = url;
-    el.style.display = "block";
-  } else {
-    el.removeAttribute("src");
-    el.style.display = "none";
-  }
+  el.src = url || PLACEHOLDER_IMG;
+  el.style.display = "block";
+  el.onerror = () => { el.src = PLACEHOLDER_IMG; el.onerror = null; };
 }
 
 function populateHomeImagesSection() {
@@ -1347,15 +1346,11 @@ function setCategoryImagePreview(url) {
   const wrap = document.getElementById("catImagePreviewWrap");
   const st = document.getElementById("catImageStatus");
   if (!prev || !wrap) return;
-  if (url && url.trim()) {
-    prev.src = url;
-    prev.style.display = "block";
-    wrap.classList.remove("empty");
-  } else {
-    prev.style.display = "none";
-    prev.removeAttribute("src");
-    wrap.classList.add("empty");
-  }
+  const finalUrl = (url && url.trim()) ? url.trim() : PLACEHOLDER_IMG;
+  prev.src = finalUrl;
+  prev.style.display = "block";
+  prev.onerror = () => { prev.src = PLACEHOLDER_IMG; prev.onerror = null; };
+  wrap.classList.remove("empty");
   if (st) { st.textContent = ""; st.classList.remove("ok", "err", "busy"); }
 }
 
@@ -1621,16 +1616,11 @@ function setProductImagePreview(url) {
   var st = document.getElementById("prodImageStatus");
   var fi = document.getElementById("prodImageFile");
   hid.value = url || "";
-  if (url && url.trim()) {
-    prev.src = url;
-    prev.style.display = "block";
-    st.textContent = "Imagen actual del producto";
-    st.style.color = "var(--gray)";
-    console.log("[IMG] preview set:", url);
-  } else {
-    prev.style.display = "none";
-    st.textContent = "Sin imagen";
-  }
+  prev.src = (url && url.trim()) ? url : PLACEHOLDER_IMG;
+  prev.style.display = "block";
+  prev.onerror = () => { prev.src = PLACEHOLDER_IMG; prev.onerror = null; };
+  st.textContent = (url && url.trim()) ? "Imagen actual del producto" : "Sin imagen — usa el selector para subir";
+  st.style.color = "var(--gray)";
   if (fi) { fi.value = ""; }
 }
 

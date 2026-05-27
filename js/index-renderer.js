@@ -25,6 +25,15 @@ const db = initializeFirestore(app, {
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
+const PLACEHOLDER_IMG = "assets/placeholder.svg";
+
+// Set an <img> src with placeholder fallback if URL is empty OR fails to load.
+function setImageWithFallback(imgEl, url) {
+  if (!imgEl) return;
+  imgEl.src = (url && url.trim()) ? url : PLACEHOLDER_IMG;
+  imgEl.onerror = () => { imgEl.src = PLACEHOLDER_IMG; imgEl.onerror = null; };
+}
+
 // ═══════════════════════════════
 // DATA FETCHING
 // ═══════════════════════════════
@@ -107,8 +116,7 @@ function renderNav(categories) {
 // Hero — image only (texts stay hardcoded in HTML)
 function renderHero(settings) {
   const hero = settings.heroSection || {};
-  const heroImg = $("#hero .hero-img-wrap img");
-  if (heroImg && hero.bgImage) heroImg.src = hero.bgImage;
+  setImageWithFallback($("#hero .hero-img-wrap img"), hero.bgImage);
 }
 
 // Preload the hero image as soon as we know its URL so it overlaps with the JS
@@ -149,7 +157,7 @@ function renderCategories(categories) {
   grid.innerHTML = homeCats.map(c => `
     <a href="catalogo.html?cat=${slugify(c.name)}" class="cat-card">
       <div class="cat-img">
-        <img src="${c.imageUrl || c.coverImage || 'https://via.placeholder.com/800'}" alt="${c.name}" />
+        <img src="${c.imageUrl || c.coverImage || PLACEHOLDER_IMG}" alt="${c.name}" />
       </div>
       <div class="cat-overlay"></div>
       <div class="cat-info">
@@ -165,6 +173,11 @@ function renderCategories(categories) {
       </div>
     </a>
   `).join("");
+
+  // Attach placeholder fallback for any image that fails to load
+  grid.querySelectorAll(".cat-img img").forEach(img => {
+    img.onerror = () => { img.src = PLACEHOLDER_IMG; img.onerror = null; };
+  });
 
   // Add "Ver más" button if more categories exist
   const allCats = categories.length;
@@ -222,7 +235,7 @@ function renderFeaturedProducts(products) {
     return `
     <div class="product-card">
       <div class="product-img-wrap">
-        <img src="${p.primaryImage || 'https://via.placeholder.com/500'}" alt="${p.name}" />
+        <img src="${p.primaryImage || PLACEHOLDER_IMG}" alt="${p.name}" />
         ${badge ? `<span class="${badgeClass}">${badge}</span>` : ""}
         <div class="product-actions">
           <button class="btn-cart btn-add-cart-grid" data-id="${p.id}" data-name="${p.name.replace(/\"/g, '&quot;')}" data-price="${p.price}" data-image="${p.imageUrl || p.primaryImage || (p.images && p.images.length ? p.images[0] : '')}">Agregar al carrito</button>
@@ -247,20 +260,21 @@ function renderFeaturedProducts(products) {
       </div>
     </div>`;
   }).join("");
+
+  // Attach placeholder fallback for any product image that fails to load
+  track.querySelectorAll(".product-img-wrap img").forEach(img => {
+    img.onerror = () => { img.src = PLACEHOLDER_IMG; img.onerror = null; };
+  });
 }
 
 // Promo banner — image only (texts stay hardcoded in HTML)
 function renderBanner(settings) {
-  const img = $("#full-banner img");
-  if (img && settings?.promoBanner?.image) img.src = settings.promoBanner.image;
+  setImageWithFallback($("#full-banner img"), settings?.promoBanner?.image);
 }
 
 // Lifestyle section — image only (texts stay hardcoded in HTML)
 function renderLifestyle(settings) {
-  const lifestyle = settings.lifestyle;
-  if (!lifestyle) return;
-  const img = $("#lifestyle .lifestyle-img img");
-  if (img && lifestyle.imageUrl) img.src = lifestyle.imageUrl;
+  setImageWithFallback($("#lifestyle .lifestyle-img img"), settings?.lifestyle?.imageUrl);
 }
 
 // Stats
