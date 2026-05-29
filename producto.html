@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://muebleria-palito-cdn.b-cdn.net" crossorigin/>
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin/>
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin/>
-  <link rel="modulepreload" href="js/producto-renderer.js?v=20260529p"/>
+  <link rel="modulepreload" href="js/producto-renderer.js?v=20260529q"/>
   <link rel="modulepreload" href="js/firebase-config.js"/>
   <script>
     // Resolve the product image URL as early as possible and fire its download immediately.
@@ -519,7 +519,7 @@
     .credit-modal-cta{position:relative;z-index:1;opacity:0;transform:translateY(12px)}
     .credit-modal-go{display:inline-flex;align-items:center;gap:10px;padding:16px 40px;
       background:#3a8c5c;color:#e8f5ec;font-family:var(--f-body);font-size:12px;letter-spacing:.2em;
-      text-transform:uppercase;font-weight:500;border:none;cursor:pointer;border-radius:8px;
+      text-transform:uppercase;font-weight:500;border:none;cursor:pointer;border-radius:8px;text-decoration:none;
       transition:background .3s,transform .2s,gap .35s;position:relative;overflow:hidden}
     .credit-modal-go::before{content:'';position:absolute;inset:0;
       background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);
@@ -707,17 +707,17 @@
         </p>
         <div class="credit-modal-divider"></div>
         <div class="credit-modal-cta">
-          <button class="credit-modal-go" id="credit-modal-go-btn">
+          <a class="credit-modal-go" id="credit-modal-go-btn" href="https://preaprobados.unicomer.com/solicitudes/palito-outlet-ec" target="_blank" rel="noopener">
             Ir al formulario
             <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <line x1="5" y1="12" x2="19" y2="12"/>
               <polyline points="12 5 19 12 12 19"/>
             </svg>
-          </button>
-          <button class="credit-modal-go" id="credit-modal-asesor-btn" style="margin-top:12px;background:#0d2818;border:1px solid rgba(90,184,124,.35)">
+          </a>
+          <a class="credit-modal-go" id="credit-modal-asesor-btn" href="#" target="_blank" rel="noopener" style="margin-top:12px;background:#0d2818;border:1px solid rgba(90,184,124,.35)">
             Pedir ayuda a asesor
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:16px;height:16px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.133.558 4.133 1.535 5.867L.057 23.5l5.764-1.513A11.938 11.938 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818c-1.96 0-3.782-.537-5.337-1.47l-.383-.228-3.42.897.913-3.32-.25-.404A9.793 9.793 0 012.182 12C2.182 6.573 6.573 2.182 12 2.182c5.426 0 9.818 4.39 9.818 9.818 0 5.427-4.392 9.818-9.818 9.818z"/></svg>
-          </button>
+          </a>
         </div>
         <button class="credit-modal-cancel" id="credit-modal-close">Cancelar</button>
       </div>
@@ -903,6 +903,15 @@
 
     function openModal(e) {
       e.preventDefault();
+      // Armar el enlace de WhatsApp del asesor con la info del producto, para que
+      // el <a> nativo lo abra sin que el bloqueador de pop-ups lo frene.
+      var asesorA = document.getElementById('credit-modal-asesor-btn');
+      if (asesorA) {
+        var pa = getProductInfo();
+        var prodUrlA = location.origin + '/producto.html?id=' + pa.id;
+        var msgA = 'Hola, vengo de la pagina web y necesito ayuda de un asesor con: ' + (pa.name || 'un producto') + ' (ID #' + pa.id + ').\n\nEnlace: ' + prodUrlA;
+        asesorA.href = 'https://wa.me/593989667093?text=' + encodeURIComponent(msgA);
+      }
       modal.style.display = 'flex';
       void modal.offsetHeight;
 
@@ -935,8 +944,8 @@
     }
 
     function onCreditGo() {
-      openTab(creditUrl);
-
+      // El formulario lo abre el enlace nativo (#credit-modal-go-btn es un <a
+      // target="_blank">). Aqui solo avanzamos la animacion al paso 2.
       var p = getProductInfo();
       var prodName = p.name;
       var prodId = p.id;
@@ -1037,14 +1046,6 @@
     var goBtn = document.getElementById('credit-modal-go-btn');
     if (goBtn) goBtn.addEventListener('click', onCreditGo);
 
-    var asesorBtn = document.getElementById('credit-modal-asesor-btn');
-    if (asesorBtn) asesorBtn.addEventListener('click', function () {
-      var p = getProductInfo();
-      var phone = '593989667093';
-      var prodUrl = location.origin + '/producto.html?id=' + p.id;
-      var msg = 'Hola, vengo de la pagina web y necesito ayuda de un asesor con: ' + (p.name || 'un producto') + ' (ID #' + p.id + ').\n\nEnlace: ' + prodUrl;
-      openTab('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg));
-    });
 
     var closeBtn = document.getElementById('credit-modal-close');
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
@@ -1129,7 +1130,7 @@
   })();
   </script>
 
-  <script type="module" src="js/producto-renderer.js?v=20260529p"></script>
+  <script type="module" src="js/producto-renderer.js?v=20260529q"></script>
 
 <script src="js/cart-system.js"></script>
 </body>
