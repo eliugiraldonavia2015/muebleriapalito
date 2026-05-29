@@ -36,8 +36,9 @@
 | `featured` | boolean | If true, appears in homepage featured carousel |
 | `displayOrder` | number | Sort order within category |
 | `badge` | string (optional) | Custom badge text (overrides onSale/isNew badge) |
-| `colors` | array | Array of hex color codes for color swatches |
-| `material` | string (optional) | e.g., "Madera", "Tapizado" |
+| `colors` | array | Variaciones: `[{ hex, image }]` — hex de la paleta estándar + foto de esa variación. La foto de la 1ª variación se copia a `primaryImage`. |
+| `material` | string (optional, legacy) | Material único (formato viejo; se lee vía normalizeMaterials) |
+| `materials` | array | Materiales a nivel de ítem, elegidos de `settings.materialList` |
 | `available` | boolean | If false, hidden from catalog |
 | `createdAt` | timestamp | — |
 | `updatedAt` | timestamp | — |
@@ -62,6 +63,8 @@
 | `siteStats` | object | `{ categories: str, products: str, countries: str }` |
 | `newsletter` | object | `{ title: str, subtitle: str }` |
 | `footer` | object | `{ tagline: str }` |
+| `colorPalette` | array | Paleta de colores estándar: `[{ hex, name }]` (name solo interno) |
+| `materialList` | array | Lista de materiales estándar: `["Madera", ...]` |
 
 ---
 
