@@ -414,7 +414,7 @@ function renderFeaturedProducts(products) {
     const badgeClass = p.onSale ? "product-badge" : (p.isNew ? "product-badge sale" : "product-badge sale");
 
     return `
-    <div class="product-card">
+    <div class="product-card" data-id="${p.id}" style="cursor:pointer">
       <div class="product-img-wrap">
         <img src="${p.primaryImage || PLACEHOLDER_IMG}" alt="${p.name}" />
         ${badge ? `<span class="${badgeClass}">${badge}</span>` : ""}
@@ -445,6 +445,16 @@ function renderFeaturedProducts(products) {
   // Attach placeholder fallback for any product image that fails to load
   track.querySelectorAll(".product-img-wrap img").forEach(img => {
     img.onerror = () => { img.src = PLACEHOLDER_IMG; img.onerror = null; };
+  });
+
+  // Make the whole card clickable — navigates to producto.html?id=<id>.
+  // Clicks on inner buttons/links (cart, wish, etc.) do NOT trigger navigation.
+  track.querySelectorAll(".product-card").forEach(card => {
+    card.addEventListener("click", (e) => {
+      if (e.target.closest("button, a")) return;
+      const id = card.dataset.id;
+      if (id) window.location.href = "producto.html?id=" + encodeURIComponent(id);
+    });
   });
 }
 
