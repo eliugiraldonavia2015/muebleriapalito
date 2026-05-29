@@ -7,8 +7,8 @@ import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260529e";
-import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260529e";
+import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260529f";
+import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260529f";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -193,8 +193,8 @@ async function runLoader() {
   mountCategoryImageUploader();
   document.getElementById("lastSync").textContent = "Sincronizado: " + new Date().toLocaleTimeString("es-EC");
   // Marcador de build escrito por el JS realmente cargado: si NO dice "build
-  // v29e", tu navegador esta corriendo un admin.js viejo en cache → Cmd+Shift+R.
-  const __BUILD = "v29e";
+  // v29f", tu navegador esta corriendo un admin.js viejo en cache → Cmd+Shift+R.
+  const __BUILD = "v29f";
   const __bv = document.getElementById("buildVersion");
   if (__bv) { __bv.textContent = "build " + __BUILD; __bv.title = "Si no dice " + __BUILD + ", recarga con Cmd+Shift+R"; }
 
@@ -3075,7 +3075,14 @@ function populateCatSelect(currentVal = "") {
     opt.textContent = c.name;
     sel.appendChild(opt);
   });
-  if (currentVal) sel.value = currentVal;
+  // Match case-insensitive: el producto guarda categoryId en minusculas pero
+  // los IDs de categoria estan capitalizados (ej. "Salas"). Sin esto el select
+  // se reiniciaba al editar.
+  if (currentVal) {
+    const m = [...sel.options].find(o => o.value.toLowerCase() === String(currentVal).toLowerCase());
+    sel.value = m ? m.value : currentVal;
+  }
+  return sel.value;
 }
 
 function populateSubcategorySelect(catId, currentVal = "") {
@@ -3095,7 +3102,10 @@ function populateSubcategorySelect(catId, currentVal = "") {
       sel.appendChild(opt);
     });
   }
-  if (currentVal) sel.value = currentVal;
+  if (currentVal) {
+    const m = [...sel.options].find(o => o.value.toLowerCase() === String(currentVal).toLowerCase());
+    sel.value = m ? m.value : currentVal;
+  }
 }
 
 document.getElementById("prodCategory").addEventListener("change", e => {
@@ -3149,8 +3159,10 @@ function openProductDrawer(id = null, preCatId = null) {
     editingProdMaterials = Array.isArray(p.materials) ? [...p.materials]
                           : (typeof p.material === "string" && p.material.trim() ? [p.material.trim()] : []);
     editingProdQrUrl = p.qrUrl || "";
-    populateCatSelect(p.categoryId || "");
-    populateSubcategorySelect(p.categoryId || "", p.subcategory || "");
+    // populateCatSelect devuelve el id real resuelto (case-insensitive); se usa
+    // para poblar y seleccionar la subcategoria correctamente.
+    const realCatId = populateCatSelect(p.categoryId || "");
+    populateSubcategorySelect(realCatId, p.subcategory || "");
   } else {
     console.log("[DRAWER] New product, preCatId:", preCatId);
     document.getElementById("prodModalTitle").textContent = "Nuevo producto";
@@ -3447,6 +3459,41 @@ function renderMaterialChips() {
   });
 }
 
+// Animacion de confirmacion al guardar/publicar un producto: check verde
+// centrado que entra, se dibuja y se va solo (~1.4s). Usa GSAP (ya cargado).
+function showSaveConfirmation(text) {
+  const overlay = document.createElement("div");
+  overlay.style.cssText = "position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(10,12,11,.55);backdrop-filter:blur(2px)";
+  const card = document.createElement("div");
+  card.style.cssText = "background:var(--charcoal-deep,#161a18);border:1px solid var(--rule,rgba(255,255,255,.12));border-radius:18px;padding:30px 40px;display:flex;flex-direction:column;align-items:center;gap:14px;box-shadow:0 24px 60px rgba(0,0,0,.45)";
+  card.innerHTML =
+    '<svg viewBox="0 0 52 52" style="width:60px;height:60px">' +
+      '<circle class="__chkC" cx="26" cy="26" r="24" fill="none" stroke="#3a8c5c" stroke-width="3"/>' +
+      '<path class="__chkT" fill="none" stroke="#3a8c5c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" d="M14 27 l8 8 l16 -18"/>' +
+    '</svg>' +
+    '<div style="font-size:15px;font-weight:600;color:var(--cream,#f3efe7);letter-spacing:.02em">' + text + '</div>';
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+
+  const circle = card.querySelector(".__chkC");
+  const tick = card.querySelector(".__chkT");
+  const cLen = 2 * Math.PI * 24, tLen = 40;
+  circle.style.strokeDasharray = cLen; circle.style.strokeDashoffset = cLen;
+  tick.style.strokeDasharray = tLen; tick.style.strokeDashoffset = tLen;
+
+  const done = () => overlay.remove();
+  if (window.gsap) {
+    gsap.set(card, { scale: 0.85, autoAlpha: 0 });
+    const tl = gsap.timeline({ onComplete: () => gsap.to(overlay, { autoAlpha: 0, duration: 0.3, delay: 0.7, onComplete: done }) });
+    tl.to(card, { scale: 1, autoAlpha: 1, duration: 0.3, ease: "back.out(1.7)" })
+      .to(circle, { strokeDashoffset: 0, duration: 0.4, ease: "power2.out" }, 0.05)
+      .to(tick, { strokeDashoffset: 0, duration: 0.3, ease: "power2.out" }, 0.32);
+  } else {
+    circle.style.strokeDashoffset = 0; tick.style.strokeDashoffset = 0;
+    setTimeout(done, 1400);
+  }
+}
+
 document.getElementById("productForm").addEventListener("submit", async e => {
   e.preventDefault();
   const name = document.getElementById("prodName").value.trim();
@@ -3516,6 +3563,7 @@ document.getElementById("productForm").addEventListener("submit", async e => {
   }
 
   try {
+    let confirmText;
     if (editingProdId) {
       await updateDoc(doc(db, COL_PRODUCTS, editingProdId), data);
       // Reflect change in local cache so dashboard reorder works without a reload
@@ -3525,13 +3573,16 @@ document.getElementById("productForm").addEventListener("submit", async e => {
         if (data.featured && data.featuredOrder !== undefined) local.featuredOrder = data.featuredOrder;
       }
       notify("OK004", name);
+      confirmText = "Producto actualizado";
     } else {
       data.createdAt = serverTimestamp();
       await addDoc(collection(db, COL_PRODUCTS), data);
       notify("OK004", "Nuevo: " + name);
+      confirmText = "Producto publicado";
     }
     regenerateProductsManifest(); // fire-and-forget, don't block UI
     closeProductDrawer();
+    showSaveConfirmation(confirmText);
     renderDashboard();
     if (currentDetailCatId) await loadCategoryProducts(currentDetailCatId);
   } catch (err) {
