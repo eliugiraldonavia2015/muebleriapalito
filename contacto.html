@@ -4,9 +4,6 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Contacto — Muebleria Palito Outlet</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <style>
@@ -15,10 +12,12 @@
       --bg:#0c1f14;--bg2:#122a1c;--cream:#e8f5ec;--cream-dim:#9dc4aa;
       --copper:#3a8c5c;--rule:rgba(160,220,180,.12);
       --gold:#9e7e2a;--gold-dk:#6b4f18;
-      --f-display:'Cormorant Garamond',Georgia,serif;--f-wide:'Bebas Neue',sans-serif;
-      --f-body:'DM Sans',sans-serif;--ease-silk:cubic-bezier(.22,.88,.12,1);
+      --f-display:'Calibri',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+      --f-wide:'Calibri',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+      --f-body:'Calibri',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+      --ease-silk:cubic-bezier(.22,.88,.12,1);
     }
-    body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-weight:300;overflow-x:hidden}
+    body{background:var(--bg);color:var(--cream);font-family:var(--f-body);font-weight:400;overflow-x:hidden}
     a{color:inherit;text-decoration:none}
     img{display:block;width:100%;height:100%;object-fit:cover}
     button{border:none;background:none;font-family:var(--f-body);cursor:pointer}
@@ -45,7 +44,7 @@
     .header-bg-num{position:absolute;right:clamp(24px,5vw,80px);top:50%;transform:translateY(-50%);font-family:var(--f-wide);font-size:clamp(120px,20vw,280px);color:rgba(160,220,180,.03);line-height:1;pointer-events:none;user-select:none}
     .sec-label{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--copper);display:flex;align-items:center;gap:10px;margin-bottom:20px}
     .sec-label::before{content:'';width:24px;height:1px;background:var(--copper)}
-    .page-title{font-family:var(--f-display);font-size:clamp(52px,9vw,120px);font-weight:300;line-height:.9}
+    .page-title{font-family:var(--f-display);font-size:clamp(42px,7.2vw,96px);font-weight:700;line-height:1}
     .page-title em{font-style:italic;color:var(--gold)}
     .page-sub{font-size:15px;color:var(--cream-dim);line-height:1.7;max-width:520px;margin-top:24px}
 
@@ -54,7 +53,7 @@
 
     /* FORM SIDE */
     .form-side{padding:clamp(60px,8vw,100px) clamp(40px,6vw,80px);border-right:1px solid var(--rule)}
-    .form-title{font-family:var(--f-display);font-size:clamp(28px,3.5vw,48px);font-weight:300;line-height:1;margin-bottom:40px}
+    .form-title{font-family:var(--f-display);font-size:clamp(22px,2.8vw,38px);font-weight:700;line-height:1.05;margin-bottom:40px}
     .form-title em{font-style:italic;color:var(--gold)}
     .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px}
     .form-group{display:flex;flex-direction:column;gap:8px}
@@ -71,7 +70,7 @@
 
     /* INFO SIDE */
     .info-side{padding:clamp(60px,8vw,100px) clamp(40px,6vw,80px);display:flex;flex-direction:column;gap:48px;background:var(--bg2)}
-    .info-heading{font-family:var(--f-display);font-size:clamp(28px,3.5vw,48px);font-weight:300;line-height:1}
+    .info-heading{font-family:var(--f-display);font-size:clamp(22px,2.8vw,38px);font-weight:700;line-height:1.05}
     .info-heading em{font-style:italic;color:var(--gold)}
     .contact-cards{display:flex;flex-direction:column;gap:20px}
     .contact-card{display:flex;gap:20px;align-items:flex-start;padding:24px;border:1px solid var(--rule);transition:border-color .3s,background .3s}
@@ -97,7 +96,7 @@
     .stores-section{padding:clamp(80px,10vw,140px) clamp(24px,5vw,80px);border-top:1px solid var(--rule)}
     .stores-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:56px;gap:24px}
     .stores-header-left{display:flex;flex-direction:column;gap:16px}
-    .stores-heading{font-family:var(--f-display);font-size:clamp(36px,5vw,72px);font-weight:300;line-height:1}
+    .stores-heading{font-family:var(--f-display);font-size:clamp(29px,4vw,58px);font-weight:700;line-height:1.05}
     .stores-heading em{font-style:italic;color:var(--gold)}
     .country-tabs{display:flex;gap:0;border:1px solid var(--rule)}
     .tab-btn{padding:12px 28px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--cream-dim);transition:background .25s,color .25s;cursor:pointer}
@@ -107,7 +106,7 @@
     .store-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--copper),transparent);transform:scaleX(0);transform-origin:left;transition:transform .45s var(--ease-silk)}
     .store-card:hover{border-color:var(--copper);background:rgba(58,140,92,.04)}
     .store-card:hover::before{transform:scaleX(1)}
-    .store-city{font-family:var(--f-wide);font-size:22px;letter-spacing:.06em}
+    .store-city{font-family:var(--f-wide);font-size:18px;letter-spacing:.06em;font-weight:700}
     .store-addr{font-size:13px;color:var(--cream-dim);line-height:1.6}
     .store-hours{font-size:12px;color:var(--cream-dim);display:flex;align-items:center;gap:8px}
     .store-hours::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--copper);flex-shrink:0}
