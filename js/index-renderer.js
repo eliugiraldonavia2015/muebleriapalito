@@ -15,6 +15,7 @@ import {
   orderBy
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
+import { normalizeColor } from "./product-normalizers.js";
 
 // ─── INIT FIREBASE ───
 const app = initializeApp(firebaseConfig);
@@ -431,7 +432,7 @@ function renderFeaturedProducts(products) {
         <div class="product-cat">${catName}</div>
         <div class="product-name">${p.name}</div>
         ${p.colors && p.colors.length > 0 ? `<div class="product-colors">
-          ${p.colors.map((c, i) => `<div class="color-swatch${i === 0 ? " active" : ""}" style="background:${c}"></div>`).join("")}
+          ${p.colors.map((c, i) => `<div class="color-swatch${i === 0 ? " active" : ""}" style="background:${normalizeColor(c).hex}"></div>`).join("")}
         </div>` : ""}
         <div class="product-price">
           <span class="price-current">${formatPrice(p.price)}</span>

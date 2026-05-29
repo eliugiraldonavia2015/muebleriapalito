@@ -10,6 +10,7 @@ import {
   collection, getDocs, query, orderBy, doc, getDoc
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
+import { normalizeColor } from "./product-normalizers.js";
 
 const app = initializeApp(firebaseConfig);
 // IndexedDB cache — second visit serves docs from local cache before network confirms.
@@ -79,7 +80,7 @@ function badgeHTML(product) {
 function colorsHTML(colors) {
   if (!colors || !colors.length) return "";
   return `<div class="product-colors-mini">` + colors.map((c, i) =>
-    `<div class="dot${i === 0 ? " active" : ""}" style="background:${c}"></div>`
+    `<div class="dot${i === 0 ? " active" : ""}" style="background:${normalizeColor(c).hex}"></div>`
   ).join("") + `</div>`;
 }
 
