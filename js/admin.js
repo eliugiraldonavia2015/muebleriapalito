@@ -49,6 +49,7 @@ let settings = {};
 let dashFeaturedCatFilter = "all";
 let editingCatSubs = [];
 let editingProdColors = [];
+let editingProdMaterials = [];
 let editingCatId = null;
 let editingProdId = null;
 let storeCount = 0;
@@ -3083,6 +3084,8 @@ function openProductDrawer(id = null, preCatId = null) {
     editingProdColors = (p.colors || []).map(c =>
       (c && typeof c === "object") ? { hex: c.hex || "", image: c.image || null }
                                    : { hex: c || "", image: null });
+    editingProdMaterials = Array.isArray(p.materials) ? [...p.materials]
+                          : (typeof p.material === "string" && p.material.trim() ? [p.material.trim()] : []);
     populateCatSelect(p.categoryId || "");
     populateSubcategorySelect(p.categoryId || "", p.subcategory || "");
   } else {
@@ -3091,10 +3094,12 @@ function openProductDrawer(id = null, preCatId = null) {
     document.getElementById("productForm").reset();
     document.getElementById("prodEditId").value = "";
     document.getElementById("prodColors").replaceChildren();
+    editingProdMaterials = [];
     populateCatSelect(preCatId || "");
     populateSubcategorySelect(preCatId || "", "");
   }
   renderColorSwatches();
+  renderMaterialChips();
   document.getElementById("deleteProductBtn").style.display = id ? "inline-flex" : "none";
   console.log("[DRAWER] Showing overlay + animating drawer...");
   overlay.style.display = "flex";
@@ -3239,6 +3244,36 @@ function renderColorSwatches() {
   });
 }
 
+// Dibuja la lista de materiales estándar (settings.materialList) como chips
+// toggle. Los marcados quedan en editingProdMaterials.
+function renderMaterialChips() {
+  const container = document.getElementById("prodMaterials");
+  const hint = document.getElementById("materialHint");
+  const list = (settings.materialList || []);
+  container.replaceChildren();
+  if (!list.length) {
+    hint.textContent = "No hay materiales. Agrega materiales en Configuracion → Materiales estandar.";
+    return;
+  }
+  hint.textContent = "Toca los materiales de este producto (puedes elegir varios).";
+  list.forEach(mat => {
+    const on = editingProdMaterials.includes(mat);
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.textContent = mat;
+    chip.style.cssText = "padding:5px 12px;border-radius:999px;cursor:pointer;font-size:12px;border:1px solid " +
+      (on ? "var(--copper)" : "var(--rule)") + ";background:" + (on ? "var(--copper)" : "none") +
+      ";color:" + (on ? "var(--bg)" : "var(--cream-dim)");
+    chip.addEventListener("click", () => {
+      const idx = editingProdMaterials.indexOf(mat);
+      if (idx === -1) editingProdMaterials.push(mat);
+      else editingProdMaterials.splice(idx, 1);
+      renderMaterialChips();
+    });
+    container.appendChild(chip);
+  });
+}
+
 document.getElementById("productForm").addEventListener("submit", async e => {
   e.preventDefault();
   const name = document.getElementById("prodName").value.trim();
@@ -3283,6 +3318,7 @@ document.getElementById("productForm").addEventListener("submit", async e => {
     featured: document.getElementById("prodFeatured").checked,
     isNew: document.getElementById("prodNew").checked,
     colors: [...editingProdColors],
+    materials: [...editingProdMaterials],
     available: true,
     updatedAt: serverTimestamp(),
   };
