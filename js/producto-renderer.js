@@ -83,23 +83,20 @@ function loadQrLib() {
 function buildQr(qrUrl) {
   let box = $("#prod-qr");
   if (!box) {
-    const panel = $("#img-panel");
-    if (!panel) return;
-    const strip = $("#thumb-strip");
+    // Sobrepuesto dentro de la imagen (esquina superior derecha).
+    const wrap = $("#img-wrap") || $("#img-panel");
+    if (!wrap) return;
     box = document.createElement("div");
     box.className = "prod-qr";
     box.id = "prod-qr";
-    if (strip && strip.parentNode === panel) panel.insertBefore(box, strip.nextSibling);
-    else panel.appendChild(box);
+    wrap.appendChild(box);
   }
   if (!qrUrl) { box.classList.remove("show"); box.replaceChildren(); return; }
   loadQrLib().then(qrcode => {
     const qr = qrcode(0, "M");
     qr.addData(qrUrl);
     qr.make();
-    box.innerHTML =
-      '<div class="qr-box">' + qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true }) + '</div>' +
-      '<div class="qr-cap">Escaneame</div>';
+    box.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
     box.classList.add("show");
   }).catch(() => { box.classList.remove("show"); });
 }
