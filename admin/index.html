@@ -1016,10 +1016,6 @@
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="4"/></svg>
         Categorias
       </button>
-      <button class="nav-item" data-section="home-images">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        Imagenes del home
-      </button>
       <button class="nav-item" data-section="settings">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         Configuracion
@@ -1055,7 +1051,7 @@
         </div>
         <div class="dash-hero-right">
           <div class="dash-sync" id="lastSync">Sincronizado: --</div>
-          <div class="dash-sync" id="buildVersion" title="Si no dice v28d, recarga sin cache">build v28d</div>
+          <div class="dash-sync" id="buildVersion" title="Si no dice v28e, recarga sin cache">build v28e</div>
         </div>
       </div>
 
@@ -1098,11 +1094,78 @@
         <header class="dash-block-head">
           <div>
             <h3 class="dash-block-title">Imagenes del home</h3>
-            <p class="dash-block-sub">Click en cualquier imagen para reemplazarla. Se publica al instante.</p>
+            <p class="dash-block-sub">Hero, banner y bloque de asesoria. Subir reemplaza al instante en el sitio.</p>
           </div>
-          <a href="#" class="dash-block-link" data-go-section="home-images">Ver todas →</a>
         </header>
-        <div class="dash-img-strip" id="dashboardHomeImgs"></div>
+        <div class="home-img-list">
+          <article class="home-img-card hero-slides-card" id="heroSlidesCard">
+            <div class="hero-slides-head">
+              <div>
+                <h3>Hero <span style="opacity:.6;font-weight:400">(slider)</span></h3>
+                <p>Imagenes (5s c/u) y videos (duracion completa). Avance automatico, el usuario puede pasar manual con las flechas.</p>
+              </div>
+              <a class="home-img-view" href="../index.html#hero" target="_blank" rel="noopener">
+                Ver en home
+                <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+            </div>
+            <div class="hero-slides-list" id="heroSlidesList"></div>
+            <div class="hero-slides-foot">
+              <button type="button" class="btn btn-ghost btn-sm" id="addHeroSlideBtn">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Agregar slide (imagen o video)
+              </button>
+              <span class="home-img-status" id="heroSlidesStatus"></span>
+            </div>
+            <input type="file" id="heroSlideFile" accept="image/*,video/*" hidden/>
+          </article>
+
+          <article class="home-img-card">
+            <button type="button" class="home-img-thumb" data-trigger="bannerImgFile" aria-label="Cambiar imagen del banner de credito">
+              <img id="bannerImgThumb" src="" alt=""/>
+              <div class="home-img-thumb-overlay">
+                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span>Cambiar</span>
+              </div>
+              <div class="home-img-spinner hidden" id="bannerImgSpinner"><span class="spinner"></span></div>
+            </button>
+            <div class="home-img-meta">
+              <h3>Banner Credito Directo</h3>
+              <p>Imagen de fondo del bloque "Accede a Credito Directo".</p>
+              <div class="home-img-meta-row">
+                <span class="home-img-status" id="bannerImgStatus"></span>
+                <a class="home-img-view" href="../index.html#full-banner" target="_blank" rel="noopener">
+                  Ver en home
+                  <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </a>
+              </div>
+            </div>
+            <input type="file" id="bannerImgFile" accept="image/*" hidden/>
+          </article>
+
+          <article class="home-img-card">
+            <button type="button" class="home-img-thumb" data-trigger="lifestyleImgFile" aria-label="Cambiar imagen de asesoria personalizada">
+              <img id="lifestyleImgThumb" src="" alt=""/>
+              <div class="home-img-thumb-overlay">
+                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span>Cambiar</span>
+              </div>
+              <div class="home-img-spinner hidden" id="lifestyleImgSpinner"><span class="spinner"></span></div>
+            </button>
+            <div class="home-img-meta">
+              <h3>Asesoria personalizada</h3>
+              <p>Imagen del bloque "¿No sabes que pedir aun?".</p>
+              <div class="home-img-meta-row">
+                <span class="home-img-status" id="lifestyleImgStatus"></span>
+                <a class="home-img-view" href="../index.html#lifestyle" target="_blank" rel="noopener">
+                  Ver en home
+                  <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </a>
+              </div>
+            </div>
+            <input type="file" id="lifestyleImgFile" accept="image/*" hidden/>
+          </article>
+        </div>
       </section>
 
       <!-- CATEGORIES VISUAL GRID -->
@@ -1178,82 +1241,6 @@
     </div>
 
     <!-- ═══ HOME IMAGES ═══ -->
-    <div id="sec-home-images" class="admin-section">
-      <div class="admin-header" style="align-items:flex-start;flex-direction:column;gap:6px">
-        <h2>Imagenes <em>del home</em></h2>
-        <p class="home-img-intro">Sube nuevas imagenes para las secciones del home. Al subir el archivo, se publica automaticamente — no hace falta guardar.</p>
-      </div>
-      <div class="home-img-list">
-        <article class="home-img-card hero-slides-card" id="heroSlidesCard">
-          <div class="hero-slides-head">
-            <div>
-              <h3>Hero <span style="opacity:.6;font-weight:400">(slider)</span></h3>
-              <p>Imagenes (5s c/u) y videos (duracion completa). Avance automatico, el usuario puede pasar manual con las flechas.</p>
-            </div>
-            <a class="home-img-view" href="../index.html#hero" target="_blank" rel="noopener">
-              Ver en home
-              <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-          <div class="hero-slides-list" id="heroSlidesList"></div>
-          <div class="hero-slides-foot">
-            <button type="button" class="btn btn-ghost btn-sm" id="addHeroSlideBtn">
-              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Agregar slide (imagen o video)
-            </button>
-            <span class="home-img-status" id="heroSlidesStatus"></span>
-          </div>
-          <input type="file" id="heroSlideFile" accept="image/*,video/*" hidden/>
-        </article>
-
-        <article class="home-img-card">
-          <button type="button" class="home-img-thumb" data-trigger="bannerImgFile" aria-label="Cambiar imagen del banner de credito">
-            <img id="bannerImgThumb" src="" alt=""/>
-            <div class="home-img-thumb-overlay">
-              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              <span>Cambiar</span>
-            </div>
-            <div class="home-img-spinner hidden" id="bannerImgSpinner"><span class="spinner"></span></div>
-          </button>
-          <div class="home-img-meta">
-            <h3>Banner Credito Directo</h3>
-            <p>Imagen de fondo del bloque "Accede a Credito Directo".</p>
-            <div class="home-img-meta-row">
-              <span class="home-img-status" id="bannerImgStatus"></span>
-              <a class="home-img-view" href="../index.html#full-banner" target="_blank" rel="noopener">
-                Ver en home
-                <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              </a>
-            </div>
-          </div>
-          <input type="file" id="bannerImgFile" accept="image/*" hidden/>
-        </article>
-
-        <article class="home-img-card">
-          <button type="button" class="home-img-thumb" data-trigger="lifestyleImgFile" aria-label="Cambiar imagen de asesoria personalizada">
-            <img id="lifestyleImgThumb" src="" alt=""/>
-            <div class="home-img-thumb-overlay">
-              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              <span>Cambiar</span>
-            </div>
-            <div class="home-img-spinner hidden" id="lifestyleImgSpinner"><span class="spinner"></span></div>
-          </button>
-          <div class="home-img-meta">
-            <h3>Asesoria personalizada</h3>
-            <p>Imagen del bloque "¿No sabes que pedir aun?".</p>
-            <div class="home-img-meta-row">
-              <span class="home-img-status" id="lifestyleImgStatus"></span>
-              <a class="home-img-view" href="../index.html#lifestyle" target="_blank" rel="noopener">
-                Ver en home
-                <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              </a>
-            </div>
-          </div>
-          <input type="file" id="lifestyleImgFile" accept="image/*" hidden/>
-        </article>
-      </div>
-    </div>
-
     <!-- ═══ SETTINGS ═══ -->
     <div id="sec-settings" class="admin-section">
       <div class="admin-header">
@@ -1337,7 +1324,7 @@
               <textarea id="setHeroSubtitle" rows="2" placeholder="Muebles de autor para quienes entienden que cada rincon..." style="min-height:64px"></textarea>
             </div>
             <div class="form-group full">
-              <p style="font-size:11px;color:var(--gray);letter-spacing:.04em;margin:4px 0 0;line-height:1.55">La imagen del Hero se gestiona desde <a href="#" data-go-section="home-images" style="color:var(--copper-lt)">Imagenes del home</a>.</p>
+              <p style="font-size:11px;color:var(--gray);letter-spacing:.04em;margin:4px 0 0;line-height:1.55">Las imagenes y videos del slider del Hero se gestionan desde <a href="#" data-go-section="dashboard" style="color:var(--copper-lt)">Dashboard</a>.</p>
             </div>
           </div>
         </div>
@@ -1367,7 +1354,7 @@
               <textarea id="setBannerSubtitle" rows="2" style="min-height:64px"></textarea>
             </div>
             <div class="form-group full">
-              <p style="font-size:11px;color:var(--gray);letter-spacing:.04em;margin:4px 0 0;line-height:1.55">La imagen del banner se gestiona desde <a href="#" data-go-section="home-images" style="color:var(--copper-lt)">Imagenes del home</a>.</p>
+              <p style="font-size:11px;color:var(--gray);letter-spacing:.04em;margin:4px 0 0;line-height:1.55">La imagen del banner se gestiona desde <a href="#" data-go-section="dashboard" style="color:var(--copper-lt)">Dashboard</a>.</p>
             </div>
           </div>
         </div>
@@ -1577,6 +1564,6 @@
   </div>
 </div>
 
-<script type="module" src="../js/admin.js?v=20260528d"></script>
+<script type="module" src="../js/admin.js?v=20260528e"></script>
 </body>
 </html>

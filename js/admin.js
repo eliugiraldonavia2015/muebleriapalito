@@ -7,8 +7,8 @@ import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260528d";
-import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260528d";
+import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260528e";
+import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260528e";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -228,7 +228,7 @@ function goToSection(section) {
     document.getElementById("catListView").style.display = "block";
     document.getElementById("catDetailView").style.display = "none";
   }
-  if (section === "home-images") {
+  if (section === "dashboard") {
     populateHomeImagesSection();
   }
 }
@@ -671,7 +671,7 @@ function renderDashboard() {
   document.getElementById("statFeatured").textContent = allProds.filter(p => p.featured).length;
   document.getElementById("statOnSale").textContent = allProds.filter(p => p.originalPrice).length;
   renderDashAudit();
-  renderDashHomeImgs();
+  populateHomeImagesSection();
   renderDashCatOrder();
   renderDashFeatured();
 }
