@@ -3075,7 +3075,6 @@ function openProductDrawer(id = null, preCatId = null) {
     document.getElementById("prodEditId").value = id;
     document.getElementById("prodName").value = p.name || "";
     document.getElementById("prodDesc").value = p.description || "";
-    document.getElementById("prodImage").value = p.primaryImage || p.imageUrl || "";
     document.getElementById("prodDisplayOrder").value = p.displayOrder ?? "";
     document.getElementById("prodPrice").value = p.price || "";
     document.getElementById("prodOriginalPrice").value = p.originalPrice || "";
@@ -3118,16 +3117,16 @@ function closeProductDrawer() {
   console.groupEnd();
 }
 document.getElementById("closeProductDrawerBtn").addEventListener("click", closeProductDrawer);
-// Abre el selector de archivo para la variación i, recorta 3:4, sube a Bunny y
-// guarda la URL en editingProdColors[i].image.
-async function pickVariationPhoto(i) {
+// Abre el selector de archivo para la variación hex, recorta 3:4, sube a Bunny y
+// guarda la URL en la variación correspondiente de editingProdColors.
+async function pickVariationPhoto(hex) {
   const input = document.createElement("input");
   input.type = "file";
   input.accept = "image/*";
   input.addEventListener("change", async () => {
     const file = input.files[0];
     if (!file) return;
-    const statusEl = document.querySelector('[data-var-status="' + i + '"]');
+    const statusEl = document.querySelector('[data-var-status="' + hex + '"]');
     const setStatus = (t, color) => { if (statusEl) { statusEl.textContent = t; statusEl.style.color = color || "var(--gray)"; } };
     setStatus("Abriendo recorte...", "var(--copper-lt)");
     const blob = await openCropModal(file, CROP_RATIO.product, "el producto");
@@ -3138,7 +3137,8 @@ async function pickVariationPhoto(i) {
     showUploadToast("busy", "Subiendo a Bunny CDN...", Math.round(toUpload.size / 1024) + " KB · variacion");
     try {
       const cdnUrl = await uploadImageToBunny(toUpload, "products");
-      if (editingProdColors[i]) editingProdColors[i].image = cdnUrl;
+      const target = editingProdColors.find(v => v.hex === hex);
+      if (target) target.image = cdnUrl;
       setStatus("OK foto subida", "var(--copper-lt)");
       showUploadToast("ok", "Foto subida", "Foto de la variacion guardada en el CDN.");
       renderColorSwatches();
@@ -3198,9 +3198,10 @@ function renderColorSwatches() {
   renderPaletteChips();
   const container = document.getElementById("prodColors");
   container.replaceChildren();
+  const primaryHex = (editingProdColors.find(c => c.image) || {}).hex;
+  const palette = (settings.colorPalette || []);
   editingProdColors.forEach((v, i) => {
-    const palette = (settings.colorPalette || []);
-    const name = (palette.find(p => p.hex === v.hex) || {}).name || v.hex;
+    const name = (palette.find(pc => pc.hex === v.hex) || {}).name || v.hex;
 
     const wrap = document.createElement("div");
     wrap.className = "color-input-wrap";
@@ -3210,7 +3211,7 @@ function renderColorSwatches() {
     dot.style.cssText = "width:24px;height:24px;border-radius:4px;border:1px solid var(--rule);flex-shrink:0;background:" + v.hex;
 
     const label = document.createElement("span");
-    label.textContent = name + (i === 0 ? " (principal)" : "");
+    label.textContent = name + (v.hex && v.hex === primaryHex ? " (principal)" : "");
     label.style.cssText = "font-size:12px;min-width:90px";
 
     const thumb = document.createElement("img");
@@ -3221,10 +3222,10 @@ function renderColorSwatches() {
     fileBtn.type = "button";
     fileBtn.className = "btn btn-ghost btn-sm";
     fileBtn.textContent = v.image ? "Cambiar foto" : "Subir foto";
-    fileBtn.addEventListener("click", () => pickVariationPhoto(i));
+    fileBtn.addEventListener("click", () => pickVariationPhoto(v.hex));
 
     const status = document.createElement("span");
-    status.dataset.varStatus = String(i);
+    status.dataset.varStatus = v.hex;
     status.style.cssText = "font-size:11px;color:var(--gray)";
 
     const remove = document.createElement("button");
