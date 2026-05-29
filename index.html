@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Muebleria Palito Outlet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@1,400&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js"></script>
@@ -33,9 +36,9 @@
     #loader{position:fixed;inset:0;z-index:9995;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0}
     #loader-logo{width:clamp(180px,32vw,300px);height:auto;object-fit:contain;opacity:0;margin-bottom:20px}
     #loader-text{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:20px}
-    #loader-name{font-family:var(--f-wide);font-size:clamp(22px,4vw,52px);letter-spacing:.2em;color:var(--cream);overflow:hidden;line-height:1}
+    #loader-name{font-family:'Bebas Neue',Impact,sans-serif;font-size:clamp(22px,4vw,52px);letter-spacing:.2em;color:var(--cream);overflow:hidden;line-height:1}
     #loader-name-inner{display:flex}
-    #loader-sub{font-family:var(--f-display);font-style:italic;font-size:clamp(14px,2.2vw,28px);letter-spacing:.32em;color:#9e7e2a;opacity:0}
+    #loader-sub{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:clamp(14px,2.2vw,28px);letter-spacing:.32em;color:#9e7e2a;opacity:0}
     #loader-line{width:0;height:1px;background:linear-gradient(90deg,transparent,#9e7e2a,transparent)}
 
     /* NAV */
@@ -151,9 +154,9 @@
     @keyframes marquee{to{transform:translateX(-50%)}}
 
     /* SECTION COMMON */
-    .sec-label{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--copper);display:flex;align-items:center;gap:12px}
+    .sec-label{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--copper);font-weight:700;display:flex;align-items:center;gap:12px}
     .sec-label::before{content:'';width:28px;height:1px;background:var(--copper)}
-    .sec-heading{font-family:var(--f-display);font-size:clamp(36px,5vw,72px);font-weight:300;line-height:1.0}
+    .sec-heading{font-family:var(--f-display);font-size:clamp(29px,4vw,58px);font-weight:700;line-height:1.05}
     .sec-heading em{font-style:italic;color:var(--copper-lt)}
 
     /* CATEGORIES */
@@ -172,7 +175,7 @@
     .cat-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(12,31,20,.85) 0%,rgba(12,31,20,.1) 60%);transition:background .5s}
     .cat-card:hover .cat-overlay{background:linear-gradient(0deg,rgba(12,31,20,.9) 0%,rgba(12,31,20,.3) 70%)}
     .cat-info{position:absolute;bottom:0;left:0;right:0;padding:28px 28px 24px;display:flex;align-items:flex-end;justify-content:space-between}
-    .cat-name{font-family:var(--f-display);font-size:clamp(22px,2.5vw,38px);font-weight:300;line-height:1}
+    .cat-name{font-family:var(--f-display);font-size:clamp(18px,2vw,30px);font-weight:700;line-height:1.1}
     .cat-count{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream-dim);margin-top:6px}
     .cat-arrow{width:40px;height:40px;border:1px solid rgba(240,234,216,.25);display:flex;align-items:center;justify-content:center;transition:background .3s,border-color .3s,transform .4s var(--ease-silk);flex-shrink:0}
     .cat-card:hover .cat-arrow{background:var(--copper);border-color:var(--copper);transform:rotate(-45deg)}
@@ -224,9 +227,9 @@
     .btn-wish svg{width:16px;stroke:var(--cream-dim)}
     .product-info{padding:20px 20px 24px;flex:1;display:flex;flex-direction:column;gap:8px}
     .product-cat{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--copper)}
-    .product-name{font-family:var(--f-display);font-size:22px;font-weight:300;line-height:1.2}
+    .product-name{font-family:var(--f-display);font-size:18px;font-weight:700;line-height:1.25}
     .product-price{display:flex;align-items:baseline;gap:10px;margin-top:auto;padding-top:12px}
-    .price-current{font-family:var(--f-display);font-size:22px;color:var(--cream)}
+    .price-current{font-family:var(--f-display);font-size:18px;font-weight:700;color:var(--cream)}
     .price-original{font-size:14px;color:var(--cream-dim);text-decoration:line-through}
     .price-off{font-size:11px;color:var(--copper)}
     .product-colors{display:flex;gap:6px;margin-top:2px}
@@ -238,7 +241,7 @@
     #full-banner img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
     .full-banner-overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(12,31,20,.88) 0%,rgba(12,31,20,.2) 100%)}
     .full-banner-content{position:absolute;top:50%;left:clamp(24px,5vw,80px);transform:translateY(-50%);max-width:560px;display:flex;flex-direction:column;gap:24px}
-    .full-banner-title{font-family:var(--f-display);font-size:clamp(40px,6vw,88px);font-weight:300;line-height:.95}
+    .full-banner-title{font-family:var(--f-display);font-size:clamp(32px,4.8vw,70px);font-weight:700;line-height:1.05}
     .full-banner-sub{font-size:14px;color:var(--cream-dim);line-height:1.7}
     .banner-pill{position:absolute;top:40px;right:80px;width:120px;height:120px;border-radius:50%;background:var(--copper);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;animation:rotatePill 20s linear infinite}
     .pill-pct{font-family:var(--f-wide);font-size:36px;color:var(--bg);line-height:1}
@@ -272,14 +275,14 @@
     #stats{padding:clamp(60px,8vw,100px) clamp(24px,5vw,80px);border-top:1px solid var(--rule)}
     .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;border:1px solid var(--rule)}
     .stat-cell{padding:48px 40px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:8px}
-    .stat-num{font-family:var(--f-display);font-size:clamp(48px,5vw,80px);font-weight:300;line-height:1}
+    .stat-num{font-family:var(--f-display);font-size:clamp(38px,4vw,64px);font-weight:700;line-height:1.05}
     .stat-num em{color:var(--copper);font-style:italic}
     .stat-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream-dim)}
 
     /* NEWSLETTER */
     #newsletter{padding:clamp(60px,8vw,100px) clamp(24px,5vw,80px);background:var(--bg2);border-top:1px solid var(--rule);display:flex;align-items:center;gap:clamp(40px,8vw,120px)}
     .nl-left{flex:0 0 auto;max-width:440px}
-    .nl-title{font-family:var(--f-display);font-size:clamp(40px,5vw,64px);font-weight:300;line-height:1;margin-bottom:16px}
+    .nl-title{font-family:var(--f-display);font-size:clamp(32px,4vw,51px);font-weight:700;line-height:1.05;margin-bottom:16px}
     .nl-sub{font-size:14px;color:var(--cream-dim);line-height:1.7}
     .nl-form{flex:1;display:flex;gap:0;max-width:500px}
     .nl-input{flex:1;padding:18px 24px;background:var(--bg);border:1px solid var(--rule);border-right:none;color:var(--cream);font-family:var(--f-body);font-size:14px;outline:none;transition:border-color .3s}
@@ -322,9 +325,9 @@
     #credito-banner::before{content:'';position:absolute;top:-50%;right:-5%;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(58,140,92,.1) 0%,transparent 70%);pointer-events:none}
     .credito-inner{display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap}
     .credito-left{display:flex;flex-direction:column;gap:0}
-    .credito-eyebrow{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:rgba(90,184,124,.7);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+    .credito-eyebrow{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:rgba(90,184,124,.7);font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:10px}
     .credito-eyebrow::before{content:'';width:24px;height:1px;background:rgba(90,184,124,.7)}
-    .credito-headline{font-family:var(--f-display);font-size:clamp(36px,5vw,72px);font-weight:300;line-height:1;color:#e8f5ec}
+    .credito-headline{font-family:var(--f-display);font-size:clamp(29px,4vw,58px);font-weight:700;line-height:1.05;color:#e8f5ec}
     .credito-headline em{font-style:italic;color:#5ab87c}
     .credito-right{display:flex;flex-direction:column;gap:12px;align-items:flex-end}
     .credito-methods{display:flex;border:1px solid rgba(90,184,124,.18)}
@@ -1081,7 +1084,7 @@
     // Signal that DOM manipulation is complete so GSAP can fade out loader.
     window.__indexRendererReady = true;
   </script>
-  <script type="module" src="js/index-renderer.js?v=20260528j"></script>
+  <script type="module" src="js/index-renderer.js?v=20260528k"></script>
 
 <script src="js/cart-system.js"></script>
 </body>
