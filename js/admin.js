@@ -2591,6 +2591,72 @@ async function loadSettings() {
   }
 }
 
+// ─── PALETA DE COLORES ESTANDAR (settings) ───
+function addPaletteColorRow(data = {}) {
+  const container = document.getElementById("paletteColors");
+  const row = document.createElement("div");
+  row.className = "color-input-wrap";
+  row.style.marginTop = "8px";
+  row.dataset.paletteRow = "1";
+
+  const color = document.createElement("input");
+  color.type = "color";
+  color.value = data.hex || "#8b7355";
+  color.dataset.paletteHex = "1";
+
+  const name = document.createElement("input");
+  name.type = "text";
+  name.placeholder = "Nombre (ej. Cafe)";
+  name.value = data.name || "";
+  name.dataset.paletteName = "1";
+  name.style.flex = "1";
+
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.textContent = "×";
+  remove.addEventListener("click", () => row.remove());
+
+  row.append(color, name, remove);
+  container.appendChild(row);
+}
+
+function readPaletteColors() {
+  return [...document.querySelectorAll("[data-palette-row]")].map(row => ({
+    hex: row.querySelector("[data-palette-hex]").value,
+    name: row.querySelector("[data-palette-name]").value.trim(),
+  })).filter(c => c.hex);
+}
+
+// ─── LISTA DE MATERIALES ESTANDAR (settings) ───
+function addMaterialRow(value = "") {
+  const container = document.getElementById("materialList");
+  const row = document.createElement("div");
+  row.className = "color-input-wrap";
+  row.style.marginTop = "8px";
+  row.dataset.materialRow = "1";
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "Nombre del material (ej. Madera)";
+  input.value = value;
+  input.dataset.materialName = "1";
+  input.style.flex = "1";
+
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.textContent = "×";
+  remove.addEventListener("click", () => row.remove());
+
+  row.append(input, remove);
+  container.appendChild(row);
+}
+
+function readMaterialList() {
+  return [...document.querySelectorAll("[data-material-row]")]
+    .map(row => row.querySelector("[data-material-name]").value.trim())
+    .filter(Boolean);
+}
+
 function populateSettingsForm() {
   const s = settings;
   const fields = {
@@ -2626,6 +2692,11 @@ function populateSettingsForm() {
   document.getElementById("storeLocations").replaceChildren();
   storeCount = 0;
   (s.storeLocations || []).forEach(store => addStoreBlock(store));
+
+  document.getElementById("paletteColors").replaceChildren();
+  (s.colorPalette || []).forEach(c => addPaletteColorRow(c));
+  document.getElementById("materialList").replaceChildren();
+  (s.materialList || []).forEach(m => addMaterialRow(m));
 }
 
 function addStoreBlock(data = {}) {
@@ -2721,6 +2792,8 @@ document.getElementById("settingsForm").addEventListener("submit", async e => {
       subtitle: document.getElementById("setBannerSubtitle").value,
     },
     storeLocations,
+    colorPalette: readPaletteColors(),
+    materialList: readMaterialList(),
     updatedAt: serverTimestamp(),
   };
 
@@ -2737,6 +2810,9 @@ document.getElementById("settingsForm").addEventListener("submit", async e => {
 });
 
 document.getElementById("resetSettingsBtn").addEventListener("click", () => populateSettingsForm());
+
+document.getElementById("addPaletteColorBtn").addEventListener("click", () => addPaletteColorRow());
+document.getElementById("addMaterialBtn").addEventListener("click", () => addMaterialRow());
 
 document.getElementById("hardResetCatalogBtn").addEventListener("click", async () => {
   if (!confirm("Esto BORRARA todo el catalogo actual y lo recargara desde seed-data.js. Continuar?")) return;
