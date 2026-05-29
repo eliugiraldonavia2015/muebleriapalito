@@ -7,8 +7,8 @@ import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260528a";
-import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260528a";
+import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260528c";
+import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260528c";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -1542,12 +1542,31 @@ function openCropModal(file, aspectRatio, label) {
     reader.onload = (e) => {
       img.onload = () => {
         cropState.natural = { w: img.naturalWidth, h: img.naturalHeight };
-        // Wait next frame so layout settles before measuring
+        // CRITICAL: show overlay BEFORE measuring, otherwise display:none makes
+        // clientWidth/Height return 0, which produces a 0x0 crop box and the
+        // canvas.toBlob() later returns null silently.
+        overlay.classList.add("active");
         requestAnimationFrame(() => {
-          cropState.displayed = { w: img.clientWidth, h: img.clientHeight };
-          cropState.scale = cropState.natural.w / cropState.displayed.w;
+          let dw = img.clientWidth;
+          let dh = img.clientHeight;
+          // Defensive fallback in case layout still isn't ready
+          if (!dw || !dh) {
+            const stageEl = document.getElementById("cropStage");
+            const maxW = stageEl ? Math.max(320, stageEl.clientWidth - 48) : 600;
+            const maxH = Math.min(window.innerHeight * 0.6, 600);
+            const r = cropState.natural.w / cropState.natural.h;
+            if (cropState.natural.w / maxW > cropState.natural.h / maxH) {
+              dw = maxW; dh = Math.round(maxW / r);
+            } else {
+              dh = maxH; dw = Math.round(maxH * r);
+            }
+            img.style.width = dw + "px";
+            img.style.height = dh + "px";
+            console.warn("[crop] clientSize was 0, using fallback dims " + dw + "x" + dh);
+          }
+          cropState.displayed = { w: dw, h: dh };
+          cropState.scale = cropState.natural.w / dw;
           initCropBox();
-          overlay.classList.add("active");
         });
       };
       img.src = e.target.result;
@@ -1684,6 +1703,14 @@ function onCropPointerUp() {
 async function commitCrop() {
   const img = document.getElementById("cropImg");
   const { box, displayed, natural } = cropState;
+
+  if (!displayed.w || !displayed.h || !natural.w || !natural.h) {
+    throw new Error("Recorte invalido: el editor no midio la imagen (displayed " + displayed.w + "x" + displayed.h + ", natural " + natural.w + "x" + natural.h + "). Cancela y reintenta.");
+  }
+  if (box.w <= 0 || box.h <= 0) {
+    throw new Error("Recorte invalido: la caja de seleccion tiene tamano 0. Arrastra las esquinas para definir el area.");
+  }
+
   // Map displayed box back to natural pixels
   const sx = box.x * (natural.w / displayed.w);
   const sy = box.y * (natural.h / displayed.h);
@@ -1700,6 +1727,10 @@ async function commitCrop() {
     outH = Math.round(outH * r);
   }
 
+  if (outW <= 0 || outH <= 0) {
+    throw new Error("Recorte invalido: dimensiones de salida " + outW + "x" + outH + ". Reintenta con un recorte mas grande.");
+  }
+
   const canvas = document.createElement("canvas");
   canvas.width = outW;
   canvas.height = outH;
@@ -1707,8 +1738,14 @@ async function commitCrop() {
   ctx.imageSmoothingQuality = "high";
   ctx.drawImage(img, sx, sy, sw, sh, 0, 0, outW, outH);
 
-  return new Promise((resolve) => {
-    canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.9);
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error("canvas.toBlob devolvio null (canvas " + outW + "x" + outH + "). Posible: imagen muy grande o memoria insuficiente."));
+        return;
+      }
+      resolve(blob);
+    }, "image/jpeg", 0.9);
   });
 }
 
@@ -1743,7 +1780,16 @@ document.addEventListener("DOMContentLoaded", () => {
     confirmBtn.style.opacity = "0.7";
     try {
       const blob = await commitCrop();
+      if (!blob) {
+        // Defensive: commitCrop now always throws on failure, but just in case
+        notify("E110", "El recorte no produjo imagen. Intenta de nuevo o cancela.");
+        return;
+      }
       closeCropModal(blob);
+    } catch (err) {
+      console.error("[crop] commit failed:", err);
+      notify("E110", err.message || "Error al recortar");
+      // Keep modal open so the user can adjust the crop and retry
     } finally {
       confirmBtn.disabled = false;
       confirmBtn.style.opacity = "";
@@ -1775,7 +1821,7 @@ const ERROR_CODES = {
   E107: { sev: "warn",  persist: false, title: "Imagen no se borro del CDN",        msg: "El item se elimino de Firestore pero la imagen quedo en Bunny.",                       fix: "Es solo espacio en disco. Borra manual desde Bunny → File Manager si te molesta." },
   E108: { sev: "error", persist: true,  title: "Manifest de productos no se actualizo",  msg: "regenerateProductsManifest fallo. El catalogo sigue funcionando pero el manifest CDN no.", fix: "Mismo arreglo que E101. Verifica la API key." },
   E109: { sev: "warn",  persist: false, title: "Purge de cache CDN fallo",          msg: "La imagen nueva podria tardar hasta 60s en propagarse.",                                fix: "Esperar o purgar manual desde Bunny Dashboard → Pull Zones → Purge." },
-  E110: { sev: "warn",  persist: false, title: "Upload cancelado",                  msg: "Se cerro el editor sin confirmar el recorte.",                                          fix: "Vuelve a clickear la imagen y completa el flujo de crop." },
+  E110: { sev: "error", persist: false, title: "Recorte fallido",                   msg: "El editor de recorte no pudo generar la imagen final.",                                  fix: "Cancela el modal, asegurate de que la imagen no sea enorme (> 20 MB) y reintenta. Si vuelve a pasar, sube una imagen mas chica." },
 
   // Firestore
   E201: { sev: "error", persist: true,  title: "Firestore: permiso denegado",       msg: "Las reglas de seguridad rechazaron la operacion.",                                       fix: "Verifica que estas logueado. Revisar reglas en Firebase Console → Firestore → Rules." },
@@ -2125,6 +2171,10 @@ function mountImageUploader(opts) {
     if (!file) return;
     const label = opts.cropLabel || "imagen";
     const fbTarget = getFeedbackTarget();
+    console.log("[uploader] change fired · file=" + file.name + " · target=" + (fbTarget && fbTarget.id ? "#" + fbTarget.id : (fbTarget ? fbTarget.tagName : "MISSING")));
+    if (!fbTarget) {
+      console.warn("[uploader] No feedback target found. previewId=" + (opts.previewId || "(none)") + " feedbackTargetId=" + (opts.feedbackTargetId || "(none)"));
+    }
 
     // Step 1: optional crop step before upload
     let toUpload = file;
@@ -2149,37 +2199,43 @@ function mountImageUploader(opts) {
     setStatus("Subiendo imagen...", "busy");
     if (spinnerEl) spinnerEl.classList.remove("hidden");
     showUploadToast("busy", "Subiendo a Bunny CDN...", Math.round(toUpload.size / 1024) + " KB · " + label);
+    console.log("[uploader] PUT to Bunny starting · folder=" + folder + " · " + Math.round(toUpload.size / 1024) + "KB");
+
+    let bunnyOk = false;
+    let cdnUrl = null;
     try {
-      const cdnUrl = await uploadImageToBunny(toUpload, folder);
+      cdnUrl = await uploadImageToBunny(toUpload, folder);
+      bunnyOk = true;
+      console.log("[uploader] Bunny PUT OK · " + cdnUrl);
       if (urlEl) urlEl.value = cdnUrl;
       if (previewEl) previewEl.src = cdnUrl;
       setStatus("Imagen subida correctamente", "ok");
       showUploadToast("ok", "Imagen subida", label.charAt(0).toUpperCase() + label.slice(1) + " actualizada en el sitio.");
-      // Big in-place green check directly on the card
       flashCardFeedback(fbTarget, "ok");
-      if (typeof opts.onUploaded === "function") {
-        try {
-          await opts.onUploaded(cdnUrl);
-        } catch (saveErr) {
-          // Upload OK but Firestore save failed — replace the OK check with a red X + message
-          console.error("[uploader] post-save failed:", saveErr);
-          const detail = "Firestore: " + (saveErr.message || "error desconocido");
-          setStatus(detail, "err");
-          flashCardFeedback(fbTarget, "err", detail);
-          throw saveErr; // let outer callers know
-        }
-      }
     } catch (err) {
-      console.error("[uploader] failed:", err);
+      console.error("[uploader] Bunny PUT failed:", err);
       const detail = err.message || "Error desconocido";
       setStatus(detail, "err");
       showUploadToast("err", "Subida fallida", detail);
-      // Big in-place red X with the actual error message
       flashCardFeedback(fbTarget, "err", detail);
-    } finally {
-      if (spinnerEl) spinnerEl.classList.add("hidden");
-      fileEl.value = "";
     }
+
+    if (bunnyOk && typeof opts.onUploaded === "function") {
+      try {
+        console.log("[uploader] onUploaded callback starting · " + cdnUrl);
+        await opts.onUploaded(cdnUrl);
+        console.log("[uploader] onUploaded OK");
+      } catch (saveErr) {
+        console.error("[uploader] Firestore save failed:", saveErr);
+        const detail = "Firestore: " + (saveErr.message || "error desconocido");
+        setStatus(detail, "err");
+        showUploadToast("err", "Guardar en Firestore fallo", detail);
+        flashCardFeedback(fbTarget, "err", detail);
+      }
+    }
+
+    if (spinnerEl) spinnerEl.classList.add("hidden");
+    fileEl.value = "";
   });
 }
 
@@ -2437,7 +2493,9 @@ document.getElementById("settingsForm").addEventListener("submit", async e => {
   e.preventDefault();
   const btn = document.getElementById("saveSettingsBtn");
   btn.disabled = true;
-  btn.textContent = "Guardando...";
+  // Preserve the SVG icon — only replace the text node, not the whole content
+  const originalHTML = btn.innerHTML;
+  btn.replaceChildren(document.createTextNode("Guardando..."));
 
   const storeLocations = [...document.querySelectorAll("[data-store-idx]")].map(b => ({
     name: b.querySelector("[name=store_name]").value,
@@ -2493,7 +2551,7 @@ document.getElementById("settingsForm").addEventListener("submit", async e => {
   }
 
   btn.disabled = false;
-  btn.textContent = "Guardar configuracion";
+  btn.innerHTML = originalHTML;
 });
 
 document.getElementById("resetSettingsBtn").addEventListener("click", () => populateSettingsForm());

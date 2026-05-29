@@ -356,21 +356,23 @@
     /* ─── In-place feedback overlay (big check / big X with message) ─── */
     .img-feedback{
       position:absolute;inset:0;display:flex;flex-direction:column;
-      align-items:center;justify-content:center;gap:6px;
-      backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
-      opacity:0;transform:scale(0.95);pointer-events:none;
+      align-items:center;justify-content:center;gap:8px;
+      backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+      opacity:0;transform:scale(0.92);pointer-events:none;
       transition:opacity 220ms cubic-bezier(0.23,1,0.32,1),transform 320ms cubic-bezier(0.23,1,0.32,1);
-      z-index:5;border-radius:inherit;
+      z-index:50;border-radius:inherit;
+      box-shadow:inset 0 0 0 2px currentColor;
     }
     .img-feedback.show{opacity:1;transform:scale(1)}
-    .img-feedback.ok{background:rgba(8,28,16,.72);color:#9ce4b3}
-    .img-feedback.err{background:rgba(40,8,8,.78);color:#ffb4ad;pointer-events:auto;cursor:pointer}
+    .img-feedback.ok{background:rgba(8,32,18,.88);color:#9ce4b3}
+    .img-feedback.err{background:rgba(48,8,8,.88);color:#ffb4ad;pointer-events:auto;cursor:pointer}
     .img-feedback-icon{
-      width:46px;height:46px;border-radius:50%;
+      width:54px;height:54px;border-radius:50%;
       display:flex;align-items:center;justify-content:center;
-      background:rgba(255,255,255,.08);border:1.5px solid currentColor;
+      background:rgba(255,255,255,.10);border:2px solid currentColor;
+      box-shadow:0 4px 18px rgba(0,0,0,.35);
     }
-    .img-feedback-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+    .img-feedback-icon svg{width:28px;height:28px;stroke:currentColor;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
     .img-feedback.ok .img-feedback-icon svg path{
       stroke-dasharray:24;stroke-dashoffset:24;
       animation:fbDraw 380ms cubic-bezier(0.23,1,0.32,1) 80ms forwards;
@@ -991,6 +993,7 @@
         </div>
         <div class="dash-hero-right">
           <div class="dash-sync" id="lastSync">Sincronizado: --</div>
+          <div class="dash-sync" id="buildVersion" title="Si no dice v28c, recarga sin cache">build v28c</div>
         </div>
       </div>
 
@@ -1513,6 +1516,6 @@
   </div>
 </div>
 
-<script type="module" src="../js/admin.js?v=20260528a"></script>
+<script type="module" src="../js/admin.js?v=20260528c"></script>
 </body>
 </html>
