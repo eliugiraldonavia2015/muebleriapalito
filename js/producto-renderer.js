@@ -63,6 +63,54 @@ function initLoupe(imageUrl) {
   });
 }
 
+// ─── QR (opcional, debajo de las miniaturas) ───
+let __qrLibPromise = null;
+function loadQrLib() {
+  if (window.qrcode) return Promise.resolve(window.qrcode);
+  if (__qrLibPromise) return __qrLibPromise;
+  __qrLibPromise = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js";
+    s.onload = () => resolve(window.qrcode);
+    s.onerror = () => reject(new Error("qr lib"));
+    document.head.appendChild(s);
+  });
+  return __qrLibPromise;
+}
+
+// Muestra el QR del producto debajo de las miniaturas. Si no hay qrUrl, oculta.
+// Crea el contenedor si el HTML estuviera cacheado viejo (sin #prod-qr).
+function buildQr(qrUrl) {
+  let box = $("#prod-qr");
+  if (!box) {
+    const panel = $("#img-panel");
+    if (!panel) return;
+    const strip = $("#thumb-strip");
+    box = document.createElement("div");
+    box.className = "prod-qr";
+    box.id = "prod-qr";
+    box.style.display = "none";
+    if (strip && strip.parentNode === panel) panel.insertBefore(box, strip.nextSibling);
+    else panel.appendChild(box);
+  }
+  if (!qrUrl) { box.style.display = "none"; box.replaceChildren(); return; }
+  loadQrLib().then(qrcode => {
+    const qr = qrcode(0, "M");
+    qr.addData(qrUrl);
+    qr.make();
+    box.innerHTML =
+      '<div style="display:inline-flex;align-items:center;gap:12px;margin-top:16px;padding:10px 14px;border:1px solid var(--rule);border-radius:12px">' +
+        '<div style="background:#fff;padding:7px;border-radius:8px;line-height:0">' +
+          '<div style="width:84px;height:84px">' + qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true }) + '</div>' +
+        '</div>' +
+        '<div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cream-dim)">Escaneame</div>' +
+      '</div>';
+    const svg = box.querySelector("svg");
+    if (svg) { svg.style.width = "100%"; svg.style.height = "100%"; svg.removeAttribute("width"); svg.removeAttribute("height"); }
+    box.style.display = "block";
+  }).catch(() => { box.style.display = "none"; });
+}
+
 // ─── THUMBNAILS ───
 function buildThumbs(images) {
   const strip = $("#thumb-strip");
@@ -777,6 +825,7 @@ function populateFromProduct(product) {
 
   buildThumbs(images);
   buildColors(product.colors);
+  buildQr(product.qrUrl);
   initQty(product.price);
   initPayment();
   buildSpecs(product);

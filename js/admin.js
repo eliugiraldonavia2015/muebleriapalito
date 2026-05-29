@@ -7,8 +7,8 @@ import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260529c";
-import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260529c";
+import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260529d";
+import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260529d";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -50,6 +50,7 @@ let dashFeaturedCatFilter = "all";
 let editingCatSubs = [];
 let editingProdColors = [];
 let editingProdMaterials = [];
+let editingProdQrUrl = "";
 let editingCatId = null;
 let editingProdId = null;
 let storeCount = 0;
@@ -192,8 +193,8 @@ async function runLoader() {
   mountCategoryImageUploader();
   document.getElementById("lastSync").textContent = "Sincronizado: " + new Date().toLocaleTimeString("es-EC");
   // Marcador de build escrito por el JS realmente cargado: si NO dice "build
-  // v29c", tu navegador esta corriendo un admin.js viejo en cache → Cmd+Shift+R.
-  const __BUILD = "v29c";
+  // v29d", tu navegador esta corriendo un admin.js viejo en cache → Cmd+Shift+R.
+  const __BUILD = "v29d";
   const __bv = document.getElementById("buildVersion");
   if (__bv) { __bv.textContent = "build " + __BUILD; __bv.title = "Si no dice " + __BUILD + ", recarga con Cmd+Shift+R"; }
 
@@ -3147,6 +3148,7 @@ function openProductDrawer(id = null, preCatId = null) {
                                    : { hex: c || "", image: null });
     editingProdMaterials = Array.isArray(p.materials) ? [...p.materials]
                           : (typeof p.material === "string" && p.material.trim() ? [p.material.trim()] : []);
+    editingProdQrUrl = p.qrUrl || "";
     populateCatSelect(p.categoryId || "");
     populateSubcategorySelect(p.categoryId || "", p.subcategory || "");
   } else {
@@ -3156,10 +3158,14 @@ function openProductDrawer(id = null, preCatId = null) {
     document.getElementById("prodEditId").value = "";
     document.getElementById("prodColors").replaceChildren();
     editingProdMaterials = [];
+    editingProdQrUrl = "";
     populateCatSelect(preCatId || "");
     populateSubcategorySelect(preCatId || "", "");
   }
   ensureProductVariationUI();
+  const qrInput = document.getElementById("prodQrUrl");
+  if (qrInput) qrInput.value = editingProdQrUrl;
+  renderQrPreview();
   renderColorSwatches();
   renderMaterialChips();
   document.getElementById("deleteProductBtn").style.display = id ? "inline-flex" : "none";
@@ -3232,6 +3238,47 @@ document.getElementById("addProductBtn").addEventListener("click", () => openPro
 // los bloques nuevos (chips de paleta + materiales), los inyecta y oculta los
 // controles viejos. Así editar variaciones de color y materiales funciona
 // aunque el navegador sirva un admin/index.html viejo. Idempotente.
+// ─── QR (codigo opcional por producto) ───
+let __qrLibPromise = null;
+function loadQrLib() {
+  if (window.qrcode) return Promise.resolve(window.qrcode);
+  if (__qrLibPromise) return __qrLibPromise;
+  __qrLibPromise = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js";
+    s.onload = () => resolve(window.qrcode);
+    s.onerror = () => reject(new Error("no se pudo cargar la libreria QR"));
+    document.head.appendChild(s);
+  });
+  return __qrLibPromise;
+}
+
+// Previsualiza el QR del valor en #prodQrUrl dentro de #prodQrPreview.
+function renderQrPreview() {
+  const input = document.getElementById("prodQrUrl");
+  const box = document.getElementById("prodQrPreview");
+  if (!input || !box) return;
+  const url = input.value.trim();
+  if (!url) { box.replaceChildren(); return; }
+  box.textContent = "Generando QR...";
+  box.style.cssText = "margin-top:10px;font-size:12px;color:var(--gray)";
+  loadQrLib().then(qrcode => {
+    const qr = qrcode(0, "M");
+    qr.addData(url);
+    qr.make();
+    box.style.cssText = "margin-top:10px";
+    box.innerHTML =
+      '<div style="display:inline-block;background:#fff;padding:8px;border-radius:8px;border:1px solid var(--rule)">' +
+      '<div style="width:120px;height:120px">' + qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true }) + '</div>' +
+      '</div>';
+    const svg = box.querySelector("svg");
+    if (svg) { svg.style.width = "100%"; svg.style.height = "100%"; svg.removeAttribute("width"); svg.removeAttribute("height"); }
+  }).catch(err => {
+    box.textContent = "No se pudo generar el QR: " + err.message;
+    box.style.cssText = "margin-top:10px;font-size:12px;color:var(--red-lt)";
+  });
+}
+
 function ensureProductVariationUI() {
   const colors = document.getElementById("prodColors");
   if (!colors) return;
@@ -3271,6 +3318,23 @@ function ensureProductVariationUI() {
       colors.parentElement.appendChild(group);
     }
   }
+
+  if (!document.getElementById("prodQrUrl")) {
+    const group = document.createElement("div");
+    group.className = "form-group full";
+    group.innerHTML =
+      '<label>Codigo QR (opcional)</label>' +
+      '<div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap">' +
+        '<input type="url" id="prodQrUrl" placeholder="https://... (link a video, info, etc.)" style="flex:1;min-width:200px"/>' +
+        '<button type="button" class="btn btn-ghost btn-sm" id="genQrBtn">Generar QR</button>' +
+      '</div>' +
+      '<div id="prodQrPreview" style="margin-top:10px"></div>';
+    (colorsGroup && colorsGroup.parentElement ? colorsGroup.parentElement : colors.parentElement).appendChild(group);
+  }
+
+  // Cableado idempotente del boton Generar QR.
+  const genBtn = document.getElementById("genQrBtn");
+  if (genBtn) genBtn.onclick = () => renderQrPreview();
 }
 
 function renderPaletteChips() {
@@ -3434,6 +3498,7 @@ document.getElementById("productForm").addEventListener("submit", async e => {
     isNew: document.getElementById("prodNew").checked,
     colors: [...editingProdColors],
     materials: [...editingProdMaterials],
+    qrUrl: (document.getElementById("prodQrUrl")?.value || "").trim(),
     available: true,
     updatedAt: serverTimestamp(),
   };

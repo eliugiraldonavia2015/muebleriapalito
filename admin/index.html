@@ -1051,7 +1051,7 @@
         </div>
         <div class="dash-hero-right">
           <div class="dash-sync" id="lastSync">Sincronizado: --</div>
-          <div class="dash-sync" id="buildVersion" title="Si no dice v29c, recarga con Cmd+Shift+R">build v29c</div>
+          <div class="dash-sync" id="buildVersion" title="Si no dice v29d, recarga con Cmd+Shift+R">build v29d</div>
         </div>
       </div>
 
@@ -1525,6 +1525,14 @@
           <p id="materialHint" style="font-size:12px;color:var(--gray);margin:0 0 8px"></p>
           <div id="prodMaterials" style="display:flex;flex-wrap:wrap;gap:8px"></div>
         </div>
+        <div class="form-group full">
+          <label>Codigo QR (opcional)</label>
+          <div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap">
+            <input type="url" id="prodQrUrl" placeholder="https://... (link a video, info, etc.)" style="flex:1;min-width:200px"/>
+            <button type="button" class="btn btn-ghost btn-sm" id="genQrBtn">Generar QR</button>
+          </div>
+          <div id="prodQrPreview" style="margin-top:10px"></div>
+        </div>
       </div>
     </form>
   </div>
@@ -1572,6 +1580,6 @@
   </div>
 </div>
 
-<script type="module" src="../js/admin.js?v=20260529c"></script>
+<script type="module" src="../js/admin.js?v=20260529d"></script>
 </body>
 </html>
