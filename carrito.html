@@ -215,6 +215,103 @@
     .store-maps-btn:hover{border-color:#3a8c5c;color:#3a8c5c;background:#fafaf8}
 
     footer{background:#0c1f14;border-top-color:rgba(255,255,255,.06)}
+    /* ─── CART SHELL ─── */
+    .cart-shell{
+      display:grid;grid-template-columns:1fr 380px;gap:48px;
+      padding:clamp(48px,6vw,80px) clamp(24px,5vw,80px);
+      background:#f7f5f0;align-items:start;
+    }
+    .cart-list{display:flex;flex-direction:column;gap:12px}
+    .cart-item{
+      display:grid;grid-template-columns:110px 1fr auto;gap:18px;
+      padding:16px;background:#ffffff;border:1px solid rgba(0,0,0,.08);
+      transition:border-color .25s var(--ease-silk),transform .25s var(--ease-silk);
+    }
+    .cart-item:hover{border-color:rgba(58,140,92,.4)}
+    .cart-item-thumb{width:110px;height:110px;overflow:hidden;background:#f0eee8}
+    .cart-item-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .cart-item-info{display:flex;flex-direction:column;gap:8px;min-width:0}
+    .cart-item-cat{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9e7e2a;font-weight:600}
+    .cart-item-name{font-family:var(--f-display);font-size:18px;font-weight:400;color:#1a1a18;line-height:1.2}
+    .cart-item-price{font-size:13px;color:#5a5a58;letter-spacing:.02em}
+    .cart-item-qty{display:inline-flex;align-items:center;gap:10px;margin-top:auto;padding-top:6px}
+    .qty-btn{
+      width:30px;height:30px;border:1px solid rgba(0,0,0,.12);
+      background:transparent;color:#1a1a18;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      font-size:14px;line-height:1;
+      transition:border-color .15s,background .15s,transform .15s var(--ease-silk);
+    }
+    .qty-btn:hover{border-color:#3a8c5c;background:rgba(58,140,92,.06)}
+    .qty-btn:active{transform:scale(0.94)}
+    .qty-val{font-size:14px;font-weight:600;min-width:28px;text-align:center;color:#1a1a18}
+    .cart-item-right{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:10px}
+    .cart-item-subtotal{font-family:var(--f-display);font-size:20px;font-weight:600;color:#1a1a18;line-height:1}
+    .cart-item-remove{
+      background:none;border:1px solid rgba(0,0,0,.1);color:#777775;
+      padding:7px 14px;font-size:10px;letter-spacing:.14em;
+      text-transform:uppercase;font-weight:600;cursor:pointer;
+      transition:all .2s var(--ease-silk);
+    }
+    .cart-item-remove:hover{border-color:#c0392b;color:#c0392b;background:rgba(192,57,43,.06)}
+
+    .cart-summary{position:sticky;top:96px}
+    .cart-summary-card{
+      background:#ffffff;border:1px solid rgba(0,0,0,.08);
+      padding:28px;
+    }
+    .cart-summary-card h3{
+      font-family:var(--f-display);font-size:22px;font-weight:600;
+      color:#1a1a18;margin-bottom:20px;letter-spacing:-.01em;
+    }
+    .summary-row{
+      display:flex;justify-content:space-between;align-items:baseline;
+      padding:12px 0;font-size:14px;color:#3a3a38;
+      border-bottom:1px solid rgba(0,0,0,.07);
+    }
+    .summary-row strong{font-weight:600;color:#1a1a18}
+    .summary-row.sub-note{color:#777775;font-size:12px}
+    .summary-row.total{
+      border-bottom:none;padding-top:18px;padding-bottom:18px;
+      font-family:var(--f-display);font-size:20px;font-weight:600;
+    }
+    .summary-row.total strong{color:#9e7e2a;font-size:24px}
+    .cart-summary-card .wa-large-btn{
+      width:100%;justify-content:center;margin-top:18px;
+      box-shadow:0 4px 16px rgba(37,211,102,.28);
+    }
+    .continue-link{
+      display:block;text-align:center;margin-top:14px;
+      font-size:11px;color:#777775;letter-spacing:.14em;
+      text-transform:uppercase;font-weight:600;transition:color .2s;
+    }
+    .continue-link:hover{color:#3a8c5c}
+
+    .cart-empty{
+      grid-column:1 / -1;text-align:center;
+      padding:80px 24px;background:#ffffff;border:1px dashed rgba(0,0,0,.12);
+    }
+    .cart-empty-icon{
+      width:64px;height:64px;border-radius:50%;
+      background:rgba(58,140,92,.08);color:#3a8c5c;
+      display:flex;align-items:center;justify-content:center;
+      margin:0 auto 18px;
+    }
+    .cart-empty-icon svg{width:30px;height:30px;stroke:currentColor;stroke-width:1.5;fill:none}
+    .cart-empty h2{
+      font-family:var(--f-display);font-size:32px;font-weight:600;
+      color:#1a1a18;margin-bottom:12px;
+    }
+    .cart-empty p{color:#5a5a58;margin:0 auto 28px;max-width:420px;line-height:1.6}
+    .cart-empty .btn-primary{margin:0 auto}
+
+    @media(max-width:900px){
+      .cart-shell{grid-template-columns:1fr;gap:24px;padding:48px 20px}
+      .cart-summary{position:static}
+      .cart-item{grid-template-columns:90px 1fr;gap:14px;padding:12px}
+      .cart-item-thumb{width:90px;height:90px}
+      .cart-item-right{grid-column:1 / -1;flex-direction:row;align-items:center;justify-content:space-between}
+    }
   </style>
 </head>
 <body>
@@ -244,103 +341,41 @@
     <p class="page-sub">Revisa tus items y envianos tu solicitud por WhatsApp para coordinar la entrega o financiamiento.</p>
   </div>
 
-  <div class="contact-split">
-    <!-- WA CTA -->
-    <div class="form-side" style="display:flex; flex-direction:column; justify-content:center;">
-      <h2 class="info-heading" style="margin-bottom:24px;">Atencion personalizada</h2>
-      <p style="font-size:15px; color:var(--cream-dim); line-height:1.7; margin-bottom:40px; max-width:440px;" class="wa-desc">
-        ¿Tienes dudas sobre algun mueble, necesitas medidas especiales o buscas asesoria para tu proyecto de interiores? Nuestro equipo de expertos esta listo para ayudarte.
-      </p>
-      
-      <a href="https://wa.me/593959667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="wa-large-btn" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
-        Escribenos por WhatsApp
-      </a>
-      
-      <div class="wa-status">
-        <span class="pulse-dot"></span>
-        095 966 7093 · Respuesta inmediata
+  <div class="cart-shell">
+    <div class="cart-main">
+      <div id="cartItems" class="cart-list"></div>
+      <div id="cartEmpty" class="cart-empty" hidden>
+        <div class="cart-empty-icon">
+          <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        </div>
+        <h2>Tu carrito esta vacio</h2>
+        <p>Aun no has agregado nada. Explora el catalogo y empieza a llenar tu hogar.</p>
+        <a href="index.html" class="btn-primary">Explorar catalogo</a>
       </div>
     </div>
-
-    <!-- INFO -->
-    <div class="info-side">
-      <h2 class="info-heading">Canales de <em>atencion</em></h2>
-      <div class="contact-cards">
-        <div class="contact-card">
-          <div class="cc-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.17 6.17l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92v2z"/></svg>
-          </div>
-          <div>
-            <div class="cc-label">Linea directa</div>
-            <div class="cc-value">095 966 7093</div>
-            <div class="cc-sub">Lunes a Domingo</div>
-          </div>
+    <aside class="cart-summary">
+      <div class="cart-summary-card">
+        <h3>Resumen</h3>
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <strong id="sumSubtotal">$0</strong>
         </div>
-        <div class="contact-card">
-          <div class="cc-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          </div>
-          <div>
-            <div class="cc-label">Correo electronico</div>
-            <div class="cc-value">info@palito.com</div>
-            <div class="cc-sub">Respuesta en menos de 24h habiles</div>
-          </div>
+        <div class="summary-row sub-note">
+          <span>Envio</span>
+          <span>A coordinar</span>
         </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <strong id="sumTotal">$0</strong>
+        </div>
+        <a id="waCheckout" href="https://wa.me/593959667093" target="_blank" rel="noopener" class="wa-large-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+          Enviar pedido por WhatsApp
+        </a>
+        <a href="index.html" class="continue-link">← Continuar comprando</a>
       </div>
-      <div>
-        <div class="sec-label" style="margin-bottom:16px">Horario general</div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <div class="sched-row" style="display:flex;justify-content:space-between;font-size:13px;padding-bottom:10px;border-bottom:1px solid rgba(0,0,0,.08)"><span class="sched-dim" style="color:#6a6a68">Lunes — Viernes</span><span class="sched-val" style="color:#1a1a18">10:00 — 18:00</span></div>
-          <div class="sched-row" style="display:flex;justify-content:space-between;font-size:13px"><span class="sched-dim" style="color:#6a6a68">Sabado — Domingo</span><span class="sched-val" style="color:#1a1a18">10:00 — 20:00</span></div>
-        </div>
-      </div>
-    </div>
+    </aside>
   </div>
-
-  <!-- STORES -->
-  <section class="stores-section">
-    <div class="stores-header">
-      <div class="stores-header-left">
-        <div class="sec-label">Tiendas fisicas</div>
-        <h2 class="stores-heading">Encuentranos <em>cerca de ti</em></h2>
-      </div>
-    </div>
-
-    <div class="stores-grid" id="stores-grid">
-      <div class="store-card" data-country="ecuador">
-        <div class="store-tag">Principal</div>
-        <div class="store-city">Av. Las Aguas</div>
-        <div class="store-addr">Av. Las Aguas, Guayaquil, Guayas</div>
-        <div class="store-hours">Lun–Vie 10:00–18:00 · Sab–Dom 10:00–20:00</div>
-        <div class="store-phone">095 966 7093</div>
-        <a href="https://maps.app.goo.gl/DDSkH285NBq8PRv78?g_st=iwb" class="store-maps-btn" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          Como llegar
-        </a>
-      </div>
-      <div class="store-card" data-country="ecuador">
-        <div class="store-city">Avalon Plaza</div>
-        <div class="store-addr">Avalon Plaza, Guayaquil, Guayas</div>
-        <div class="store-hours">Lun–Vie 10:00–18:00 · Sab–Dom 10:00–20:00</div>
-        <div class="store-phone">095 966 7093</div>
-        <a href="https://maps.app.goo.gl/sfgPPTL4mBZUQk6G8?g_st=iwb" class="store-maps-btn" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          Como llegar
-        </a>
-      </div>
-      <div class="store-card" data-country="ecuador">
-        <div class="store-city">Parque California</div>
-        <div class="store-addr">Parque California, Guayaquil, Guayas</div>
-        <div class="store-hours">Lun–Vie 10:00–18:00 · Sab–Dom 10:00–20:00</div>
-        <div class="store-phone">095 966 7093</div>
-        <a href="https://maps.app.goo.gl/bPXDdCTR4h2mbTMk8?g_st=iwb" class="store-maps-btn" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          Como llegar
-        </a>
-      </div>
-    </div>
-  </section>
 
   <footer>
     <div class="footer-top">
@@ -368,78 +403,133 @@
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
-    // Pre-hide
-    gsap.set(['.page-title','.page-sub','.form-side > *','.info-side > *','.store-card','.stores-header > *'], { autoAlpha: 0 });
+    // Header entrance
+    gsap.set(['.page-title','.page-sub'], { autoAlpha: 0 });
     gsap.set('.page-title', { y: 40 });
     gsap.set('.page-sub',   { y: 20 });
-
-    // Header entrance
-    gsap.timeline({ delay: .2, defaults: { ease: 'power3.out' } })
-      .to('.sec-label',  { autoAlpha: 1, duration: .6 })
-      .to('.page-title', { autoAlpha: 1, y: 0, duration: .85 }, '-=.3')
-      .to('.page-sub',   { autoAlpha: 1, y: 0, duration: .7  }, '-=.5');
-
-    // Form side
-    ScrollTrigger.batch('.form-side > *', {
-      onEnter: els => gsap.to(els, { autoAlpha: 1, x: 0, stagger: .1, duration: .7, ease: 'power3.out', clearProps: 'transform' }),
-      start: 'top 82%'
-    });
-    gsap.utils.toArray('.form-side > *').forEach(el => gsap.set(el, { x: -24 }));
-
-    // Info side
-    ScrollTrigger.batch('.info-side > *', {
-      onEnter: els => gsap.to(els, { autoAlpha: 1, x: 0, stagger: .1, duration: .7, ease: 'power3.out', clearProps: 'transform' }),
-      start: 'top 82%'
-    });
-    gsap.utils.toArray('.info-side > *').forEach(el => gsap.set(el, { x: 24 }));
-
-    // Stores header
-    ScrollTrigger.batch('.stores-header > *', {
-      onEnter: els => gsap.to(els, { autoAlpha: 1, y: 0, stagger: .12, duration: .7, ease: 'power3.out', clearProps: 'transform' }),
-      start: 'top 85%'
-    });
-    gsap.utils.toArray('.stores-header > *').forEach(el => gsap.set(el, { y: 24 }));
-
-    // Store cards
-    function animateVisibleCards() {
-      const visible = document.querySelectorAll('.store-card:not([style*="display:none"])');
-      gsap.set(visible, { autoAlpha: 0, y: 28 });
-      gsap.to(visible, { autoAlpha: 1, y: 0, stagger: .08, duration: .65, ease: 'power3.out', clearProps: 'transform' });
-    }
-    ScrollTrigger.create({ trigger: '.stores-section', start: 'top 80%', once: true, onEnter: animateVisibleCards });
-
-    // Country tabs
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        const country = this.dataset.country;
-        document.querySelectorAll('.store-card').forEach(c => {
-          c.style.display = c.dataset.country === country ? '' : 'none';
-        });
-        animateVisibleCards();
-      });
-    });
-
-    // Form submit
-    function handleForm(e) {
-      e.preventDefault();
-      const btn = document.getElementById('submit-btn');
-      gsap.to(btn, { scale: .96, duration: .1, yoyo: true, repeat: 1, onComplete() {
-        btn.textContent = 'Mensaje enviado';
-        btn.style.background = 'var(--copper)';
-        btn.style.color = 'var(--bg)';
-      }});
-      return false;
-    }
-
-    // Form input focus effects
-    document.querySelectorAll('.form-input, .form-textarea, .form-select').forEach(inp => {
-      inp.addEventListener('focus', () => gsap.to(inp, { borderColor: 'var(--copper)', duration: .3 }));
-      inp.addEventListener('blur',  () => { if (!inp.value) gsap.to(inp, { borderColor: 'rgba(160,220,180,.12)', duration: .3 }); });
-    });
+    gsap.timeline({ delay: .15, defaults: { ease: 'power3.out' } })
+      .to('.sec-label',  { autoAlpha: 1, duration: .55 })
+      .to('.page-title', { autoAlpha: 1, y: 0, duration: .8 }, '-=.3')
+      .to('.page-sub',   { autoAlpha: 1, y: 0, duration: .65 }, '-=.5');
   </script>
 
 <script src="js/cart-system.js"></script>
+<script>
+  // ─── CART RENDERER ───
+  const WA_PHONE = "593959667093";
+  const PLACEHOLDER = "assets/placeholder.svg";
+
+  function fmtMoney(n) {
+    const v = Number(n) || 0;
+    return "$" + v.toLocaleString("en-US", { maximumFractionDigits: 0 });
+  }
+
+  function buildWaMessage(items, total) {
+    const lines = items.map(i => "• " + i.name + " · cantidad " + i.qty + " · " + fmtMoney(i.price * i.qty));
+    return encodeURIComponent(
+      "Hola! Me interesa este pedido de Muebleria Palito Outlet:\n\n" +
+      lines.join("\n") +
+      "\n\nTotal estimado: " + fmtMoney(total) +
+      "\n\nPodrian coordinar la entrega/financiamiento?"
+    );
+  }
+
+  function renderCart() {
+    const items = (typeof getCart === "function" ? getCart() : []);
+    const list = document.getElementById("cartItems");
+    const empty = document.getElementById("cartEmpty");
+    const wa = document.getElementById("waCheckout");
+
+    if (!items.length) {
+      list.style.display = "none";
+      empty.hidden = false;
+      document.getElementById("sumSubtotal").textContent = fmtMoney(0);
+      document.getElementById("sumTotal").textContent = fmtMoney(0);
+      if (wa) wa.href = "https://wa.me/" + WA_PHONE;
+      return;
+    }
+    list.style.display = "";
+    empty.hidden = true;
+
+    list.replaceChildren();
+    items.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "cart-item";
+      row.dataset.id = item.id;
+
+      const thumb = document.createElement("a");
+      thumb.className = "cart-item-thumb";
+      thumb.href = "producto.html?id=" + encodeURIComponent(item.id);
+      const img = document.createElement("img");
+      img.src = item.image || PLACEHOLDER;
+      img.alt = item.name;
+      img.onerror = () => { img.src = PLACEHOLDER; img.onerror = null; };
+      thumb.appendChild(img);
+
+      const info = document.createElement("div");
+      info.className = "cart-item-info";
+      const nameLink = document.createElement("a");
+      nameLink.className = "cart-item-name";
+      nameLink.href = "producto.html?id=" + encodeURIComponent(item.id);
+      nameLink.textContent = item.name;
+      const price = document.createElement("div");
+      price.className = "cart-item-price";
+      price.textContent = fmtMoney(item.price) + " c/u";
+      const qty = document.createElement("div");
+      qty.className = "cart-item-qty";
+      const dec = document.createElement("button");
+      dec.className = "qty-btn"; dec.type = "button"; dec.dataset.action = "dec";
+      dec.setAttribute("aria-label", "Restar"); dec.textContent = "−";
+      const qv = document.createElement("span");
+      qv.className = "qty-val"; qv.textContent = String(item.qty);
+      const inc = document.createElement("button");
+      inc.className = "qty-btn"; inc.type = "button"; inc.dataset.action = "inc";
+      inc.setAttribute("aria-label", "Sumar"); inc.textContent = "+";
+      qty.append(dec, qv, inc);
+      info.append(nameLink, price, qty);
+
+      const right = document.createElement("div");
+      right.className = "cart-item-right";
+      const sub = document.createElement("div");
+      sub.className = "cart-item-subtotal";
+      sub.textContent = fmtMoney(item.price * item.qty);
+      const rm = document.createElement("button");
+      rm.className = "cart-item-remove"; rm.type = "button";
+      rm.textContent = "Quitar";
+      right.append(sub, rm);
+
+      row.append(thumb, info, right);
+      list.appendChild(row);
+    });
+
+    const subtotal = items.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.qty) || 0), 0);
+    document.getElementById("sumSubtotal").textContent = fmtMoney(subtotal);
+    document.getElementById("sumTotal").textContent = fmtMoney(subtotal);
+    if (wa) wa.href = "https://wa.me/" + WA_PHONE + "?text=" + buildWaMessage(items, subtotal);
+  }
+
+  // Click delegation on the cart list
+  document.addEventListener("click", (e) => {
+    const row = e.target.closest(".cart-item");
+    if (!row) return;
+    const id = row.dataset.id;
+    const cart = getCart();
+    const item = cart.find(x => String(x.id) === String(id));
+
+    if (e.target.matches('[data-action="inc"]')) {
+      if (item) { item.qty = (item.qty || 1) + 1; saveCart(cart); renderCart(); }
+    } else if (e.target.matches('[data-action="dec"]')) {
+      if (item) {
+        item.qty = Math.max(1, (item.qty || 1) - 1);
+        saveCart(cart); renderCart();
+      }
+    } else if (e.target.matches(".cart-item-remove")) {
+      if (typeof removeFromCart === "function") removeFromCart(id);
+      renderCart();
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded", renderCart);
+</script>
 </body>
 </html>

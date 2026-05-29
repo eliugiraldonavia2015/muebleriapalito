@@ -420,7 +420,7 @@ function renderFeaturedProducts(products) {
         ${badge ? `<span class="${badgeClass}">${badge}</span>` : ""}
         <div class="product-actions">
           <button class="btn-cart btn-add-cart-grid" data-id="${p.id}" data-name="${p.name.replace(/\"/g, '&quot;')}" data-price="${p.price}" data-image="${p.imageUrl || p.primaryImage || (p.images && p.images.length ? p.images[0] : '')}">Agregar al carrito</button>
-          <button class="btn-wish" data-id="${p.id}" aria-label="Favorito">
+          <button class="btn-wish${typeof window.isInWishlist === 'function' && window.isInWishlist(p.id) ? ' active' : ''}" data-id="${p.id}" aria-label="Favorito">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round">
               <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
             </svg>
@@ -649,26 +649,16 @@ document.addEventListener("click", (e) => {
     console.error("No se encontro window.addToCart. Verifica que cart-system.js este cargado.");
   }
 });
+// Wishlist (favoritos) — click on the heart toggles + persists in localStorage
 document.addEventListener("click", (e) => {
-  const btn = e.target.closest(".btn-add-cart-grid");
+  const btn = e.target.closest(".btn-wish");
   if (!btn) return;
   e.preventDefault();
   e.stopPropagation();
-  
   const id = btn.getAttribute("data-id");
   if (!id) return;
-  
-  // Find product in ALL_PRODUCTS
-  const p = window.ALL_PRODUCTS ? window.ALL_PRODUCTS.find(x => x.id === id) : null;
-  if (!p) return;
-  
-  if (typeof addToCart === "function") {
-    addToCart({
-      id: p.id,
-      name: p.name,
-      price: p.price,
-      qty: 1,
-      image: p.images && p.images.length ? p.images[0] : ""
-    });
+  if (typeof window.toggleWishlist === "function") {
+    const nowSaved = window.toggleWishlist(id);
+    btn.classList.toggle("active", nowSaved);
   }
 });

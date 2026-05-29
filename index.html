@@ -222,9 +222,12 @@
     .btn-cart::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,240,180,.25),transparent);transform:translateX(-110%);transition:transform .5s var(--ease-silk)}
     .btn-cart:hover{background-position:0% 0}
     .btn-cart:hover::before{transform:translateX(110%)}
-    .btn-wish{width:42px;height:42px;border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;transition:border-color .3s}
+    .btn-wish{width:42px;height:42px;border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .3s,background .3s,transform .2s var(--ease-silk);background:none}
     .btn-wish:hover{border-color:var(--copper)}
-    .btn-wish svg{width:16px;stroke:var(--cream-dim)}
+    .btn-wish:active{transform:scale(0.94)}
+    .btn-wish svg{width:16px;stroke:var(--cream-dim);transition:stroke .3s,fill .3s}
+    .btn-wish.active{border-color:#c0392b;background:rgba(192,57,43,.12)}
+    .btn-wish.active svg{stroke:#c0392b;fill:#c0392b}
     .product-info{padding:20px 20px 24px;flex:1;display:flex;flex-direction:column;gap:8px}
     .product-cat{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--copper)}
     .product-name{font-family:var(--f-display);font-size:18px;font-weight:700;line-height:1.25}
@@ -1084,8 +1087,8 @@
     // Signal that DOM manipulation is complete so GSAP can fade out loader.
     window.__indexRendererReady = true;
   </script>
-  <script type="module" src="js/index-renderer.js?v=20260528n"></script>
-  <script>console.log("[home] build v28n · " + new Date().toISOString());</script>
+  <script type="module" src="js/index-renderer.js?v=20260528o"></script>
+  <script>console.log("[home] build v28o · " + new Date().toISOString());</script>
 
 <script src="js/cart-system.js"></script>
 </body>

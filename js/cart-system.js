@@ -69,4 +69,47 @@ function showToast(msg) {
   }, 3000);
 }
 
+// ─── WISHLIST (favoritos) ───
+const WISH_KEY = "palito_wishlist";
+
+function getWishlist() {
+  try {
+    return JSON.parse(localStorage.getItem(WISH_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function isInWishlist(id) {
+  return getWishlist().includes(String(id));
+}
+
+// Adds or removes the id from the wishlist. Returns true if it's now saved,
+// false if it was removed. Also shows a small toast.
+function toggleWishlist(id) {
+  const sid = String(id);
+  const list = getWishlist();
+  const idx = list.indexOf(sid);
+  let nowSaved;
+  if (idx >= 0) {
+    list.splice(idx, 1);
+    nowSaved = false;
+  } else {
+    list.push(sid);
+    nowSaved = true;
+  }
+  localStorage.setItem(WISH_KEY, JSON.stringify(list));
+  showToast(nowSaved ? "Agregado a favoritos" : "Quitado de favoritos");
+  return nowSaved;
+}
+
+// Expose to window so module-loaded renderers can call these
+window.addToCart = addToCart;
+window.removeFromCart = removeFromCart;
+window.getCart = getCart;
+window.saveCart = saveCart;
+window.getWishlist = getWishlist;
+window.isInWishlist = isInWishlist;
+window.toggleWishlist = toggleWishlist;
+
 document.addEventListener("DOMContentLoaded", updateCartCount);
