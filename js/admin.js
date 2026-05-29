@@ -7,8 +7,8 @@ import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260529d";
-import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260529d";
+import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260529e";
+import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260529e";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -193,8 +193,8 @@ async function runLoader() {
   mountCategoryImageUploader();
   document.getElementById("lastSync").textContent = "Sincronizado: " + new Date().toLocaleTimeString("es-EC");
   // Marcador de build escrito por el JS realmente cargado: si NO dice "build
-  // v29d", tu navegador esta corriendo un admin.js viejo en cache → Cmd+Shift+R.
-  const __BUILD = "v29d";
+  // v29e", tu navegador esta corriendo un admin.js viejo en cache → Cmd+Shift+R.
+  const __BUILD = "v29e";
   const __bv = document.getElementById("buildVersion");
   if (__bv) { __bv.textContent = "build " + __BUILD; __bv.title = "Si no dice " + __BUILD + ", recarga con Cmd+Shift+R"; }
 
@@ -3325,7 +3325,7 @@ function ensureProductVariationUI() {
     group.innerHTML =
       '<label>Codigo QR (opcional)</label>' +
       '<div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap">' +
-        '<input type="url" id="prodQrUrl" placeholder="https://... (link a video, info, etc.)" style="flex:1;min-width:200px"/>' +
+        '<input type="text" id="prodQrUrl" placeholder="https://... (link a video, info, etc.)" style="flex:1;min-width:200px"/>' +
         '<button type="button" class="btn btn-ghost btn-sm" id="genQrBtn">Generar QR</button>' +
       '</div>' +
       '<div id="prodQrPreview" style="margin-top:10px"></div>';
