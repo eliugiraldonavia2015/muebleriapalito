@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://muebleria-palito-cdn.b-cdn.net" crossorigin/>
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin/>
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin/>
-  <link rel="modulepreload" href="js/producto-renderer.js?v=20260529o"/>
+  <link rel="modulepreload" href="js/producto-renderer.js?v=20260529p"/>
   <link rel="modulepreload" href="js/firebase-config.js"/>
   <script>
     // Resolve the product image URL as early as possible and fire its download immediately.
@@ -106,6 +106,7 @@
     .nav-links li a:hover::after{width:100%}
     .nav-actions{display:flex;align-items:center;gap:20px}
     .nav-icon{width:20px;height:20px;stroke:var(--cream-dim);transition:stroke .3s}
+    .nav-cart-count{background:var(--copper);color:var(--bg);font-size:10px;font-weight:500;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-left:-12px;margin-top:-8px}
     .nav-icon:hover{stroke:var(--cream)}
 
     /* BACK BUTTON */
@@ -597,6 +598,10 @@
           <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
         </svg>
       </a>
+      <a href="carrito.html" style="display:flex;align-items:flex-start" aria-label="Carrito">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="nav-cart-count">0</span>
+      </a>
     </div>
   </nav>
 
@@ -708,6 +713,10 @@
               <line x1="5" y1="12" x2="19" y2="12"/>
               <polyline points="12 5 19 12 12 19"/>
             </svg>
+          </button>
+          <button class="credit-modal-go" id="credit-modal-asesor-btn" style="margin-top:12px;background:#0d2818;border:1px solid rgba(90,184,124,.35)">
+            Pedir ayuda a asesor
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:16px;height:16px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.133.558 4.133 1.535 5.867L.057 23.5l5.764-1.513A11.938 11.938 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818c-1.96 0-3.782-.537-5.337-1.47l-.383-.228-3.42.897.913-3.32-.25-.404A9.793 9.793 0 012.182 12C2.182 6.573 6.573 2.182 12 2.182c5.426 0 9.818 4.39 9.818 9.818 0 5.427-4.392 9.818-9.818 9.818z"/></svg>
           </button>
         </div>
         <button class="credit-modal-cancel" id="credit-modal-close">Cancelar</button>
@@ -869,6 +878,15 @@
     var creditUrl = 'https://preaprobados.unicomer.com/solicitudes/palito-outlet-ec';
     var tl;
 
+    // Apertura robusta en pestaña nueva: el click sintetico sobre un <a> evita
+    // que el bloqueador de pop-ups frene window.open (que es lo que impedia que
+    // el formulario "cargara").
+    function openTab(url) {
+      var a = document.createElement('a');
+      a.href = url; a.target = '_blank'; a.rel = 'noopener';
+      document.body.appendChild(a); a.click(); a.remove();
+    }
+
     function getProductInfo() {
       var prod = null;
       try { prod = window.__cacheHitProduct; } catch (_) {}
@@ -917,7 +935,7 @@
     }
 
     function onCreditGo() {
-      window.open(creditUrl, '_blank');
+      openTab(creditUrl);
 
       var p = getProductInfo();
       var prodName = p.name;
@@ -964,7 +982,7 @@
         });
 
       // WhatsApp credit button
-      document.getElementById('credit-modal-wa-btn').onclick = function () { window.open(waCreditUrl, '_blank'); };
+      document.getElementById('credit-modal-wa-btn').onclick = function () { openTab(waCreditUrl); };
 
       // Real-time button state toggle
       var shopBtnEl = document.getElementById('credit-modal-shop-btn');
@@ -1010,7 +1028,7 @@
       var prodUrl = location.origin + '/producto.html?id=' + p.id;
       var msg = 'Hola, soy ' + nameVal + ', vengo de la pagina web, me interesa ' + prodName + ' con ID #' + p.id + ', me podrian dar mas informacion?\n\nEste es el URL: ' + prodUrl;
       closeModal();
-      setTimeout(function () { window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank'); }, 500);
+      setTimeout(function () { openTab('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg)); }, 500);
     }
 
     var btn = document.getElementById('btn-credito-abrir');
@@ -1018,6 +1036,15 @@
 
     var goBtn = document.getElementById('credit-modal-go-btn');
     if (goBtn) goBtn.addEventListener('click', onCreditGo);
+
+    var asesorBtn = document.getElementById('credit-modal-asesor-btn');
+    if (asesorBtn) asesorBtn.addEventListener('click', function () {
+      var p = getProductInfo();
+      var phone = '593989667093';
+      var prodUrl = location.origin + '/producto.html?id=' + p.id;
+      var msg = 'Hola, vengo de la pagina web y necesito ayuda de un asesor con: ' + (p.name || 'un producto') + ' (ID #' + p.id + ').\n\nEnlace: ' + prodUrl;
+      openTab('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg));
+    });
 
     var closeBtn = document.getElementById('credit-modal-close');
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
@@ -1102,7 +1129,7 @@
   })();
   </script>
 
-  <script type="module" src="js/producto-renderer.js?v=20260529o"></script>
+  <script type="module" src="js/producto-renderer.js?v=20260529p"></script>
 
 <script src="js/cart-system.js"></script>
 </body>
