@@ -162,6 +162,88 @@
 
     /* ======= LIGHT THEME ======= */
     .page-header{background:#f7f5f0;border-bottom-color:rgba(0,0,0,.07)}
+
+    /* ─── CREDIT HERO ─── */
+    .credit-hero{position:relative}
+    .credit-hero::after{
+      content:'';position:absolute;left:0;right:0;bottom:0;height:140px;
+      background:radial-gradient(ellipse at 30% 100%,rgba(58,140,92,.06) 0%,transparent 60%);
+      pointer-events:none;
+    }
+    .credit-features{
+      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:14px;margin-top:36px;max-width:780px;position:relative;z-index:1;
+    }
+    .credit-feature{
+      display:flex;gap:14px;align-items:flex-start;
+      padding:18px 18px 18px 16px;
+      background:rgba(255,255,255,.65);
+      border:1px solid rgba(0,0,0,.07);
+      transition:border-color .25s var(--ease-silk),background .25s,transform .25s var(--ease-silk),box-shadow .25s;
+    }
+    .credit-feature:hover{
+      border-color:rgba(58,140,92,.42);
+      background:#ffffff;
+      transform:translateY(-2px);
+      box-shadow:0 8px 24px rgba(58,140,92,.10);
+    }
+    .credit-feature-icon{
+      width:38px;height:38px;
+      border:1px solid rgba(58,140,92,.3);
+      background:rgba(58,140,92,.06);
+      border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;color:#3a8c5c;
+    }
+    .credit-feature-icon svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+    .credit-feature-title{font-size:13px;font-weight:700;color:#1a1a18;letter-spacing:-.005em;line-height:1.2}
+    .credit-feature-sub{font-size:11px;color:#6a6a68;letter-spacing:.02em;margin-top:2px;line-height:1.4}
+
+    .credit-cta-row{
+      display:flex;align-items:center;gap:24px;flex-wrap:wrap;
+      margin-top:32px;position:relative;z-index:1;
+    }
+    .credit-cta-btn{
+      display:inline-flex;align-items:center;gap:12px;
+      padding:14px 28px;
+      background:linear-gradient(105deg,#2d7a4c 0%,#3a8c5c 50%,#2d7a4c 100%);
+      background-size:200% 100%;background-position:100% 0;
+      color:#ffffff;
+      font-family:var(--f-body);
+      font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;
+      border:none;cursor:pointer;
+      box-shadow:0 8px 24px rgba(58,140,92,.28);
+      transition:background-position .55s var(--ease-silk),transform .25s var(--ease-silk),box-shadow .35s;
+    }
+    .credit-cta-btn:hover{
+      background-position:0% 0;
+      transform:translateY(-2px);
+      box-shadow:0 12px 32px rgba(58,140,92,.38);
+    }
+    .credit-cta-btn:active{transform:translateY(0) scale(.97)}
+    .credit-cta-btn svg{width:16px;height:16px;stroke:currentColor;fill:none}
+
+    .credit-call-link{
+      display:inline-flex;flex-direction:column;gap:1px;
+      padding:8px 0 8px 24px;
+      border-left:1px solid rgba(0,0,0,.12);
+    }
+    .credit-call-label{
+      font-size:9px;letter-spacing:.18em;text-transform:uppercase;
+      color:#9e7e2a;font-weight:700;
+    }
+    .credit-call-num{
+      font-size:18px;font-weight:700;color:#1a1a18;letter-spacing:.02em;
+      font-variant-numeric:tabular-nums;
+      transition:color .2s;
+    }
+    .credit-call-link:hover .credit-call-num{color:#3a8c5c}
+
+    @media (max-width:720px){
+      .credit-features{grid-template-columns:1fr;max-width:none;margin-top:28px}
+      .credit-cta-row{gap:18px}
+      .credit-call-link{border-left:none;padding:0;border-top:1px solid rgba(0,0,0,.12);padding-top:16px;width:100%}
+    }
     .page-header .sec-label{color:#3a8c5c}
     .page-header .page-title{color:#1a1a18}
     .page-header .page-title em{color:#9e7e2a}
@@ -243,11 +325,52 @@
     </div>
   </nav>
 
-  <div class="page-header">
-    <div class="header-bg-num">CONTACTO</div>
-    <div class="sec-label">Estamos aqui para ti</div>
-    <h1 class="page-title">Hablemos de<br>tu <em>hogar ideal</em></h1>
-    <p class="page-sub">Nuestros asesores de diseno estan listos para ayudarte a crear el espacio que siempre sonas. Escribenos, llamanos o visitanos.</p>
+  <div class="page-header credit-hero">
+    <div class="header-bg-num">CREDITO</div>
+    <div class="sec-label">Credito directo · sin tramites</div>
+    <h1 class="page-title">Solo tu <em>cedula</em>.<br>Te lo llevas hoy.</h1>
+    <p class="page-sub">Sin garante, sin estados de cuenta, sin papeleos imposibles. Aprobacion en minutos y plazos a tu medida para que renueves tu hogar sin esperar.</p>
+
+    <div class="credit-features">
+      <div class="credit-feature">
+        <div class="credit-feature-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2"/><line x1="3" y1="11" x2="21" y2="11"/><line x1="7" y1="16" x2="11" y2="16"/></svg>
+        </div>
+        <div>
+          <div class="credit-feature-title">Solo tu cedula</div>
+          <div class="credit-feature-sub">Sin garante, sin papeles</div>
+        </div>
+      </div>
+      <div class="credit-feature">
+        <div class="credit-feature-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+        </div>
+        <div>
+          <div class="credit-feature-title">Aprobacion rapida</div>
+          <div class="credit-feature-sub">Te respondemos al instante</div>
+        </div>
+      </div>
+      <div class="credit-feature">
+        <div class="credit-feature-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div>
+          <div class="credit-feature-title">Plazos flexibles</div>
+          <div class="credit-feature-sub">A tu medida</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="credit-cta-row">
+      <a class="credit-cta-btn" href="https://wa.me/593979791683?text=Hola%2C%20quiero%20consultar%20el%20credito%20directo%20de%20Muebleria%20Palito" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        Consultar credito directo
+      </a>
+      <a class="credit-call-link" href="tel:+593979791683">
+        <span class="credit-call-label">Asesor de creditos</span>
+        <span class="credit-call-num">0979791683</span>
+      </a>
+    </div>
   </div>
 
   <div class="contact-split">
@@ -378,15 +501,19 @@
     gsap.registerPlugin(ScrollTrigger);
 
     // Pre-hide
-    gsap.set(['.page-title','.page-sub','.form-side > *','.info-side > *','.store-card','.stores-header > *'], { autoAlpha: 0 });
+    gsap.set(['.page-title','.page-sub','.form-side > *','.info-side > *','.store-card','.stores-header > *','.credit-feature','.credit-cta-row > *'], { autoAlpha: 0 });
     gsap.set('.page-title', { y: 40 });
     gsap.set('.page-sub',   { y: 20 });
+    gsap.set('.credit-feature', { y: 18 });
+    gsap.set('.credit-cta-row > *', { y: 14 });
 
     // Header entrance
     gsap.timeline({ delay: .2, defaults: { ease: 'power3.out' } })
       .to('.sec-label',  { autoAlpha: 1, duration: .6 })
       .to('.page-title', { autoAlpha: 1, y: 0, duration: .85 }, '-=.3')
-      .to('.page-sub',   { autoAlpha: 1, y: 0, duration: .7  }, '-=.5');
+      .to('.page-sub',   { autoAlpha: 1, y: 0, duration: .7  }, '-=.5')
+      .to('.credit-feature', { autoAlpha: 1, y: 0, stagger: .08, duration: .55, clearProps: 'transform' }, '-=.4')
+      .to('.credit-cta-row > *', { autoAlpha: 1, y: 0, stagger: .1, duration: .55, clearProps: 'transform' }, '-=.25');
 
     // Form side
     ScrollTrigger.batch('.form-side > *', {
