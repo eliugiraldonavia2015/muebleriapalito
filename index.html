@@ -60,8 +60,8 @@
     .hero-right{position:absolute;inset:0;z-index:1;overflow:hidden}
     .hero-left{
       position:absolute;inset:0;z-index:3;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
-      padding:clamp(32px,6vw,80px) clamp(20px,5vw,64px);
+      display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+      padding:0 clamp(20px,5vw,64px) clamp(48px,8vh,96px);
       text-align:center;pointer-events:none;
     }
     .hero-left > div{
@@ -1083,7 +1083,7 @@
     // Signal that DOM manipulation is complete so GSAP can fade out loader.
     window.__indexRendererReady = true;
   </script>
-  <script type="module" src="js/index-renderer.js?v=20260528f"></script>
+  <script type="module" src="js/index-renderer.js?v=20260528g"></script>
 
 <script src="js/cart-system.js"></script>
 </body>
