@@ -2592,6 +2592,46 @@ async function loadSettings() {
   }
 }
 
+// Garantiza que los editores de "Paleta de colores" y "Materiales" existan en
+// el formulario de settings. Si el navegador sirve un admin/index.html viejo en
+// caché (sin estas tarjetas), las crea dinámicamente — así aparecen siempre que
+// cargue este JS (que sí se versiona con ?v=), sin depender del caché del HTML.
+// Idempotente: no duplica si ya existen. También cablea sus botones "+".
+function ensureStandardsUI() {
+  const form = document.getElementById("settingsForm");
+  if (!form) return;
+
+  if (!document.getElementById("paletteColors")) {
+    const card = document.createElement("div");
+    card.className = "admin-card";
+    card.style.padding = "24px";
+    card.innerHTML =
+      '<h3 style="margin:0 0 4px">Paleta de colores estandar</h3>' +
+      '<p style="font-size:12px;color:var(--gray);margin:0 0 16px">Estos colores son los que podras elegir al cargar un producto. El nombre es solo para identificarlos aqui (el cliente ve solo el cuadrito).</p>' +
+      '<div id="paletteColors"></div>' +
+      '<button type="button" class="btn btn-ghost btn-sm" id="addPaletteColorBtn" style="margin-top:10px">+ Agregar color</button>';
+    form.appendChild(card);
+  }
+
+  if (!document.getElementById("materialList")) {
+    const card = document.createElement("div");
+    card.className = "admin-card";
+    card.style.padding = "24px";
+    card.innerHTML =
+      '<h3 style="margin:0 0 4px">Materiales estandar</h3>' +
+      '<p style="font-size:12px;color:var(--gray);margin:0 0 16px">Estos materiales son los que podras marcar en cada producto.</p>' +
+      '<div id="materialList"></div>' +
+      '<button type="button" class="btn btn-ghost btn-sm" id="addMaterialBtn" style="margin-top:10px">+ Agregar material</button>';
+    form.appendChild(card);
+  }
+
+  // Cableado idempotente (onclick reemplaza, no acumula listeners).
+  const addColorBtn = document.getElementById("addPaletteColorBtn");
+  if (addColorBtn) addColorBtn.onclick = () => addPaletteColorRow();
+  const addMatBtn = document.getElementById("addMaterialBtn");
+  if (addMatBtn) addMatBtn.onclick = () => addMaterialRow();
+}
+
 // ─── PALETA DE COLORES ESTANDAR (settings) ───
 function addPaletteColorRow(data = {}) {
   const container = document.getElementById("paletteColors");
@@ -2694,10 +2734,11 @@ function populateSettingsForm() {
   storeCount = 0;
   (s.storeLocations || []).forEach(store => addStoreBlock(store));
 
-  document.getElementById("paletteColors").replaceChildren();
-  (s.colorPalette || []).forEach(c => addPaletteColorRow(c));
-  document.getElementById("materialList").replaceChildren();
-  (s.materialList || []).forEach(m => addMaterialRow(m));
+  ensureStandardsUI();
+  const palBox = document.getElementById("paletteColors");
+  if (palBox) { palBox.replaceChildren(); (s.colorPalette || []).forEach(c => addPaletteColorRow(c)); }
+  const matBox = document.getElementById("materialList");
+  if (matBox) { matBox.replaceChildren(); (s.materialList || []).forEach(m => addMaterialRow(m)); }
 }
 
 function addStoreBlock(data = {}) {
@@ -2811,9 +2852,9 @@ document.getElementById("settingsForm").addEventListener("submit", async e => {
 });
 
 document.getElementById("resetSettingsBtn").addEventListener("click", () => populateSettingsForm());
-
-document.getElementById("addPaletteColorBtn").addEventListener("click", () => addPaletteColorRow());
-document.getElementById("addMaterialBtn").addEventListener("click", () => addMaterialRow());
+// Los botones "+ Agregar color/material" se cablean en ensureStandardsUI()
+// (llamado desde populateSettingsForm), para que funcionen tanto si el HTML
+// trae las tarjetas como si las crea el JS por caché viejo.
 
 document.getElementById("hardResetCatalogBtn").addEventListener("click", async () => {
   if (!confirm("Esto BORRARA todo el catalogo actual y lo recargara desde seed-data.js. Continuar?")) return;
@@ -3103,6 +3144,7 @@ function openProductDrawer(id = null, preCatId = null) {
     populateCatSelect(preCatId || "");
     populateSubcategorySelect(preCatId || "", "");
   }
+  ensureProductVariationUI();
   renderColorSwatches();
   renderMaterialChips();
   document.getElementById("deleteProductBtn").style.display = id ? "inline-flex" : "none";
@@ -3171,10 +3213,56 @@ document.getElementById("addProductBtn").addEventListener("click", () => openPro
 
 // Dibuja los chips de la paleta (settings.colorPalette). Click en un chip que
 // no está usado agrega una variación; si ya está usado, no hace nada.
+// Resiliencia ante HTML cacheado viejo en el formulario de producto: si faltan
+// los bloques nuevos (chips de paleta + materiales), los inyecta y oculta los
+// controles viejos. Así editar variaciones de color y materiales funciona
+// aunque el navegador sirva un admin/index.html viejo. Idempotente.
+function ensureProductVariationUI() {
+  const colors = document.getElementById("prodColors");
+  if (!colors) return;
+  const colorsGroup = colors.closest(".form-group") || colors.parentElement;
+
+  if (!document.getElementById("prodPaletteChips")) {
+    const hint = document.createElement("p");
+    hint.id = "paletteHint";
+    hint.style.cssText = "font-size:12px;color:var(--gray);margin:0 0 8px";
+    const chips = document.createElement("div");
+    chips.id = "prodPaletteChips";
+    chips.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px";
+    colors.parentElement.insertBefore(hint, colors);
+    colors.parentElement.insertBefore(chips, colors);
+    // Ocultar el control viejo de color libre (input + boton "+") si existe.
+    const oldInput = document.getElementById("prodColorInput");
+    if (oldInput && oldInput.parentElement) oldInput.parentElement.style.display = "none";
+  }
+
+  // Ocultar el bloque viejo de "Imagen del producto" (subida unica) si existe.
+  const oldFile = document.getElementById("prodImageFile");
+  if (oldFile) {
+    const g = oldFile.closest(".form-group");
+    if (g) g.style.display = "none";
+  }
+
+  if (!document.getElementById("prodMaterials")) {
+    const group = document.createElement("div");
+    group.className = "form-group full";
+    group.innerHTML =
+      '<label>Materiales (elige de la lista del dashboard)</label>' +
+      '<p id="materialHint" style="font-size:12px;color:var(--gray);margin:0 0 8px"></p>' +
+      '<div id="prodMaterials" style="display:flex;flex-wrap:wrap;gap:8px"></div>';
+    if (colorsGroup && colorsGroup.parentElement) {
+      colorsGroup.parentElement.insertBefore(group, colorsGroup.nextSibling);
+    } else {
+      colors.parentElement.appendChild(group);
+    }
+  }
+}
+
 function renderPaletteChips() {
   const chips = document.getElementById("prodPaletteChips");
   const hint = document.getElementById("paletteHint");
   const palette = (settings.colorPalette || []);
+  if (!chips || !hint) return;
   chips.replaceChildren();
   if (!palette.length) {
     hint.textContent = "No hay colores en la paleta. Agrega colores en Configuracion → Paleta de colores estandar.";
@@ -3255,6 +3343,7 @@ function renderMaterialChips() {
   const container = document.getElementById("prodMaterials");
   const hint = document.getElementById("materialHint");
   const list = (settings.materialList || []);
+  if (!container || !hint) return;
   container.replaceChildren();
   if (!list.length) {
     hint.textContent = "No hay materiales. Agrega materiales en Configuracion → Materiales estandar.";
