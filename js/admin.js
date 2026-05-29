@@ -7,8 +7,8 @@ import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260528e";
-import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260528e";
+import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260528l";
+import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260528l";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
