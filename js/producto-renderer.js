@@ -492,8 +492,7 @@ function buildSpecs(product) {
     ["Categoria", product.category],
     ["Subcategoria", product.subcategory],
     ["Material", materials.join(", ")],
-    ["SKU", product.id],
-    ["Disponibilidad", product.available !== false ? "Disponible" : "Agotado"],
+    ["Disponibilidad", "Verificar disponibilidad con asesor"],
   ].filter(([, v]) => v);
 
   if (!fields.length) return;

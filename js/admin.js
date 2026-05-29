@@ -7,8 +7,8 @@ import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260529k";
-import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260529k";
+import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260529l";
+import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260529l";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -193,8 +193,8 @@ async function runLoader() {
   mountCategoryImageUploader();
   document.getElementById("lastSync").textContent = "Sincronizado: " + new Date().toLocaleTimeString("es-EC");
   // Marcador de build escrito por el JS realmente cargado: si NO dice "build
-  // v29k", tu navegador esta corriendo un admin.js viejo en cache → Cmd+Shift+R.
-  const __BUILD = "v29k";
+  // v29l", tu navegador esta corriendo un admin.js viejo en cache → Cmd+Shift+R.
+  const __BUILD = "v29l";
   const __bv = document.getElementById("buildVersion");
   if (__bv) { __bv.textContent = "build " + __BUILD; __bv.title = "Si no dice " + __BUILD + ", recarga con Cmd+Shift+R"; }
 
