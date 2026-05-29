@@ -927,8 +927,10 @@ async function init() {
       playEntrance();
     } else {
       // En cache-hit no re-poblamos todo (evita duplicar listeners), pero el QR
-      // puede haberse agregado/cambiado: refrescarlo con el dato fresco.
+      // y las especificaciones pueden haberse agregado/cambiado: refrescarlos
+      // con el dato fresco de Firestore. Ambos son idempotentes.
       buildQr(product.qrUrl);
+      buildSpecs(product);
     }
 
     await renderNav();
