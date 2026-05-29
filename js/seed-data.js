@@ -229,7 +229,7 @@ export const SETTINGS = {
     image: `${CDN}/banners/dormitorios-hero.jpg`,
   },
 
-  whatsappNumber: "593989667093",
+  whatsappNumber: "593959667093",
   whatsappPhoneDisplay: "098 966 7093",
   phoneLine: "1800 123 456",
   email: "info@palito.com",
@@ -244,7 +244,7 @@ export const SETTINGS = {
     facebook: "https://facebook.com/muebleriapalito",
     instagram: "https://instagram.com/muebleriapalito",
     youtube: "https://youtube.com/@muebleriapalito",
-    whatsapp: "https://wa.me/593989667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA",
+    whatsapp: "https://wa.me/593959667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA",
   },
 };
 
