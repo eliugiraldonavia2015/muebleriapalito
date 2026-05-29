@@ -352,6 +352,46 @@
       display:flex;align-items:center;justify-content:center;
       transition:opacity 180ms ease;
     }
+
+    /* ─── In-place feedback overlay (big check / big X with message) ─── */
+    .img-feedback{
+      position:absolute;inset:0;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;gap:6px;
+      backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+      opacity:0;transform:scale(0.95);pointer-events:none;
+      transition:opacity 220ms cubic-bezier(0.23,1,0.32,1),transform 320ms cubic-bezier(0.23,1,0.32,1);
+      z-index:5;border-radius:inherit;
+    }
+    .img-feedback.show{opacity:1;transform:scale(1)}
+    .img-feedback.ok{background:rgba(8,28,16,.72);color:#9ce4b3}
+    .img-feedback.err{background:rgba(40,8,8,.78);color:#ffb4ad;pointer-events:auto;cursor:pointer}
+    .img-feedback-icon{
+      width:46px;height:46px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(255,255,255,.08);border:1.5px solid currentColor;
+    }
+    .img-feedback-icon svg{width:24px;height:24px;stroke:currentColor;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+    .img-feedback.ok .img-feedback-icon svg path{
+      stroke-dasharray:24;stroke-dashoffset:24;
+      animation:fbDraw 380ms cubic-bezier(0.23,1,0.32,1) 80ms forwards;
+    }
+    .img-feedback.err .img-feedback-icon svg line{
+      stroke-dasharray:14;stroke-dashoffset:14;
+      animation:fbDraw 240ms cubic-bezier(0.23,1,0.32,1) 60ms forwards;
+    }
+    .img-feedback-label{
+      font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;
+      text-align:center;padding:0 8px;max-width:96%;line-height:1.35;
+    }
+    .img-feedback-msg{
+      font-size:10.5px;letter-spacing:.02em;text-transform:none;font-weight:500;
+      color:#ffd9d5;text-align:center;padding:0 10px;max-width:100%;line-height:1.4;
+      max-height:48px;overflow:hidden;text-overflow:ellipsis;
+    }
+    @keyframes fbDraw{ to { stroke-dashoffset:0 } }
+
+    /* The container that holds an image needs position:relative for the overlay to anchor */
+    .home-img-thumb{position:relative}
     .home-img-meta h3{font-size:15px;font-weight:600;color:var(--cream);margin-bottom:4px;letter-spacing:.01em}
     .home-img-meta p{font-size:12.5px;color:var(--gray);margin-bottom:12px;line-height:1.55}
     .home-img-meta-row{display:flex;align-items:center;gap:14px;justify-content:space-between;flex-wrap:wrap}
@@ -1473,6 +1513,6 @@
   </div>
 </div>
 
-<script type="module" src="../js/admin.js?v=20260527f"></script>
+<script type="module" src="../js/admin.js?v=20260528a"></script>
 </body>
 </html>

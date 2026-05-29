@@ -7,8 +7,8 @@ import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260527f";
-import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260527f";
+import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260528a";
+import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260528a";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -976,6 +976,7 @@ function renderDashCatOrder() {
     const thumb = document.createElement("button");
     thumb.type = "button";
     thumb.className = "dash-cat-thumb";
+    thumb.id = "dashCatThumb_" + cat.id;
     thumb.setAttribute("aria-label", "Cambiar imagen de " + cat.name);
 
     const img = document.createElement("img");
@@ -1064,6 +1065,7 @@ function renderDashCatOrder() {
       folder: "categories",
       cropAspectRatio: CROP_RATIO.category,
       cropLabel: cat.name,
+      feedbackTargetId: thumb.id,
       onUploaded: async (cdnUrl) => {
         img.src = cdnUrl;
         try {
@@ -1498,7 +1500,9 @@ async function uploadImageToBunny(file, subFolder) {
     xhr.onerror = function() {
       console.error('[BUNNY] ERROR network error');
       console.groupEnd();
-      reject(new Error('Bunny upload network error'));
+      setBunnyHealth(false);
+      if (typeof notifyError === 'function') notifyError('E105', 'No se pudo alcanzar br.storage.bunnycdn.com');
+      reject(new Error('Sin conexion a Bunny CDN. Revisa tu internet o el bloqueo de red.'));
     };
     xhr.send(file);
   });
@@ -2013,6 +2017,65 @@ function hideUploadToast() {
   if (_uploadToastTimer) { clearTimeout(_uploadToastTimer); _uploadToastTimer = null; }
 }
 
+// ─── IN-PLACE FEEDBACK OVERLAY ───
+// Paints a big green check (success) or red X with the error message (failure)
+// directly on top of the upload card the user clicked. So the user doesn't have
+// to look at the corner toast or the console.
+function flashCardFeedback(targetEl, mode, message) {
+  if (!targetEl) return;
+  // Remove any previous feedback overlay on this target
+  targetEl.querySelectorAll(":scope > .img-feedback").forEach(n => n.remove());
+
+  const fb = document.createElement("div");
+  fb.className = "img-feedback " + (mode === "ok" ? "ok" : "err");
+
+  const iconWrap = document.createElement("div");
+  iconWrap.className = "img-feedback-icon";
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  if (mode === "ok") {
+    const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p.setAttribute("d", "M5 12 l5 5 L19 7");
+    svg.appendChild(p);
+  } else {
+    const l1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    l1.setAttribute("x1","7"); l1.setAttribute("y1","7");
+    l1.setAttribute("x2","17"); l1.setAttribute("y2","17");
+    const l2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    l2.setAttribute("x1","17"); l2.setAttribute("y1","7");
+    l2.setAttribute("x2","7"); l2.setAttribute("y2","17");
+    svg.appendChild(l1); svg.appendChild(l2);
+  }
+  iconWrap.appendChild(svg);
+
+  const label = document.createElement("div");
+  label.className = "img-feedback-label";
+  label.textContent = mode === "ok" ? "Guardada" : "Error";
+
+  fb.append(iconWrap, label);
+
+  if (mode === "err" && message) {
+    const msg = document.createElement("div");
+    msg.className = "img-feedback-msg";
+    msg.textContent = String(message).slice(0, 140);
+    fb.appendChild(msg);
+    // Click dismisses the error overlay
+    fb.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); fb.remove(); });
+  }
+
+  targetEl.appendChild(fb);
+  // Force reflow then add .show so the transition runs
+  void fb.offsetWidth;
+  fb.classList.add("show");
+
+  if (mode === "ok") {
+    setTimeout(() => {
+      fb.classList.remove("show");
+      setTimeout(() => fb.remove(), 260);
+    }, 1500);
+  }
+}
+
 // ─── REUSABLE IMAGE UPLOADER ───
 // Wires a file input to upload to Bunny CDN and update preview + hidden URL field.
 // onUploaded(cdnUrl) is invoked after the upload succeeds, e.g. to persist the URL
@@ -2046,10 +2109,22 @@ function mountImageUploader(opts) {
     }
   }
 
+  // Optional: an element to anchor the big inline feedback overlay onto.
+  // Defaults to the parent of the preview thumb (the upload card).
+  function getFeedbackTarget() {
+    if (opts.feedbackTargetId) {
+      const t = document.getElementById(opts.feedbackTargetId);
+      if (t) return t;
+    }
+    if (previewEl && previewEl.parentElement) return previewEl.parentElement;
+    return null;
+  }
+
   fileEl.addEventListener("change", async function(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     const label = opts.cropLabel || "imagen";
+    const fbTarget = getFeedbackTarget();
 
     // Step 1: optional crop step before upload
     let toUpload = file;
@@ -2080,13 +2155,27 @@ function mountImageUploader(opts) {
       if (previewEl) previewEl.src = cdnUrl;
       setStatus("Imagen subida correctamente", "ok");
       showUploadToast("ok", "Imagen subida", label.charAt(0).toUpperCase() + label.slice(1) + " actualizada en el sitio.");
+      // Big in-place green check directly on the card
+      flashCardFeedback(fbTarget, "ok");
       if (typeof opts.onUploaded === "function") {
-        await opts.onUploaded(cdnUrl);
+        try {
+          await opts.onUploaded(cdnUrl);
+        } catch (saveErr) {
+          // Upload OK but Firestore save failed — replace the OK check with a red X + message
+          console.error("[uploader] post-save failed:", saveErr);
+          const detail = "Firestore: " + (saveErr.message || "error desconocido");
+          setStatus(detail, "err");
+          flashCardFeedback(fbTarget, "err", detail);
+          throw saveErr; // let outer callers know
+        }
       }
     } catch (err) {
       console.error("[uploader] failed:", err);
-      setStatus("Error al subir", "err");
-      showUploadToast("err", "Subida fallida", err.message);
+      const detail = err.message || "Error desconocido";
+      setStatus(detail, "err");
+      showUploadToast("err", "Subida fallida", detail);
+      // Big in-place red X with the actual error message
+      flashCardFeedback(fbTarget, "err", detail);
     } finally {
       if (spinnerEl) spinnerEl.classList.add("hidden");
       fileEl.value = "";
