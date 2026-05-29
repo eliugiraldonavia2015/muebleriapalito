@@ -1051,7 +1051,7 @@
         </div>
         <div class="dash-hero-right">
           <div class="dash-sync" id="lastSync">Sincronizado: --</div>
-          <div class="dash-sync" id="buildVersion" title="Si no dice v29b, recarga con Cmd+Shift+R">build v29b</div>
+          <div class="dash-sync" id="buildVersion" title="Si no dice v29c, recarga con Cmd+Shift+R">build v29c</div>
         </div>
       </div>
 
@@ -1249,6 +1249,22 @@
 
       <form id="settingsForm" style="display:flex;flex-direction:column;gap:32px">
 
+        <!-- COLOR PALETTE -->
+        <div class="admin-card" style="padding:24px">
+          <h3 style="margin:0 0 4px">Paleta de colores estandar</h3>
+          <p style="font-size:12px;color:var(--gray);margin:0 0 16px">Estos colores son los que podras elegir al cargar un producto. El nombre es solo para identificarlos aqui (el cliente ve solo el cuadrito).</p>
+          <div id="paletteColors"></div>
+          <button type="button" class="btn btn-ghost btn-sm" id="addPaletteColorBtn" style="margin-top:10px">+ Agregar color</button>
+        </div>
+
+        <!-- MATERIAL LIST -->
+        <div class="admin-card" style="padding:24px">
+          <h3 style="margin:0 0 4px">Materiales estandar</h3>
+          <p style="font-size:12px;color:var(--gray);margin:0 0 16px">Estos materiales son los que podras marcar en cada producto.</p>
+          <div id="materialList"></div>
+          <button type="button" class="btn btn-ghost btn-sm" id="addMaterialBtn" style="margin-top:10px">+ Agregar material</button>
+        </div>
+
         <!-- CONTACT INFO -->
         <div class="admin-card" style="padding:24px">
           <h3 style="font-size:15px;margin-bottom:20px;font-weight:600">Contacto</h3>
@@ -1357,22 +1373,6 @@
               <p style="font-size:11px;color:var(--gray);letter-spacing:.04em;margin:4px 0 0;line-height:1.55">La imagen del banner se gestiona desde <a href="#" data-go-section="dashboard" style="color:var(--copper-lt)">Dashboard</a>.</p>
             </div>
           </div>
-        </div>
-
-        <!-- COLOR PALETTE -->
-        <div class="admin-card" style="padding:24px">
-          <h3 style="margin:0 0 4px">Paleta de colores estandar</h3>
-          <p style="font-size:12px;color:var(--gray);margin:0 0 16px">Estos colores son los que podras elegir al cargar un producto. El nombre es solo para identificarlos aqui (el cliente ve solo el cuadrito).</p>
-          <div id="paletteColors"></div>
-          <button type="button" class="btn btn-ghost btn-sm" id="addPaletteColorBtn" style="margin-top:10px">+ Agregar color</button>
-        </div>
-
-        <!-- MATERIAL LIST -->
-        <div class="admin-card" style="padding:24px">
-          <h3 style="margin:0 0 4px">Materiales estandar</h3>
-          <p style="font-size:12px;color:var(--gray);margin:0 0 16px">Estos materiales son los que podras marcar en cada producto.</p>
-          <div id="materialList"></div>
-          <button type="button" class="btn btn-ghost btn-sm" id="addMaterialBtn" style="margin-top:10px">+ Agregar material</button>
         </div>
 
         <!-- STORE LOCATIONS -->
@@ -1572,6 +1572,6 @@
   </div>
 </div>
 
-<script type="module" src="../js/admin.js?v=20260529b"></script>
+<script type="module" src="../js/admin.js?v=20260529c"></script>
 </body>
 </html>
