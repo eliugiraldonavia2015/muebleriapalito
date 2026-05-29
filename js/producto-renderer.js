@@ -4,6 +4,7 @@ import {
   collection, getDocs, query, orderBy, doc, getDoc, where, limit
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
+import { normalizeColor, normalizeMaterials } from "./product-normalizers.js";
 
 const app = initializeApp(firebaseConfig);
 // IndexedDB cache — second visit serves docs from local cache (sub-50ms) before network confirms.
@@ -91,22 +92,37 @@ function buildThumbs(images) {
   });
 }
 
-// ─── COLOR SWATCHES ───
+// ─── COLOR SWATCHES (variaciones) ───
+// Cada color es una variación {hex, image}. Clic en un cuadrito cambia la foto
+// principal (mismo fade que las miniaturas) a la foto de esa variación.
 function buildColors(colors) {
   const wrap = $("#prod-colors-wrap");
   const container = $("#prod-colors");
   if (!colors || !colors.length) { if (wrap) wrap.style.display = "none"; return; }
+  if (!container) return;
 
-  selectedColor = colors[0];
-  colors.forEach((c, i) => {
+  const norm = colors.map(normalizeColor).filter(c => c.hex);
+  if (!norm.length) { if (wrap) wrap.style.display = "none"; return; }
+
+  selectedColor = norm[0].hex;
+  norm.forEach((c, i) => {
     const div = document.createElement("div");
     div.className = "cswatch" + (i === 0 ? " active" : "");
-    div.style.background = c;
-    div.title = c;
+    div.style.background = c.hex;
+    div.title = c.hex;
     div.addEventListener("click", () => {
       container.querySelectorAll(".cswatch").forEach(s => s.classList.remove("active"));
       div.classList.add("active");
-      selectedColor = c;
+      selectedColor = c.hex;
+      if (!c.image) return;
+      const mainImg = $("#main-img");
+      if (!mainImg) return;
+      gsap.to(mainImg, { opacity: 0, duration: 0.18, onComplete: () => {
+        mainImg.src = c.image;
+        const loupe = $("#loupe");
+        if (loupe) loupe.style.backgroundImage = "url(" + c.image + ")";
+        gsap.to(mainImg, { opacity: 1, duration: 0.25 });
+      }});
     });
     container.appendChild(div);
   });
@@ -433,9 +449,11 @@ function buildSpecs(product) {
   const section = $("#specs-section");
   if (!grid || !section) return;
 
+  const materials = normalizeMaterials(product);
   const fields = [
     ["Categoria", product.category],
     ["Subcategoria", product.subcategory],
+    ["Material", materials.join(", ")],
     ["SKU", product.id],
     ["Disponibilidad", product.available !== false ? "Disponible" : "Agotado"],
   ].filter(([, v]) => v);
@@ -736,13 +754,14 @@ function populateFromProduct(product) {
 
   setText("#prod-desc", product.description || "");
 
-  // Collect images
+  // Collect images: fotos de las variaciones de color primero, luego las
+  // imágenes sueltas legacy. Dedupe por URL.
   const images = [];
-  if (product.imageUrl) images.push(product.imageUrl);
-  if (product.primaryImage && product.primaryImage !== product.imageUrl) images.push(product.primaryImage);
-  if (Array.isArray(product.images)) {
-    product.images.forEach(u => { if (u && !images.includes(u)) images.push(u); });
-  }
+  const pushImg = (u) => { if (u && !images.includes(u)) images.push(u); };
+  (product.colors || []).forEach(c => pushImg(normalizeColor(c).image));
+  pushImg(product.imageUrl);
+  pushImg(product.primaryImage);
+  if (Array.isArray(product.images)) product.images.forEach(pushImg);
   if (!images.length) images.push("https://via.placeholder.com/800x900");
 
   const mainImg = $("#main-img");
