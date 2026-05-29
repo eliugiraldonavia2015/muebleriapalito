@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://muebleria-palito-cdn.b-cdn.net" crossorigin/>
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin/>
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin/>
-  <link rel="modulepreload" href="js/producto-renderer.js?v=20260529r"/>
+  <link rel="modulepreload" href="js/producto-renderer.js?v=20260529s"/>
   <link rel="modulepreload" href="js/firebase-config.js"/>
   <script>
     // Resolve the product image URL as early as possible and fire its download immediately.
@@ -739,10 +739,10 @@
         </p>
         <div class="credit-modal-divider"></div>
         <div class="credit-modal-cta">
-          <button class="credit-modal-go" id="credit-modal-wa-btn">
+          <a class="credit-modal-go" id="credit-modal-wa-btn" href="#" target="_blank" rel="noopener">
             Enviar por WhatsApp (Credito)
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.133.558 4.133 1.535 5.867L.057 23.5l5.764-1.513A11.938 11.938 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818c-1.96 0-3.782-.537-5.337-1.47l-.383-.228-3.42.897.913-3.32-.25-.404A9.793 9.793 0 012.182 12C2.182 6.573 6.573 2.182 12 2.182c5.426 0 9.818 4.39 9.818 9.818 0 5.427-4.392 9.818-9.818 9.818z"/></svg>
-          </button>
+          </a>
           <button class="credit-modal-go" id="credit-modal-shop-btn" style="margin-top:12px;background:#0d2818;border:1px solid rgba(90,184,124,.3);opacity:.4;pointer-events:none">
             Seguir con la compra
             <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;stroke:currentColor">
@@ -950,7 +950,7 @@
       var prodName = p.name;
       var prodId = p.id;
       var prodUrl = location.origin + '/producto.html?id=' + prodId;
-      var phone = '593989667093';
+      var phone = '593979791683';
       var waCreditMsg = 'Hola, vengo de la pagina web, me intereso este item: ' + prodName + ' con ID #' + prodId + ' y ya llene el formulario de credito.\n\nEste es el enlace del producto: ' + prodUrl;
       var waCreditUrl = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(waCreditMsg);
       var waShopBase = 'Hola, soy [NOMBRE], vengo de la pagina web, me interesa ' + prodName + ' con ID #' + prodId + ', me podrian dar mas informacion?\n\nEste es el URL: ' + prodUrl;
@@ -990,8 +990,9 @@
             .to(cancel2, { opacity: 1, duration: 0.2 }, '-=0.15');
         });
 
-      // WhatsApp credit button
-      document.getElementById('credit-modal-wa-btn').onclick = function () { openTab(waCreditUrl); };
+      // WhatsApp credit button: enlace nativo (href) para que el navegador lo
+      // abra sin que el bloqueador de pop-ups lo frene.
+      document.getElementById('credit-modal-wa-btn').href = waCreditUrl;
 
       // Real-time button state toggle
       var shopBtnEl = document.getElementById('credit-modal-shop-btn');
@@ -1130,7 +1131,7 @@
   })();
   </script>
 
-  <script type="module" src="js/producto-renderer.js?v=20260529r"></script>
+  <script type="module" src="js/producto-renderer.js?v=20260529s"></script>
 
 <script src="js/cart-system.js"></script>
 </body>
