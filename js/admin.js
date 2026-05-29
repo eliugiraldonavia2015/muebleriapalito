@@ -7,8 +7,8 @@ import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260528c";
-import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260528c";
+import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260528d";
+import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260528d";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -2272,13 +2272,160 @@ function setHomeThumb(thumbId, url) {
 
 function populateHomeImagesSection() {
   const s = settings || {};
-  setHomeThumb("heroImgThumb", s.heroSection?.bgImage || "");
   setHomeThumb("bannerImgThumb", s.promoBanner?.image || "");
   setHomeThumb("lifestyleImgThumb", s.lifestyle?.imageUrl || "");
-  ["heroImgStatus", "bannerImgStatus", "lifestyleImgStatus"].forEach(id => {
+  ["bannerImgStatus", "lifestyleImgStatus", "heroSlidesStatus"].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.textContent = ""; el.classList.remove("ok", "err", "busy"); }
   });
+  renderHeroSlides();
+}
+
+// ─── HERO SLIDES (image + video) ───
+function getHeroSlides() {
+  const hero = (settings && settings.heroSection) || {};
+  let slides = Array.isArray(hero.slides) ? hero.slides.filter(s => s && s.url) : [];
+  // Backward compat: if there's a legacy bgImage but no slides array, treat
+  // it as one image slide so the user sees their current Hero in the editor.
+  if (!slides.length && hero.bgImage) {
+    slides = [{ type: "image", url: hero.bgImage }];
+  }
+  return slides;
+}
+
+function renderHeroSlides() {
+  const list = document.getElementById("heroSlidesList");
+  if (!list) return;
+  list.replaceChildren();
+  const slides = getHeroSlides();
+  slides.forEach((s, i) => {
+    const row = document.createElement("div");
+    row.className = "hero-slide-row";
+
+    const thumb = document.createElement("div");
+    thumb.className = "hero-slide-thumb";
+    if (s.type === "video") {
+      const v = document.createElement("video");
+      v.src = s.url;
+      v.muted = true;
+      v.playsInline = true;
+      v.setAttribute("playsinline", "");
+      v.preload = "metadata";
+      thumb.appendChild(v);
+    } else {
+      const img = document.createElement("img");
+      img.src = s.url;
+      img.alt = "";
+      img.onerror = () => { img.src = PLACEHOLDER_IMG; img.onerror = null; };
+      thumb.appendChild(img);
+    }
+    const typeBadge = document.createElement("span");
+    typeBadge.className = "hero-slide-type" + (s.type === "video" ? " vid" : "");
+    typeBadge.textContent = s.type === "video" ? "VID" : "IMG";
+    thumb.appendChild(typeBadge);
+
+    const info = document.createElement("div");
+    info.className = "hero-slide-info";
+    const pos = document.createElement("span");
+    pos.className = "hero-slide-pos";
+    pos.textContent = "Slide " + (i + 1);
+    const meta = document.createElement("span");
+    meta.className = "hero-slide-meta";
+    meta.textContent = s.type === "video" ? "video · duracion completa" : "imagen · 5 s";
+    info.append(pos, meta);
+
+    const actions = document.createElement("div");
+    actions.className = "hero-slide-actions";
+    const upBtn = document.createElement("button");
+    upBtn.type = "button"; upBtn.className = "hero-slide-btn"; upBtn.textContent = "↑";
+    upBtn.title = "Subir"; upBtn.disabled = i === 0;
+    upBtn.addEventListener("click", () => moveHeroSlide(i, -1));
+    const dnBtn = document.createElement("button");
+    dnBtn.type = "button"; dnBtn.className = "hero-slide-btn"; dnBtn.textContent = "↓";
+    dnBtn.title = "Bajar"; dnBtn.disabled = i === slides.length - 1;
+    dnBtn.addEventListener("click", () => moveHeroSlide(i, 1));
+    const delBtn = document.createElement("button");
+    delBtn.type = "button"; delBtn.className = "hero-slide-btn danger"; delBtn.textContent = "×";
+    delBtn.title = "Borrar";
+    delBtn.addEventListener("click", () => deleteHeroSlide(i));
+    actions.append(upBtn, dnBtn, delBtn);
+
+    row.append(thumb, info, actions);
+    list.appendChild(row);
+  });
+}
+
+async function moveHeroSlide(idx, dir) {
+  const slides = getHeroSlides();
+  const tgt = idx + dir;
+  if (tgt < 0 || tgt >= slides.length) return;
+  [slides[idx], slides[tgt]] = [slides[tgt], slides[idx]];
+  try {
+    await saveHomeImage("heroSection.slides", slides);
+    renderHeroSlides();
+    notify("OK007", "Slide #" + (idx + 1) + " ↔ #" + (tgt + 1));
+  } catch (err) {
+    notifyError(firestoreCodeFromError(err, "E210"), err.message);
+  }
+}
+
+async function deleteHeroSlide(idx) {
+  const slides = getHeroSlides();
+  const s = slides[idx];
+  if (!s) return;
+  if (!window.confirm("Borrar este slide del Hero?")) return;
+  const updated = slides.slice(0, idx).concat(slides.slice(idx + 1));
+  try {
+    await saveHomeImage("heroSection.slides", updated);
+    // Best-effort: remove file from Bunny CDN. If it fails, file just stays orphaned.
+    try { await deleteImageFromBunny(s.url); }
+    catch (e) { notify("E107", e.message); }
+    renderHeroSlides();
+    notify("OK005", "Slide eliminado");
+  } catch (err) {
+    notifyError(firestoreCodeFromError(err, "E210"), err.message);
+  }
+}
+
+async function handleHeroSlideUpload(file) {
+  if (!file) return;
+  const isVideo = file.type && file.type.startsWith("video/");
+  const card = document.getElementById("heroSlidesCard");
+  const statusEl = document.getElementById("heroSlidesStatus");
+  const setStatus = (text, mode) => {
+    if (!statusEl) return;
+    statusEl.textContent = text || "";
+    statusEl.classList.remove("ok", "err", "busy");
+    if (mode) statusEl.classList.add(mode);
+  };
+
+  let toUpload = file;
+  if (!isVideo) {
+    setStatus("Abre el editor de recorte...", "busy");
+    const blob = await openCropModal(file, CROP_RATIO.hero, "el slide del Hero");
+    if (!blob) { setStatus("", null); return; }
+    const baseName = (file.name || "slide").replace(/\.[^.]+$/, "");
+    toUpload = new File([blob], baseName + ".jpg", { type: "image/jpeg" });
+  }
+
+  setStatus("Subiendo a Bunny CDN... (" + Math.round(toUpload.size / 1024) + " KB)", "busy");
+  showUploadToast("busy", "Subiendo slide del Hero", Math.round(toUpload.size / 1024) + " KB · " + (isVideo ? "video" : "imagen"));
+  try {
+    const cdnUrl = await uploadImageToBunny(toUpload, "hero-slides");
+    const updated = [...getHeroSlides(), { type: isVideo ? "video" : "image", url: cdnUrl }];
+    await saveHomeImage("heroSection.slides", updated);
+    renderHeroSlides();
+    setStatus("Slide agregado", "ok");
+    showUploadToast("ok", "Slide agregado", isVideo ? "Video listo en el slider." : "Imagen lista en el slider.");
+    flashCardFeedback(card, "ok");
+    notify("OK002", isVideo ? "Video al Hero (" + updated.length + " slides)" : "Imagen al Hero (" + updated.length + " slides)");
+  } catch (err) {
+    console.error("[hero-slide] upload failed:", err);
+    const detail = err.message || "Error desconocido";
+    setStatus(detail, "err");
+    showUploadToast("err", "No se pudo agregar el slide", detail);
+    flashCardFeedback(card, "err", detail);
+  }
 }
 
 function mountHomeImagesUploaders() {
@@ -2293,24 +2440,21 @@ function mountHomeImagesUploaders() {
     mountImageUploader(cfg);
   }
 
-  wire('[data-trigger="heroImgFile"]', {
-    fileInputId: "heroImgFile",
-    previewId: "heroImgThumb",
-    statusId: "heroImgStatus",
-    spinnerId: "heroImgSpinner",
-    statusClass: "home-img-status",
-    folder: "site",
-    cropAspectRatio: CROP_RATIO.hero,
-    cropLabel: "el Hero",
-    onUploaded: async (url) => {
-      try {
-        await saveHomeImage("heroSection.bgImage", url);
-        notify("OK002", "Hero");
-      } catch (err) {
-        notifyError(firestoreCodeFromError(err, "E210"), "Hero subido pero settings no se guardo: " + err.message);
-      }
-    }
-  });
+  // Hero slider — uses its own dedicated handler (supports image + video)
+  const addSlideBtn = document.getElementById("addHeroSlideBtn");
+  const slideFile = document.getElementById("heroSlideFile");
+  if (addSlideBtn && slideFile && !addSlideBtn.dataset.wired) {
+    addSlideBtn.dataset.wired = "1";
+    addSlideBtn.addEventListener("click", () => {
+      slideFile.value = "";
+      slideFile.click();
+    });
+    slideFile.addEventListener("change", async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) await handleHeroSlideUpload(file);
+      slideFile.value = "";
+    });
+  }
 
   wire('[data-trigger="bannerImgFile"]', {
     fileInputId: "bannerImgFile",

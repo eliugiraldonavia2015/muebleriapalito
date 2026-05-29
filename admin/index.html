@@ -394,6 +394,68 @@
 
     /* The container that holds an image needs position:relative for the overlay to anchor */
     .home-img-thumb{position:relative}
+
+    /* ─── HERO SLIDES EDITOR ─── */
+    .hero-slides-card{
+      display:flex;flex-direction:column;grid-template-columns:none !important;
+      gap:14px;padding:20px;
+    }
+    .hero-slides-head{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    }
+    .hero-slides-head h3{font-size:15px;font-weight:600;color:var(--cream);margin-bottom:4px;letter-spacing:.01em}
+    .hero-slides-head p{font-size:12.5px;color:var(--gray);line-height:1.55;max-width:520px}
+    .hero-slides-list{
+      display:flex;flex-direction:column;gap:8px;
+      border:1px dashed var(--rule);border-radius:10px;padding:8px;
+      min-height:64px;
+    }
+    .hero-slides-list:empty::before{
+      content:"Sin slides. Agrega imagenes o videos abajo.";
+      display:block;text-align:center;padding:20px 8px;
+      font-size:12px;color:var(--gray);letter-spacing:.04em;
+    }
+    .hero-slide-row{
+      display:grid;grid-template-columns:88px 1fr auto;gap:14px;align-items:center;
+      padding:8px 12px 8px 8px;background:var(--bg3);border:1px solid var(--rule);border-radius:8px;
+      transition:border-color 180ms cubic-bezier(0.23,1,0.32,1),transform 200ms cubic-bezier(0.23,1,0.32,1);
+    }
+    .hero-slide-row:hover{border-color:rgba(160,220,180,.22)}
+    .hero-slide-row.uploading{opacity:.62}
+    .hero-slide-thumb{
+      position:relative;width:88px;height:66px;border-radius:6px;overflow:hidden;
+      background:var(--bg);border:1px solid var(--rule);
+    }
+    .hero-slide-thumb img,.hero-slide-thumb video{
+      width:100%;height:100%;object-fit:cover;display:block;
+    }
+    .hero-slide-type{
+      position:absolute;top:4px;left:4px;
+      background:rgba(8,16,11,.78);color:var(--copper-lt);
+      font-size:9px;font-weight:700;letter-spacing:.14em;
+      padding:2px 6px;border-radius:99px;
+    }
+    .hero-slide-type.vid{color:#9ce4b3}
+    .hero-slide-info{display:flex;flex-direction:column;gap:2px;min-width:0}
+    .hero-slide-pos{font-size:13px;color:var(--cream);font-weight:600;letter-spacing:.01em}
+    .hero-slide-meta{font-size:11px;color:var(--gray);letter-spacing:.04em;text-transform:uppercase;font-weight:500}
+    .hero-slide-actions{display:flex;gap:4px}
+    .hero-slide-btn{
+      width:30px;height:30px;border-radius:6px;border:1px solid var(--rule);
+      background:transparent;color:var(--cream-dim);font-size:13px;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      transition:transform 140ms cubic-bezier(0.23,1,0.32,1),background 180ms ease,color 180ms ease,border-color 180ms ease;
+    }
+    .hero-slide-btn:hover:not(:disabled){background:rgba(160,220,180,.08);color:var(--cream);border-color:rgba(160,220,180,.22)}
+    .hero-slide-btn:active:not(:disabled){transform:scale(0.93)}
+    .hero-slide-btn:disabled{opacity:.32;cursor:not-allowed}
+    .hero-slide-btn.danger:hover{background:rgba(192,57,43,.12);color:var(--red-lt);border-color:rgba(192,57,43,.4)}
+    .hero-slides-foot{
+      display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+      padding-top:4px;
+    }
+    .hero-slides-foot .btn{padding-left:14px;padding-right:14px}
+    .hero-slides-foot .btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none}
     .home-img-meta h3{font-size:15px;font-weight:600;color:var(--cream);margin-bottom:4px;letter-spacing:.01em}
     .home-img-meta p{font-size:12.5px;color:var(--gray);margin-bottom:12px;line-height:1.55}
     .home-img-meta-row{display:flex;align-items:center;gap:14px;justify-content:space-between;flex-wrap:wrap}
@@ -993,7 +1055,7 @@
         </div>
         <div class="dash-hero-right">
           <div class="dash-sync" id="lastSync">Sincronizado: --</div>
-          <div class="dash-sync" id="buildVersion" title="Si no dice v28c, recarga sin cache">build v28c</div>
+          <div class="dash-sync" id="buildVersion" title="Si no dice v28d, recarga sin cache">build v28d</div>
         </div>
       </div>
 
@@ -1122,27 +1184,26 @@
         <p class="home-img-intro">Sube nuevas imagenes para las secciones del home. Al subir el archivo, se publica automaticamente — no hace falta guardar.</p>
       </div>
       <div class="home-img-list">
-        <article class="home-img-card">
-          <button type="button" class="home-img-thumb" data-trigger="heroImgFile" aria-label="Cambiar imagen del Hero">
-            <img id="heroImgThumb" src="" alt=""/>
-            <div class="home-img-thumb-overlay">
-              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              <span>Cambiar</span>
+        <article class="home-img-card hero-slides-card" id="heroSlidesCard">
+          <div class="hero-slides-head">
+            <div>
+              <h3>Hero <span style="opacity:.6;font-weight:400">(slider)</span></h3>
+              <p>Imagenes (5s c/u) y videos (duracion completa). Avance automatico, el usuario puede pasar manual con las flechas.</p>
             </div>
-            <div class="home-img-spinner hidden" id="heroImgSpinner"><span class="spinner"></span></div>
-          </button>
-          <div class="home-img-meta">
-            <h3>Hero</h3>
-            <p>Imagen grande del lado derecho, junto al titulo de bienvenida.</p>
-            <div class="home-img-meta-row">
-              <span class="home-img-status" id="heroImgStatus"></span>
-              <a class="home-img-view" href="../index.html#hero" target="_blank" rel="noopener">
-                Ver en home
-                <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              </a>
-            </div>
+            <a class="home-img-view" href="../index.html#hero" target="_blank" rel="noopener">
+              Ver en home
+              <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
           </div>
-          <input type="file" id="heroImgFile" accept="image/*" hidden/>
+          <div class="hero-slides-list" id="heroSlidesList"></div>
+          <div class="hero-slides-foot">
+            <button type="button" class="btn btn-ghost btn-sm" id="addHeroSlideBtn">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Agregar slide (imagen o video)
+            </button>
+            <span class="home-img-status" id="heroSlidesStatus"></span>
+          </div>
+          <input type="file" id="heroSlideFile" accept="image/*,video/*" hidden/>
         </article>
 
         <article class="home-img-card">
@@ -1516,6 +1577,6 @@
   </div>
 </div>
 
-<script type="module" src="../js/admin.js?v=20260528c"></script>
+<script type="module" src="../js/admin.js?v=20260528d"></script>
 </body>
 </html>

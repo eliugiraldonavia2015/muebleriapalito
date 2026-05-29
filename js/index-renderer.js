@@ -124,10 +124,168 @@ function renderNav(categories) {
   navList.appendChild(liLoc);
 }
 
-// Hero — image only (texts stay hardcoded in HTML)
+// Hero — slider with images and/or videos (texts stay hardcoded in HTML)
 function renderHero(settings) {
   const hero = settings.heroSection || {};
-  setImageWithFallback($("#hero .hero-img-wrap img"), hero.bgImage);
+  let slides = Array.isArray(hero.slides) ? hero.slides.filter(s => s && s.url) : [];
+  // Backward compat: if no slides defined but legacy bgImage exists, build one
+  if (!slides.length && hero.bgImage) {
+    slides = [{ type: "image", url: hero.bgImage }];
+  }
+  setupHeroSlider(slides);
+}
+
+const HERO_IMAGE_MS = 5000;
+let _heroSliderState = null;
+
+function setupHeroSlider(slides) {
+  const wrap = $("#hero .hero-img-wrap");
+  const counter = $("#hero .hero-counter");
+  if (!wrap) return;
+
+  // Tear down any previous slider state
+  if (_heroSliderState && _heroSliderState.advanceTimer) {
+    clearTimeout(_heroSliderState.advanceTimer);
+  }
+  if (_heroSliderState && _heroSliderState.currentVideo) {
+    _heroSliderState.currentVideo.pause();
+  }
+  wrap.replaceChildren();
+  _heroSliderState = null;
+
+  if (!slides.length) {
+    // Fallback placeholder image
+    const ph = document.createElement("img");
+    ph.src = PLACEHOLDER_IMG;
+    ph.alt = "";
+    wrap.appendChild(ph);
+    if (counter) counter.textContent = "00";
+    return;
+  }
+
+  // Build slide elements
+  const slideEls = slides.map((s, i) => {
+    const div = document.createElement("div");
+    div.className = "hero-slide" + (i === 0 ? " active" : "");
+    div.dataset.idx = String(i);
+    if (s.type === "video") {
+      const v = document.createElement("video");
+      v.src = s.url;
+      v.muted = true;
+      v.playsInline = true;
+      v.setAttribute("playsinline", "");
+      v.setAttribute("webkit-playsinline", "");
+      v.preload = "metadata";
+      v.onerror = () => { console.warn("[hero] video failed:", s.url); };
+      div.appendChild(v);
+    } else {
+      const img = document.createElement("img");
+      img.src = s.url;
+      img.alt = "";
+      img.onerror = () => { img.src = PLACEHOLDER_IMG; img.onerror = null; };
+      div.appendChild(img);
+    }
+    wrap.appendChild(div);
+    return div;
+  });
+
+  // Controls only when 2+ slides
+  let prevBtn = null, nextBtn = null, dotsEl = null;
+  if (slides.length > 1) {
+    prevBtn = buildHeroNavBtn("prev");
+    nextBtn = buildHeroNavBtn("next");
+    dotsEl = document.createElement("div");
+    dotsEl.className = "hero-dots";
+    slides.forEach((_, i) => {
+      const d = document.createElement("button");
+      d.type = "button";
+      d.className = "hero-dot" + (i === 0 ? " active" : "");
+      d.setAttribute("aria-label", "Slide " + (i + 1));
+      d.addEventListener("click", () => manualNav(i));
+      dotsEl.appendChild(d);
+    });
+    wrap.append(prevBtn, nextBtn, dotsEl);
+    prevBtn.addEventListener("click", () => manualNav(currentIdx() - 1));
+    nextBtn.addEventListener("click", () => manualNav(currentIdx() + 1));
+  }
+
+  const state = {
+    slides,
+    slideEls,
+    dotsEl,
+    counter,
+    idx: 0,
+    advanceTimer: null,
+    currentVideo: null,
+  };
+  _heroSliderState = state;
+
+  function currentIdx() { return state.idx; }
+
+  function clearTimers() {
+    if (state.advanceTimer) { clearTimeout(state.advanceTimer); state.advanceTimer = null; }
+    if (state.currentVideo) {
+      state.currentVideo.onended = null;
+      try { state.currentVideo.pause(); state.currentVideo.currentTime = 0; } catch (e) {}
+      state.currentVideo = null;
+    }
+  }
+
+  function show(targetIdx) {
+    const n = state.slides.length;
+    const idx = ((targetIdx % n) + n) % n;
+    clearTimers();
+
+    state.slideEls.forEach((el, i) => el.classList.toggle("active", i === idx));
+    if (state.dotsEl) {
+      [...state.dotsEl.children].forEach((d, i) => d.classList.toggle("active", i === idx));
+    }
+    if (state.counter) {
+      state.counter.textContent = String(idx + 1).padStart(2, "0");
+    }
+    state.idx = idx;
+
+    if (n <= 1) return; // no auto-advance for single slide
+
+    const slide = state.slides[idx];
+    if (slide.type === "video") {
+      const v = state.slideEls[idx].querySelector("video");
+      if (v) {
+        state.currentVideo = v;
+        try { v.currentTime = 0; } catch (e) {}
+        v.onended = () => { v.onended = null; show(state.idx + 1); };
+        const playPromise = v.play();
+        if (playPromise && playPromise.catch) {
+          playPromise.catch(() => {
+            // Autoplay blocked — fall back to fixed timer so the slider keeps moving
+            state.advanceTimer = setTimeout(() => show(state.idx + 1), HERO_IMAGE_MS);
+          });
+        }
+      } else {
+        state.advanceTimer = setTimeout(() => show(state.idx + 1), HERO_IMAGE_MS);
+      }
+    } else {
+      state.advanceTimer = setTimeout(() => show(state.idx + 1), HERO_IMAGE_MS);
+    }
+  }
+
+  function manualNav(targetIdx) { show(targetIdx); }
+
+  show(0);
+}
+
+function buildHeroNavBtn(dir) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "hero-nav " + dir;
+  b.setAttribute("aria-label", dir === "prev" ? "Anterior" : "Siguiente");
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  const poly = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+  poly.setAttribute("points", dir === "prev" ? "15 6 9 12 15 18" : "9 6 15 12 9 18");
+  svg.appendChild(poly);
+  b.appendChild(svg);
+  return b;
 }
 
 // Preload the hero image as soon as we know its URL so it overlaps with the JS
