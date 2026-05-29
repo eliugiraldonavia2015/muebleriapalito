@@ -7,8 +7,8 @@ import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260529l";
-import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260529l";
+import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260529m";
+import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260529m";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -51,6 +51,7 @@ let editingCatSubs = [];
 let editingProdColors = [];
 let editingProdMaterials = [];
 let editingProdQrUrl = "";
+let editingProdSpecsText = "";
 let editingCatId = null;
 let editingProdId = null;
 let storeCount = 0;
@@ -193,8 +194,8 @@ async function runLoader() {
   mountCategoryImageUploader();
   document.getElementById("lastSync").textContent = "Sincronizado: " + new Date().toLocaleTimeString("es-EC");
   // Marcador de build escrito por el JS realmente cargado: si NO dice "build
-  // v29l", tu navegador esta corriendo un admin.js viejo en cache → Cmd+Shift+R.
-  const __BUILD = "v29l";
+  // v29m", tu navegador esta corriendo un admin.js viejo en cache → Cmd+Shift+R.
+  const __BUILD = "v29m";
   const __bv = document.getElementById("buildVersion");
   if (__bv) { __bv.textContent = "build " + __BUILD; __bv.title = "Si no dice " + __BUILD + ", recarga con Cmd+Shift+R"; }
 
@@ -3159,6 +3160,7 @@ function openProductDrawer(id = null, preCatId = null) {
     editingProdMaterials = Array.isArray(p.materials) ? [...p.materials]
                           : (typeof p.material === "string" && p.material.trim() ? [p.material.trim()] : []);
     editingProdQrUrl = p.qrUrl || "";
+    editingProdSpecsText = p.specsText || "";
     // populateCatSelect devuelve el id real resuelto (case-insensitive); se usa
     // para poblar y seleccionar la subcategoria correctamente.
     const realCatId = populateCatSelect(p.categoryId || "");
@@ -3171,12 +3173,15 @@ function openProductDrawer(id = null, preCatId = null) {
     document.getElementById("prodColors").replaceChildren();
     editingProdMaterials = [];
     editingProdQrUrl = "";
+    editingProdSpecsText = "";
     populateCatSelect(preCatId || "");
     populateSubcategorySelect(preCatId || "", "");
   }
   ensureProductVariationUI();
   const qrInput = document.getElementById("prodQrUrl");
   if (qrInput) qrInput.value = editingProdQrUrl;
+  const specsInput = document.getElementById("prodSpecsText");
+  if (specsInput) specsInput.value = editingProdSpecsText;
   renderQrPreview();
   renderColorSwatches();
   renderMaterialChips();
@@ -3341,6 +3346,15 @@ function ensureProductVariationUI() {
         '<button type="button" class="btn btn-ghost btn-sm" id="genQrBtn">Generar QR</button>' +
       '</div>' +
       '<div id="prodQrPreview" style="margin-top:10px"></div>';
+    (colorsGroup && colorsGroup.parentElement ? colorsGroup.parentElement : colors.parentElement).appendChild(group);
+  }
+
+  if (!document.getElementById("prodSpecsText")) {
+    const group = document.createElement("div");
+    group.className = "form-group full";
+    group.innerHTML =
+      '<label>Especificaciones (texto, opcional)</label>' +
+      '<textarea id="prodSpecsText" rows="4" placeholder="Detalles, medidas, materiales, garantia... Se muestra bajo el boton \'Ver especificaciones\'. Vacio = el boton no aparece." style="min-height:90px"></textarea>';
     (colorsGroup && colorsGroup.parentElement ? colorsGroup.parentElement : colors.parentElement).appendChild(group);
   }
 
@@ -3546,6 +3560,7 @@ document.getElementById("productForm").addEventListener("submit", async e => {
     colors: [...editingProdColors],
     materials: [...editingProdMaterials],
     qrUrl: (document.getElementById("prodQrUrl")?.value || "").trim(),
+    specsText: (document.getElementById("prodSpecsText")?.value || "").trim(),
     available: true,
     updatedAt: serverTimestamp(),
   };

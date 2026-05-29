@@ -495,9 +495,12 @@ function buildSpecs(product) {
     ["Disponibilidad", "Verificar disponibilidad con asesor"],
   ].filter(([, v]) => v);
 
-  if (!fields.length) return;
+  const extraText = (product.specsText || "").trim();
+
+  if (!fields.length && !extraText) return;
 
   section.style.display = "";
+  grid.replaceChildren();
   fields.forEach(([label, val]) => {
     const item = document.createElement("div");
     item.className = "spec-item";
@@ -511,6 +514,30 @@ function buildSpecs(product) {
     item.appendChild(vEl);
     grid.appendChild(item);
   });
+
+  // Texto libre desplegable ("Ver especificaciones"). Solo si el item lo tiene.
+  const toggle = $("#specs-toggle");
+  const extra = $("#specs-extra");
+  const textEl = $("#specs-extra-text");
+  const label = toggle ? toggle.querySelector(".specs-toggle-label") : null;
+  if (toggle && extra && textEl) {
+    if (extraText) {
+      textEl.textContent = extraText;
+      toggle.style.display = "inline-flex";
+      extra.classList.remove("open");
+      toggle.classList.remove("open");
+      if (label) label.textContent = "Ver especificaciones";
+      toggle.onclick = () => {
+        const open = extra.classList.toggle("open");
+        toggle.classList.toggle("open", open);
+        if (label) label.textContent = open ? "Ocultar especificaciones" : "Ver especificaciones";
+      };
+    } else {
+      toggle.style.display = "none";
+      extra.classList.remove("open");
+      textEl.textContent = "";
+    }
+  }
 }
 
 // ─── ORDER PANEL — always visible, btn scrolls to it ───

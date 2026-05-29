@@ -39,7 +39,8 @@
 | `colors` | array | Variaciones: `[{ hex, image }]` — hex de la paleta estándar + foto de esa variación. La foto de la 1ª variación se copia a `primaryImage`. |
 | `material` | string (optional, legacy) | Material único (formato viejo; se lee vía normalizeMaterials) |
 | `materials` | array | Materiales a nivel de ítem, elegidos de `settings.materialList` |
-| `qrUrl` | string (optional) | URL para generar un QR; si existe, se muestra el QR en la página de producto (bajo las miniaturas) |
+| `qrUrl` | string (optional) | URL para generar un QR; si existe, se muestra el QR sobrepuesto en la imagen del producto |
+| `specsText` | string (optional) | Texto libre de especificaciones; si existe, aparece el boton "Ver especificaciones" en la pagina de producto |
 | `available` | boolean | If false, hidden from catalog |
 | `createdAt` | timestamp | — |
 | `updatedAt` | timestamp | — |

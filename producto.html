@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://muebleria-palito-cdn.b-cdn.net" crossorigin/>
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin/>
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin/>
-  <link rel="modulepreload" href="js/producto-renderer.js?v=20260529l"/>
+  <link rel="modulepreload" href="js/producto-renderer.js?v=20260529m"/>
   <link rel="modulepreload" href="js/firebase-config.js"/>
   <script>
     // Resolve the product image URL as early as possible and fire its download immediately.
@@ -189,6 +189,15 @@
     .spec-item:last-child{border-bottom:none;padding-bottom:0}
     .spec-label{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);opacity:.85;flex-shrink:0;font-weight:500}
     .spec-val{font-size:14px;color:var(--cream);text-align:right;font-weight:500}
+    /* Acordeon "Ver especificaciones" (texto libre por item). Panel claro. */
+    .specs-toggle{display:none;align-items:center;gap:8px;margin-top:16px;background:none;border:1px solid rgba(0,0,0,.14);border-radius:8px;padding:9px 14px;color:#5a5a58;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;cursor:pointer;transition:border-color .2s,color .2s}
+    .specs-toggle:hover{border-color:#3a8c5c;color:#1a1a18}
+    .specs-toggle .specs-chev{width:14px;height:14px;transition:transform .3s ease}
+    .specs-toggle.open .specs-chev{transform:rotate(180deg)}
+    .specs-extra{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s ease}
+    .specs-extra.open{grid-template-rows:1fr}
+    .specs-extra-inner{overflow:hidden}
+    .specs-extra-text{margin:0;padding-top:14px;font-size:14px;line-height:1.7;color:#5a5a58;white-space:pre-wrap}
 
     /* ORDER PANEL — always visible */
     .order-panel{background:var(--bg2);border-top:1px solid var(--rule);padding:0 clamp(24px,5vw,80px)}
@@ -663,6 +672,11 @@
       <div class="specs-section" id="specs-section" style="display:none">
         <div class="specs-label">Especificaciones</div>
         <div class="specs-grid" id="specs-grid"></div>
+        <button type="button" class="specs-toggle" id="specs-toggle">
+          <span class="specs-toggle-label">Ver especificaciones</span>
+          <svg class="specs-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="specs-extra" id="specs-extra"><div class="specs-extra-inner"><p class="specs-extra-text" id="specs-extra-text"></p></div></div>
       </div>
     </div>
   </section>
@@ -1088,7 +1102,7 @@
   })();
   </script>
 
-  <script type="module" src="js/producto-renderer.js?v=20260529l"></script>
+  <script type="module" src="js/producto-renderer.js?v=20260529m"></script>
 
 <script src="js/cart-system.js"></script>
 </body>
