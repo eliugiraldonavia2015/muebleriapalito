@@ -89,26 +89,19 @@ function buildQr(qrUrl) {
     box = document.createElement("div");
     box.className = "prod-qr";
     box.id = "prod-qr";
-    box.style.display = "none";
     if (strip && strip.parentNode === panel) panel.insertBefore(box, strip.nextSibling);
     else panel.appendChild(box);
   }
-  if (!qrUrl) { box.style.display = "none"; box.replaceChildren(); return; }
+  if (!qrUrl) { box.classList.remove("show"); box.replaceChildren(); return; }
   loadQrLib().then(qrcode => {
     const qr = qrcode(0, "M");
     qr.addData(qrUrl);
     qr.make();
     box.innerHTML =
-      '<div style="display:inline-flex;align-items:center;gap:12px;margin-top:16px;padding:10px 14px;border:1px solid var(--rule);border-radius:12px">' +
-        '<div style="background:#fff;padding:7px;border-radius:8px;line-height:0">' +
-          '<div style="width:84px;height:84px">' + qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true }) + '</div>' +
-        '</div>' +
-        '<div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cream-dim)">Escaneame</div>' +
-      '</div>';
-    const svg = box.querySelector("svg");
-    if (svg) { svg.style.width = "100%"; svg.style.height = "100%"; svg.removeAttribute("width"); svg.removeAttribute("height"); }
-    box.style.display = "block";
-  }).catch(() => { box.style.display = "none"; });
+      '<div class="qr-box">' + qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true }) + '</div>' +
+      '<div class="qr-cap">Escaneame</div>';
+    box.classList.add("show");
+  }).catch(() => { box.classList.remove("show"); });
 }
 
 // ─── THUMBNAILS ───

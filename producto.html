@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://muebleria-palito-cdn.b-cdn.net" crossorigin/>
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin/>
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin/>
-  <link rel="modulepreload" href="js/producto-renderer.js?v=20260529f"/>
+  <link rel="modulepreload" href="js/producto-renderer.js?v=20260529g"/>
   <link rel="modulepreload" href="js/firebase-config.js"/>
   <script>
     // Resolve the product image URL as early as possible and fire its download immediately.
@@ -135,6 +135,13 @@
     /* THUMBNAIL STRIP */
     .thumb-strip{height:104px;display:flex;gap:8px;padding:12px 20px;background:rgba(18,42,28,.8);overflow-x:auto;scrollbar-width:none;align-items:center}
     .thumb-strip::-webkit-scrollbar{display:none}
+    /* QR opcional bajo las miniaturas. flex:0 0 auto para que conserve su lugar
+       en el panel de altura fija (la imagen cede espacio en vez de recortarlo). */
+    .prod-qr{flex:0 0 auto;display:none;align-items:center;gap:14px;padding:12px 20px;background:rgba(18,42,28,.8);border-top:1px solid var(--rule)}
+    .prod-qr.show{display:flex}
+    .prod-qr .qr-box{background:#fff;padding:6px;border-radius:8px;line-height:0;flex:0 0 auto}
+    .prod-qr .qr-box svg{width:74px;height:74px;display:block}
+    .prod-qr .qr-cap{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream-dim)}
     .thumb{width:76px;height:76px;flex-shrink:0;overflow:hidden;border:2px solid transparent;cursor:pointer;transition:border-color .25s,transform .25s}
     .thumb:hover{transform:scale(1.06)}
     .thumb.active{border-color:var(--copper)}
@@ -623,7 +630,7 @@
         </div>
       </div>
       <div class="thumb-strip" id="thumb-strip"></div>
-      <div class="prod-qr" id="prod-qr" style="display:none"></div>
+      <div class="prod-qr" id="prod-qr"></div>
     </div>
 
     <!-- INFO PANEL -->
@@ -1084,7 +1091,7 @@
   })();
   </script>
 
-  <script type="module" src="js/producto-renderer.js?v=20260529f"></script>
+  <script type="module" src="js/producto-renderer.js?v=20260529g"></script>
 
 <script src="js/cart-system.js"></script>
 </body>
