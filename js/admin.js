@@ -7,8 +7,8 @@ import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260528l";
-import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260528l";
+import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260528m";
+import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260528m";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -1149,13 +1149,26 @@ function renderDashFeatured() {
     .sort((a, b) => (a.featuredOrder ?? Number.MAX_SAFE_INTEGER) - (b.featuredOrder ?? Number.MAX_SAFE_INTEGER));
 
   const activeTitle = document.createElement("div");
-  activeTitle.style.cssText = "display:flex;align-items:center;justify-content:space-between;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);margin-bottom:8px;font-weight:600";
+  activeTitle.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);margin-bottom:8px;font-weight:600;flex-wrap:wrap";
   const activeLabel = document.createElement("span");
   activeLabel.textContent = "En home";
+  const activeRight = document.createElement("span");
+  activeRight.style.cssText = "display:flex;align-items:center;gap:10px";
   const activeCount = document.createElement("span");
   activeCount.style.cssText = "color:var(--copper-lt);letter-spacing:.06em";
   activeCount.textContent = featured.length + (featured.length === 1 ? " producto" : " productos");
-  activeTitle.append(activeLabel, activeCount);
+  activeRight.appendChild(activeCount);
+  if (featured.length > 0) {
+    const clearAllBtn = document.createElement("button");
+    clearAllBtn.type = "button";
+    clearAllBtn.textContent = "Quitar todos";
+    clearAllBtn.style.cssText = "font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:4px;border:1px solid var(--rule);background:none;color:var(--gray);cursor:pointer;transition:all .15s ease-out;font-weight:600";
+    clearAllBtn.addEventListener("mouseenter", () => { clearAllBtn.style.borderColor = "var(--red)"; clearAllBtn.style.color = "var(--red-lt)"; });
+    clearAllBtn.addEventListener("mouseleave", () => { clearAllBtn.style.borderColor = "var(--rule)"; clearAllBtn.style.color = "var(--gray)"; });
+    clearAllBtn.addEventListener("click", clearAllFeaturedProducts);
+    activeRight.appendChild(clearAllBtn);
+  }
+  activeTitle.append(activeLabel, activeRight);
   el.appendChild(activeTitle);
 
   if (!featured.length) {
@@ -1309,6 +1322,31 @@ async function moveFeaturedInHome(prodId, dir) {
     });
     await b.commit();
   } catch (err) {
+    notifyError(firestoreCodeFromError(err, "E211"), err.message);
+  }
+}
+
+async function clearAllFeaturedProducts() {
+  const featured = products.filter(p => p.featured);
+  if (!featured.length) return;
+  if (!window.confirm("Vas a quitar de \"Lo mas deseado\" los " + featured.length + " productos actuales. Los productos siguen en el catalogo, solo se ocultan del home. Continuar?")) return;
+
+  // Optimistic local update
+  featured.forEach(p => { p.featured = false; p.featuredOrder = null; });
+  renderDashboard();
+
+  // Firestore batch write
+  try {
+    const b = writeBatch(db);
+    featured.forEach(p => {
+      b.update(doc(db, COL_PRODUCTS, p.id), { featured: false, featuredOrder: null, updatedAt: serverTimestamp() });
+    });
+    await b.commit();
+    notify("OK007", "Lo mas deseado vaciado (" + featured.length + " productos quitados)");
+  } catch (err) {
+    // Roll back optimistic update
+    featured.forEach(p => { p.featured = true; });
+    renderDashboard();
     notifyError(firestoreCodeFromError(err, "E211"), err.message);
   }
 }
