@@ -3075,13 +3075,15 @@ function openProductDrawer(id = null, preCatId = null) {
     document.getElementById("prodEditId").value = id;
     document.getElementById("prodName").value = p.name || "";
     document.getElementById("prodDesc").value = p.description || "";
-    setProductImagePreview(p.primaryImage || p.imageUrl || "");
+    document.getElementById("prodImage").value = p.primaryImage || p.imageUrl || "";
     document.getElementById("prodDisplayOrder").value = p.displayOrder ?? "";
     document.getElementById("prodPrice").value = p.price || "";
     document.getElementById("prodOriginalPrice").value = p.originalPrice || "";
     document.getElementById("prodFeatured").checked = !!p.featured;
     document.getElementById("prodNew").checked = !!p.isNew;
-    editingProdColors = [...(p.colors || [])];
+    editingProdColors = (p.colors || []).map(c =>
+      (c && typeof c === "object") ? { hex: c.hex || "", image: c.image || null }
+                                   : { hex: c || "", image: null });
     populateCatSelect(p.categoryId || "");
     populateSubcategorySelect(p.categoryId || "", p.subcategory || "");
   } else {
@@ -3116,63 +3118,37 @@ function closeProductDrawer() {
   console.groupEnd();
 }
 document.getElementById("closeProductDrawerBtn").addEventListener("click", closeProductDrawer);
-// ─── PRODUCT IMAGE FILE PICKER ───
-function setProductImagePreview(url) {
-  var hid = document.getElementById("prodImage");
-  var prev = document.getElementById("prodImagePreview");
-  var st = document.getElementById("prodImageStatus");
-  var fi = document.getElementById("prodImageFile");
-  hid.value = url || "";
-  prev.src = (url && url.trim()) ? url : PLACEHOLDER_IMG;
-  prev.style.display = "block";
-  prev.onerror = () => { prev.src = PLACEHOLDER_IMG; prev.onerror = null; };
-  st.textContent = (url && url.trim()) ? "Imagen actual del producto" : "Sin imagen — usa el selector para subir";
-  st.style.color = "var(--gray)";
-  if (fi) { fi.value = ""; }
+// Abre el selector de archivo para la variación i, recorta 3:4, sube a Bunny y
+// guarda la URL en editingProdColors[i].image.
+async function pickVariationPhoto(i) {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.addEventListener("change", async () => {
+    const file = input.files[0];
+    if (!file) return;
+    const statusEl = document.querySelector('[data-var-status="' + i + '"]');
+    const setStatus = (t, color) => { if (statusEl) { statusEl.textContent = t; statusEl.style.color = color || "var(--gray)"; } };
+    setStatus("Abriendo recorte...", "var(--copper-lt)");
+    const blob = await openCropModal(file, CROP_RATIO.product, "el producto");
+    if (!blob) { setStatus(""); return; }
+    const baseName = file.name.replace(/\.[^.]+$/, "");
+    const toUpload = new File([blob], baseName + ".jpg", { type: "image/jpeg" });
+    setStatus("Subiendo a Bunny CDN...", "var(--copper-lt)");
+    showUploadToast("busy", "Subiendo a Bunny CDN...", Math.round(toUpload.size / 1024) + " KB · variacion");
+    try {
+      const cdnUrl = await uploadImageToBunny(toUpload, "products");
+      if (editingProdColors[i]) editingProdColors[i].image = cdnUrl;
+      setStatus("OK foto subida", "var(--copper-lt)");
+      showUploadToast("ok", "Foto subida", "Foto de la variacion guardada en el CDN.");
+      renderColorSwatches();
+    } catch (err) {
+      setStatus("ERROR " + err.message, "var(--red-lt)");
+      showUploadToast("err", "Subida fallida", err.message);
+    }
+  });
+  input.click();
 }
-
-document.getElementById("prodImageFile").addEventListener("change", async function(e) {
-  var file = e.target.files[0];
-  if (!file) { return; }
-  console.log("[IMG] selected:", file.name, Math.round(file.size / 1024) + "KB");
-  var prev = document.getElementById("prodImagePreview");
-  var st = document.getElementById("prodImageStatus");
-  var fileInput = e.target;
-
-  // Open crop modal so the image fits the product card (3:4)
-  st.textContent = "Abre el editor de recorte...";
-  st.style.color = "var(--copper-lt)";
-  const blob = await openCropModal(file, CROP_RATIO.product, "el producto");
-  if (!blob) {
-    st.textContent = "";
-    fileInput.value = "";
-    return;
-  }
-  const baseName = file.name.replace(/\.[^.]+$/, "");
-  const toUpload = new File([blob], baseName + ".jpg", { type: "image/jpeg" });
-
-  prev.src = URL.createObjectURL(toUpload);
-  prev.style.display = "block";
-  st.textContent = "Subiendo a Bunny CDN...";
-  st.style.color = "var(--copper-lt)";
-  showUploadToast("busy", "Subiendo a Bunny CDN...", Math.round(toUpload.size / 1024) + " KB · producto");
-  try {
-    var cdnUrl = await uploadImageToBunny(toUpload, "products");
-    document.getElementById("prodImage").value = cdnUrl;
-    prev.src = cdnUrl;
-    st.textContent = "OK Imagen subida";
-    st.style.color = "var(--copper-lt)";
-    showUploadToast("ok", "Imagen subida", "Imagen del producto guardada en el CDN.");
-    console.log("[IMG] uploaded:", cdnUrl);
-  } catch (err) {
-    st.textContent = "ERROR " + err.message;
-    st.style.color = "var(--red-lt)";
-    showUploadToast("err", "Subida fallida", err.message);
-    console.error("[IMG] upload failed:", err);
-  } finally {
-    fileInput.value = "";
-  }
-});
 
 document.getElementById("cancelProductDrawerBtn").addEventListener("click", closeProductDrawer);
 document.getElementById("productDrawerOverlay").addEventListener("click", closeProductDrawer);
@@ -3182,40 +3158,82 @@ document.getElementById("deleteProductBtn").addEventListener("click", async () =
 
 document.getElementById("addProductBtn").addEventListener("click", () => openProductDrawer(null, null));
 
-document.getElementById("addColorBtn").addEventListener("click", () => {
-  const hex = document.getElementById("prodColorText").value.trim() || document.getElementById("prodColorInput").value;
-  if (!hex || editingProdColors.includes(hex)) return;
-  editingProdColors.push(hex);
-  renderColorSwatches();
-  document.getElementById("prodColorText").value = "";
-});
 
-document.getElementById("prodColorInput").addEventListener("input", e => {
-  document.getElementById("prodColorText").value = e.target.value;
-});
+// Dibuja los chips de la paleta (settings.colorPalette). Click en un chip que
+// no está usado agrega una variación; si ya está usado, no hace nada.
+function renderPaletteChips() {
+  const chips = document.getElementById("prodPaletteChips");
+  const hint = document.getElementById("paletteHint");
+  const palette = (settings.colorPalette || []);
+  chips.replaceChildren();
+  if (!palette.length) {
+    hint.textContent = "No hay colores en la paleta. Agrega colores en Configuracion → Paleta de colores estandar.";
+    return;
+  }
+  hint.textContent = "Toca un color para agregar su variacion y subir la foto de ese color.";
+  palette.forEach(pc => {
+    const used = editingProdColors.some(v => v.hex === pc.hex);
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.title = pc.name || pc.hex;
+    chip.style.cssText = "display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--rule);background:none;color:var(--cream-dim);cursor:pointer;font-size:12px;opacity:" + (used ? ".4" : "1");
+    const dot = document.createElement("span");
+    dot.style.cssText = "width:16px;height:16px;border-radius:50%;border:1px solid var(--rule);background:" + pc.hex;
+    const label = document.createElement("span");
+    label.textContent = pc.name || pc.hex;
+    chip.append(dot, label);
+    chip.disabled = used;
+    chip.addEventListener("click", () => {
+      if (editingProdColors.some(v => v.hex === pc.hex)) return;
+      editingProdColors.push({ hex: pc.hex, image: null });
+      renderColorSwatches();
+    });
+    chips.appendChild(chip);
+  });
+}
 
+// Dibuja las variaciones elegidas: cuadrito (solo lectura) + botón subir foto +
+// miniatura + quitar. La 1ª variación con foto será la foto principal.
 function renderColorSwatches() {
+  renderPaletteChips();
   const container = document.getElementById("prodColors");
   container.replaceChildren();
-  editingProdColors.forEach((c, i) => {
+  editingProdColors.forEach((v, i) => {
+    const palette = (settings.colorPalette || []);
+    const name = (palette.find(p => p.hex === v.hex) || {}).name || v.hex;
+
     const wrap = document.createElement("div");
     wrap.className = "color-input-wrap";
+    wrap.style.cssText = "display:flex;align-items:center;gap:10px;margin-top:8px";
 
-    const colorInput = document.createElement("input");
-    colorInput.type = "color";
-    colorInput.value = c;
-    colorInput.addEventListener("change", () => { editingProdColors[i] = colorInput.value; renderColorSwatches(); });
+    const dot = document.createElement("span");
+    dot.style.cssText = "width:24px;height:24px;border-radius:4px;border:1px solid var(--rule);flex-shrink:0;background:" + v.hex;
 
     const label = document.createElement("span");
-    label.style.fontSize = "12px";
-    label.textContent = c;
+    label.textContent = name + (i === 0 ? " (principal)" : "");
+    label.style.cssText = "font-size:12px;min-width:90px";
 
-    const removeBtn = document.createElement("button");
-    removeBtn.type = "button";
-    removeBtn.textContent = "×";
-    removeBtn.addEventListener("click", () => { editingProdColors.splice(i, 1); renderColorSwatches(); });
+    const thumb = document.createElement("img");
+    thumb.style.cssText = "width:40px;height:40px;object-fit:cover;border-radius:4px;border:1px solid var(--rule);background:var(--charcoal-deep);" + (v.image ? "" : "display:none");
+    if (v.image) thumb.src = v.image;
 
-    wrap.append(colorInput, label, removeBtn);
+    const fileBtn = document.createElement("button");
+    fileBtn.type = "button";
+    fileBtn.className = "btn btn-ghost btn-sm";
+    fileBtn.textContent = v.image ? "Cambiar foto" : "Subir foto";
+    fileBtn.addEventListener("click", () => pickVariationPhoto(i));
+
+    const status = document.createElement("span");
+    status.dataset.varStatus = String(i);
+    status.style.cssText = "font-size:11px;color:var(--gray)";
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "×";
+    remove.style.cssText = "background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;margin-left:auto";
+    remove.addEventListener("click", () => { editingProdColors.splice(i, 1); renderColorSwatches(); });
+
+    wrap.append(dot, label, thumb, fileBtn, status, remove);
     container.appendChild(wrap);
   });
 }
@@ -3224,7 +3242,7 @@ document.getElementById("productForm").addEventListener("submit", async e => {
   e.preventDefault();
   const name = document.getElementById("prodName").value.trim();
   const origPrice = document.getElementById("prodOriginalPrice").value;
-  var imageUrl = document.getElementById("prodImage").value.trim();
+  var imageUrl = (editingProdColors.find(c => c.image) || {}).image || "";
   const catId = document.getElementById("prodCategory").value;
   const catName = categories.find(c => c.id === catId)?.name || catId;
   const priceRaw = document.getElementById("prodPrice").value;
@@ -3241,8 +3259,8 @@ document.getElementById("productForm").addEventListener("submit", async e => {
       msg: "Ingresa un precio mayor a 0." },
     { id: "prodOriginalPrice", valid: !originalPrice || originalPrice > price,
       msg: "El precio original debe ser mayor que el precio actual (o dejalo vacio si no esta en oferta)." },
-    { id: "prodImageFile", valid: imageUrl.length > 0,
-      msg: "Sube una imagen para el producto. No puede ir vacio." },
+    { id: "prodColors", valid: imageUrl.length > 0,
+      msg: "Agrega al menos un color y sube su foto. No puede ir vacio." },
   ]);
   if (!okValid) return;
 

@@ -1489,17 +1489,7 @@
           <label for="prodSubcategory">Subcategoria</label>
           <select id="prodSubcategory"><option value="">Sin subcategoria</option></select>
         </div>
-        <div class="form-group full">
-          <label>Imagen del producto</label>
-          <div style="display:flex;gap:12px;align-items:center">
-            <img id="prodImagePreview" src="" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid var(--rule);background:var(--charcoal-deep);display:none"/>
-            <div style="flex:1">
-              <input type="file" id="prodImageFile" accept="image/*" style="font-size:13px;color:var(--cream);cursor:pointer"/>
-              <input type="hidden" id="prodImage"/>
-              <p id="prodImageStatus" style="font-size:11px;color:var(--gray);margin:4px 0 0"></p>
-            </div>
-          </div>
-        </div>
+        <input type="hidden" id="prodImage"/>
         <div class="form-group">
           <label for="prodPrice">Precio actual</label>
           <input type="number" id="prodPrice" step="0.01" placeholder="1240" required/>
@@ -1525,12 +1515,9 @@
           </label>
         </div>
         <div class="form-group full">
-          <label>Colores disponibles</label>
-          <div style="display:flex;gap:8px">
-            <input type="color" id="prodColorInput" value="#8b7355" style="width:36px;height:36px;border:1px solid var(--rule);border-radius:4px;padding:2px;cursor:pointer"/>
-            <input type="text" id="prodColorText" placeholder="#8b7355" style="flex:1"/>
-            <button type="button" class="btn btn-ghost btn-sm" id="addColorBtn">+</button>
-          </div>
+          <label>Variaciones de color (elige de la paleta del dashboard)</label>
+          <p id="paletteHint" style="font-size:12px;color:var(--gray);margin:0 0 8px"></p>
+          <div id="prodPaletteChips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
           <div class="color-inputs" id="prodColors"></div>
         </div>
       </div>
