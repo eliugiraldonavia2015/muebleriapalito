@@ -2800,7 +2800,7 @@ document.getElementById("settingsForm").addEventListener("submit", async e => {
 
   try {
     await setDoc(doc(db, COL_SETTINGS, "store"), data, { merge: true });
-    settings = data;
+    settings = { ...settings, ...data };
     notify("OK008");
   } catch (err) {
     notifyError(firestoreCodeFromError(err, "E210"), err.message);
@@ -2980,7 +2980,12 @@ async function deleteCategory(id) {
     const ids = [...new Set([id, id.toLowerCase()])];
     const q = query(collection(db, COL_PRODUCTS), where("categoryId", "in", ids));
     const prodsSnap = await getDocs(q);
-    const imageUrls = prodsSnap.docs.map(d => d.data().primaryImage || d.data().imageUrl).filter(Boolean);
+    const imageUrls = [...new Set(prodsSnap.docs.flatMap(d => {
+      const data = d.data();
+      const urls = [data.primaryImage || data.imageUrl];
+      (data.colors || []).forEach(c => { if (c && typeof c === "object" && c.image) urls.push(c.image); });
+      return urls;
+    }).filter(Boolean))];
 
     const b = writeBatch(db);
     prodsSnap.docs.forEach(d => b.delete(d.ref));
@@ -3279,6 +3284,12 @@ document.getElementById("productForm").addEventListener("submit", async e => {
   const name = document.getElementById("prodName").value.trim();
   const origPrice = document.getElementById("prodOriginalPrice").value;
   var imageUrl = (editingProdColors.find(c => c.image) || {}).image || "";
+  // Retrocompat: producto viejo sin foto por variación pero que ya tenía imagen
+  // principal — conservarla para no bloquear la edición.
+  if (!imageUrl && editingProdId) {
+    const prevProd = catProductsAll.find(p => p.id === editingProdId) || products.find(p => p.id === editingProdId);
+    if (prevProd) imageUrl = prevProd.primaryImage || prevProd.imageUrl || "";
+  }
   const catId = document.getElementById("prodCategory").value;
   const catName = categories.find(c => c.id === catId)?.name || catId;
   const priceRaw = document.getElementById("prodPrice").value;
@@ -3369,10 +3380,13 @@ async function deleteProduct(id) {
   try {
     await deleteDoc(doc(db, COL_PRODUCTS, id));
     if (prod) {
-      const imgUrl = prod.primaryImage || prod.imageUrl;
-      if (imgUrl) {
+      const urls = [];
+      const addUrl = (u) => { if (u && !urls.includes(u)) urls.push(u); };
+      addUrl(prod.primaryImage); addUrl(prod.imageUrl);
+      (prod.colors || []).forEach(c => { if (c && typeof c === "object") addUrl(c.image); });
+      for (const u of urls) {
         try {
-          await deleteImageFromBunny(imgUrl);
+          await deleteImageFromBunny(u);
         } catch (imgErr) {
           // Firestore delete succeeded but Bunny didn't — surface as warning
           notifyError("E107", imgErr.message);
