@@ -129,10 +129,11 @@
        monitor y nunca coincidia con el recorte del admin. Ahora es 1:1 fijo y
        calza exacto con CROP_RATIO.product. */
     .img-panel{position:sticky;top:120px;border-right:1px solid var(--rule);display:flex;flex-direction:column}
-    /* max-width en alto de pantalla: al ser cuadrada, topar el ancho con el alto
-       disponible evita que en monitores anchos la foto sobresalga del viewport.
-       Sigue siendo 1:1 exacto en todos los casos. */
-    .main-img-wrap{position:relative;width:100%;max-width:calc(100vh - 120px);aspect-ratio:1/1;margin:0 auto;overflow:hidden;cursor:crosshair;background:#1a3a2a}
+    /* 5:4 = proporcion real del panel (58% del ancho x alto de pantalla - 120px
+       en un monitor tipico: 1156x926 ≈ 1.25). La foto ocupa TODO el ancho del
+       panel — sin franjas de fondo a los lados — y el recorte del admin usa el
+       mismo 5:4, asi que lo que se recorta llena el panel exacto. */
+    .main-img-wrap{position:relative;width:100%;aspect-ratio:5/4;overflow:hidden;cursor:crosshair;background:#1a3a2a}
     .main-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s cubic-bezier(.22,.61,.36,1)}
     .main-img-wrap img.loaded{opacity:1}
     .main-img-wrap:hover img{transform:scale(1.04)}
