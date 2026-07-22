@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://muebleria-palito-cdn.b-cdn.net" crossorigin/>
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin/>
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin/>
-  <link rel="modulepreload" href="js/producto-renderer.js?v=20260529t"/>
+  <link rel="modulepreload" href="js/producto-renderer.js?v=20260722"/>
   <link rel="modulepreload" href="js/firebase-config.js"/>
   <script>
     // Resolve the product image URL as early as possible and fire its download immediately.
@@ -136,6 +136,27 @@
     /* THUMBNAIL STRIP */
     .thumb-strip{display:none}
     .thumb-strip::-webkit-scrollbar{display:none}
+
+    /* GALERIA — flechas + puntitos sobre la foto a panel completo. Se ocultan
+       solos cuando el producto tiene una sola foto (js agrega .gal-on). */
+    /* pan-y deja el scroll vertical al navegador y nos reserva el gesto horizontal */
+    .gal-on{touch-action:pan-y}
+    .gal-arrow,.gal-dots{opacity:0;transition:opacity .2s;z-index:40}
+    .gal-on .gal-dots{opacity:1}
+    .gal-on:hover .gal-arrow{opacity:1}
+    .gal-arrow{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.45);color:#fff;font-size:20px;line-height:1;display:none;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);padding:0}
+    .gal-on .gal-arrow{display:flex}
+    .gal-arrow:hover{background:rgba(0,0,0,.7)}
+    .gal-prev{left:14px}
+    .gal-next{right:14px}
+    .gal-dots{position:absolute;left:0;right:0;bottom:16px;display:none;justify-content:center;gap:7px;pointer-events:none}
+    .gal-on .gal-dots{display:flex}
+    .gal-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.45);box-shadow:0 1px 3px rgba(0,0,0,.5);transition:background .2s,width .2s;pointer-events:auto;cursor:pointer;border:none;padding:0}
+    .gal-dot.active{background:#fff;width:20px;border-radius:4px}
+    /* Mientras se arrastra: sin zoom-hover ni transicion, para que siga al dedo. */
+    .gal-dragging{cursor:grabbing}
+    .gal-dragging img{transition:none!important;transform:none!important}
+    @media(max-width:768px){.gal-arrow{display:none!important}}
     /* QR opcional sobrepuesto en la esquina superior derecha de la imagen. */
     .prod-qr{position:absolute;top:16px;right:16px;z-index:10;display:none;background:#fff;padding:10px;border-radius:13px;box-shadow:0 6px 22px rgba(0,0,0,.30);line-height:0}
     .prod-qr.show{display:block}
@@ -640,6 +661,9 @@
         <div class="loupe" id="loupe">
           <div class="loupe-ring"></div>
         </div>
+        <button class="gal-arrow gal-prev" id="gal-prev" type="button" aria-label="Foto anterior">‹</button>
+        <button class="gal-arrow gal-next" id="gal-next" type="button" aria-label="Foto siguiente">›</button>
+        <div class="gal-dots" id="gal-dots"></div>
         <div class="prod-qr" id="prod-qr"></div>
       </div>
       <div class="thumb-strip" id="thumb-strip"></div>
@@ -1131,7 +1155,7 @@
   })();
   </script>
 
-  <script type="module" src="js/producto-renderer.js?v=20260529t"></script>
+  <script type="module" src="js/producto-renderer.js?v=20260722"></script>
 
 <script src="js/cart-system.js"></script>
 </body>

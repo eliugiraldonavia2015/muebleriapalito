@@ -10,7 +10,7 @@ import {
   collection, getDocs, query, orderBy, doc, getDoc
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
-import { normalizeColor } from "./product-normalizers.js";
+import { normalizeColor, hasColorSelection } from "./product-normalizers.js?v=20260722";
 
 const app = initializeApp(firebaseConfig);
 // IndexedDB cache — second visit serves docs from local cache before network confirms.
@@ -77,8 +77,12 @@ function badgeHTML(product) {
   }
   return "";
 }
-function colorsHTML(colors) {
-  if (!colors || !colors.length) return "";
+// Los puntitos solo se dibujan si el producto se vende por color. Si el toggle
+// esta apagado, la eleccion no existe: no se muestra ningun punto.
+function colorsHTML(product) {
+  if (!hasColorSelection(product)) return "";
+  const colors = product.colors || [];
+  if (!colors.length) return "";
   return `<div class="product-colors-mini">` + colors.map((c, i) =>
     `<div class="dot${i === 0 ? " active" : ""}" style="background:${normalizeColor(c).hex}"></div>`
   ).join("") + `</div>`;
@@ -264,7 +268,7 @@ function buildCardsBatch(grid) {
             ${p.originalPrice ? `<span class="price-original">${priceFmt(p.originalPrice)}</span>` : ""}
             ${p.discountPct ? `<span class="price-off">-${Math.abs(p.discountPct)}%</span>` : ""}
           </div>
-          ${colorsHTML(p.colors)}
+          ${colorsHTML(p)}
         </div>
       </div>
     `;

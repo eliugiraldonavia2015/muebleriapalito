@@ -1515,10 +1515,22 @@
           </label>
         </div>
         <div class="form-group full">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;text-transform:none;font-size:13px;color:var(--cream);letter-spacing:normal">
+            <div class="toggle"><input type="checkbox" id="prodHasColors" checked/><span class="toggle-slider"></span></div>
+            Este producto se vende por color
+          </label>
+          <p style="font-size:12px;color:var(--gray);margin:6px 0 0">Apagado: el cliente no ve seleccion de color y las fotos se suben abajo, sueltas.</p>
+        </div>
+        <div class="form-group full" id="prodColorsGroup">
           <label>Variaciones de color (elige de la paleta del dashboard)</label>
           <p id="paletteHint" style="font-size:12px;color:var(--gray);margin:0 0 8px"></p>
           <div id="prodPaletteChips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
           <div class="color-inputs" id="prodColors"></div>
+        </div>
+        <div class="form-group full" id="prodGalleryGroup">
+          <label>Fotos del producto</label>
+          <p style="font-size:12px;color:var(--gray);margin:0 0 8px">La primera foto es la principal. Arrastra el orden con las flechas.</p>
+          <div id="prodGallery"></div>
         </div>
         <div class="form-group full">
           <label>Materiales (elige de la lista del dashboard)</label>
@@ -1584,6 +1596,6 @@
   </div>
 </div>
 
-<script type="module" src="../js/admin.js?v=20260529t"></script>
+<script type="module" src="../js/admin.js?v=20260722"></script>
 </body>
 </html>
