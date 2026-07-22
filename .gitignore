@@ -1,0 +1,4 @@
+# Basura que macOS crea al trabajar el repo desde un disco exFAT/USB.
+# Sin esto, un `git add -A` mete cientos de archivos AppleDouble al repo.
+._*
+.DS_Store

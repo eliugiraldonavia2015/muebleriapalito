@@ -9,6 +9,9 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { firebaseConfig, BUNNY_CDN } from "./firebase-config.js?v=20260529t";
 import { CATEGORIES, SETTINGS } from "./seed-data.js?v=20260529t";
+import {
+  normalizeColor, normalizeMaterials, hasColorSelection,
+} from "./product-normalizers.js?v=20260722";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -48,8 +51,10 @@ let products = [];
 let settings = {};
 let dashFeaturedCatFilter = "all";
 let editingCatSubs = [];
-let editingProdColors = [];
+let editingProdColors = [];      // [{ hex, images:[url] }] — variaciones del item
 let editingProdMaterials = [];
+let editingProdImages = [];      // galeria del producto cuando NO se vende por color
+let editingProdHasColors = true; // el toggle "se vende por color"
 let editingProdQrUrl = "";
 let editingProdSpecsText = "";
 let editingCatId = null;
@@ -3154,11 +3159,17 @@ function openProductDrawer(id = null, preCatId = null) {
     document.getElementById("prodOriginalPrice").value = p.originalPrice || "";
     document.getElementById("prodFeatured").checked = !!p.featured;
     document.getElementById("prodNew").checked = !!p.isNew;
-    editingProdColors = (p.colors || []).map(c =>
-      (c && typeof c === "object") ? { hex: c.hex || "", image: c.image || null }
-                                   : { hex: c || "", image: null });
-    editingProdMaterials = Array.isArray(p.materials) ? [...p.materials]
-                          : (typeof p.material === "string" && p.material.trim() ? [p.material.trim()] : []);
+    // Los normalizadores traducen el formato viejo (1 foto en `image`, colors
+    // como strings) al nuevo sin tocar la base.
+    editingProdColors = (p.colors || []).map(c => {
+      const n = normalizeColor(c);
+      return { hex: n.hex, images: n.images.slice() };
+    });
+    editingProdMaterials = normalizeMaterials(p);
+    editingProdImages = Array.isArray(p.images)
+      ? p.images.filter(u => typeof u === "string" && u.trim()) : [];
+    // Documento sin el flag (cargado antes del toggle): se infiere.
+    editingProdHasColors = hasColorSelection(p);
     editingProdQrUrl = p.qrUrl || "";
     editingProdSpecsText = p.specsText || "";
     // populateCatSelect devuelve el id real resuelto (case-insensitive); se usa
@@ -3172,18 +3183,24 @@ function openProductDrawer(id = null, preCatId = null) {
     document.getElementById("prodEditId").value = "";
     document.getElementById("prodColors").replaceChildren();
     editingProdMaterials = [];
+    editingProdImages = [];
+    editingProdHasColors = true; // por defecto igual que el flujo de hoy
     editingProdQrUrl = "";
     editingProdSpecsText = "";
     populateCatSelect(preCatId || "");
     populateSubcategorySelect(preCatId || "", "");
   }
   ensureProductVariationUI();
+  const hasColorsToggle = document.getElementById("prodHasColors");
+  if (hasColorsToggle) hasColorsToggle.checked = editingProdHasColors;
+  syncColorModeUI();
   const qrInput = document.getElementById("prodQrUrl");
   if (qrInput) qrInput.value = editingProdQrUrl;
   const specsInput = document.getElementById("prodSpecsText");
   if (specsInput) specsInput.value = editingProdSpecsText;
   renderQrPreview();
   renderColorSwatches();
+  renderProductGallery();
   renderMaterialChips();
   document.getElementById("deleteProductBtn").style.display = id ? "inline-flex" : "none";
   console.log("[DRAWER] Showing overlay + animating drawer...");
@@ -3207,37 +3224,142 @@ function closeProductDrawer() {
   console.groupEnd();
 }
 document.getElementById("closeProductDrawerBtn").addEventListener("click", closeProductDrawer);
-// Abre el selector de archivo para la variación hex, recorta 3:4, sube a Bunny y
-// guarda la URL en la variación correspondiente de editingProdColors.
-async function pickVariationPhoto(hex) {
+// Recorta 3:4 y sube a Bunny una lista de archivos, uno tras otro. Devuelve las
+// URLs que se subieron bien: una foto que falle no aborta las demas.
+async function cropAndUploadMany(files, setStatus) {
+  const urls = [];
+  const total = files.length;
+  let failures = 0;
+  for (let i = 0; i < total; i++) {
+    const file = files[i];
+    const tag = total > 1 ? " (foto " + (i + 1) + " de " + total + ")" : "";
+    setStatus("Recortando" + tag + "...", "var(--copper-lt)");
+    const blob = await openCropModal(file, CROP_RATIO.product, "el producto");
+    if (!blob) continue; // el usuario cancelo el recorte de esta foto
+    const baseName = file.name.replace(/\.[^.]+$/, "");
+    const toUpload = new File([blob], baseName + ".jpg", { type: "image/jpeg" });
+    setStatus("Subiendo" + tag + "...", "var(--copper-lt)");
+    showUploadToast("busy", "Subiendo a Bunny CDN...", Math.round(toUpload.size / 1024) + " KB" + tag);
+    try {
+      urls.push(await uploadImageToBunny(toUpload, "products"));
+    } catch (err) {
+      failures++;
+      showUploadToast("err", "Subida fallida" + tag, err.message);
+    }
+  }
+  if (urls.length) {
+    setStatus("OK " + urls.length + (urls.length === 1 ? " foto" : " fotos"), "var(--copper-lt)");
+    showUploadToast("ok", urls.length === 1 ? "Foto subida" : urls.length + " fotos subidas", "Guardadas en el CDN.");
+  } else {
+    setStatus(failures ? "ERROR no se subio ninguna" : "", failures ? "var(--red-lt)" : null);
+  }
+  return urls;
+}
+
+// Abre el selector (varios archivos a la vez) y agrega las fotos subidas al
+// array que devuelva getTarget(). Es un getter y no el array directo para que,
+// si la variacion se elimina mientras se sube, las fotos no vayan a un array
+// huerfano.
+function pickPhotosInto(getTarget, rerender, statusSel) {
   const input = document.createElement("input");
   input.type = "file";
   input.accept = "image/*";
+  input.multiple = true;
   input.addEventListener("change", async () => {
-    const file = input.files[0];
-    if (!file) return;
-    const statusEl = document.querySelector('[data-var-status="' + hex + '"]');
-    const setStatus = (t, color) => { if (statusEl) { statusEl.textContent = t; statusEl.style.color = color || "var(--gray)"; } };
-    setStatus("Abriendo recorte...", "var(--copper-lt)");
-    const blob = await openCropModal(file, CROP_RATIO.product, "el producto");
-    if (!blob) { setStatus(""); return; }
-    const baseName = file.name.replace(/\.[^.]+$/, "");
-    const toUpload = new File([blob], baseName + ".jpg", { type: "image/jpeg" });
-    setStatus("Subiendo a Bunny CDN...", "var(--copper-lt)");
-    showUploadToast("busy", "Subiendo a Bunny CDN...", Math.round(toUpload.size / 1024) + " KB · variacion");
-    try {
-      const cdnUrl = await uploadImageToBunny(toUpload, "products");
-      const target = editingProdColors.find(v => v.hex === hex);
-      if (target) target.image = cdnUrl;
-      setStatus("OK foto subida", "var(--copper-lt)");
-      showUploadToast("ok", "Foto subida", "Foto de la variacion guardada en el CDN.");
-      renderColorSwatches();
-    } catch (err) {
-      setStatus("ERROR " + err.message, "var(--red-lt)");
-      showUploadToast("err", "Subida fallida", err.message);
-    }
+    const files = Array.from(input.files || []);
+    if (!files.length) return;
+    const setStatus = (t, color) => {
+      const el = statusSel ? document.querySelector(statusSel) : null;
+      if (el) { el.textContent = t; el.style.color = color || "var(--gray)"; }
+    };
+    const urls = await cropAndUploadMany(files, setStatus);
+    const target = getTarget();
+    if (!target) return;
+    urls.forEach(u => { if (!target.includes(u)) target.push(u); });
+    rerender();
   });
   input.click();
+}
+
+// Tira de miniaturas reordenable. `images` es el array vivo; toda accion lo
+// muta y llama a rerender(). Se usa igual en las variaciones y en la galeria.
+// Devuelve el boton "agregar" para que quien la use lo cablee a su destino.
+function renderPhotoStrip(container, images, rerender, addLabel) {
+  container.replaceChildren();
+  const strip = document.createElement("div");
+  strip.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;align-items:center";
+
+  const swap = (a, b) => { const t = images[a]; images[a] = images[b]; images[b] = t; rerender(); };
+
+  images.forEach((url, i) => {
+    const cell = document.createElement("div");
+    cell.style.cssText = "position:relative;width:64px;height:64px;border-radius:6px;overflow:hidden;flex-shrink:0;background:var(--charcoal-deep);border:1px solid " + (i === 0 ? "var(--copper)" : "var(--rule)");
+
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = "";
+    img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block";
+    cell.appendChild(img);
+
+    if (i === 0) {
+      const tag = document.createElement("span");
+      tag.textContent = "Principal";
+      tag.style.cssText = "position:absolute;left:0;right:0;bottom:0;font-size:9px;text-align:center;background:var(--copper);color:#1a1a18;padding:1px 0";
+      cell.appendChild(tag);
+    }
+
+    const bar = document.createElement("div");
+    bar.style.cssText = "position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;background:rgba(0,0,0,.55)";
+    const mkBtn = (txt, title, fn, disabled) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = txt;
+      b.title = title;
+      b.disabled = !!disabled;
+      b.style.cssText = "background:none;border:none;padding:3px 5px;font-size:12px;line-height:1;color:" + (disabled ? "var(--gray)" : "#fff") + ";cursor:" + (disabled ? "default" : "pointer");
+      if (!disabled) b.addEventListener("click", fn);
+      return b;
+    };
+    bar.append(
+      mkBtn("◂", "Mover antes", () => swap(i, i - 1), i === 0),
+      mkBtn("×", "Quitar foto", () => { images.splice(i, 1); rerender(); }, false),
+      mkBtn("▸", "Mover despues", () => swap(i, i + 1), i === images.length - 1),
+    );
+    cell.appendChild(bar);
+    strip.appendChild(cell);
+  });
+
+  const add = document.createElement("button");
+  add.type = "button";
+  add.className = "btn btn-ghost btn-sm";
+  add.textContent = addLabel;
+  strip.appendChild(add);
+
+  container.appendChild(strip);
+  return add;
+}
+
+// Galeria del producto (modo sin color).
+function renderProductGallery() {
+  const container = document.getElementById("prodGallery");
+  if (!container) return;
+  container.replaceChildren();
+
+  const status = document.createElement("div");
+  status.id = "prodGalleryStatus";
+  status.style.cssText = "font-size:11px;color:var(--gray);margin-bottom:6px";
+  if (!editingProdImages.length) {
+    status.textContent = "Sin fotos todavia.";
+    status.style.color = "var(--red-lt)";
+  }
+
+  const strip = document.createElement("div");
+  const addBtn = renderPhotoStrip(strip, editingProdImages, renderProductGallery, "+ Agregar fotos");
+  addBtn.addEventListener("click", () => pickPhotosInto(
+    () => editingProdImages, renderProductGallery, "#prodGalleryStatus"
+  ));
+
+  container.append(status, strip);
 }
 
 document.getElementById("cancelProductDrawerBtn").addEventListener("click", closeProductDrawer);
@@ -3358,9 +3480,66 @@ function ensureProductVariationUI() {
     (colorsGroup && colorsGroup.parentElement ? colorsGroup.parentElement : colors.parentElement).appendChild(group);
   }
 
+  // Toggle "se vende por color" — interruptor del bloque de variaciones.
+  if (!document.getElementById("prodHasColors")) {
+    const group = document.createElement("div");
+    group.className = "form-group full";
+    group.innerHTML =
+      '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;text-transform:none;font-size:13px;color:var(--cream);letter-spacing:normal">' +
+        '<div class="toggle"><input type="checkbox" id="prodHasColors" checked/><span class="toggle-slider"></span></div>' +
+        'Este producto se vende por color' +
+      '</label>' +
+      '<p style="font-size:12px;color:var(--gray);margin:6px 0 0">Apagado: el cliente no ve seleccion de color y las fotos se suben abajo, sueltas.</p>';
+    if (colorsGroup && colorsGroup.parentElement) {
+      colorsGroup.parentElement.insertBefore(group, colorsGroup);
+    }
+  }
+
+  // Galeria del producto (modo sin color).
+  if (!document.getElementById("prodGallery")) {
+    const group = document.createElement("div");
+    group.className = "form-group full";
+    group.id = "prodGalleryGroup";
+    group.innerHTML =
+      '<label>Fotos del producto</label>' +
+      '<p style="font-size:12px;color:var(--gray);margin:0 0 8px">La primera foto es la principal. Ordena con las flechas.</p>' +
+      '<div id="prodGallery"></div>';
+    if (colorsGroup && colorsGroup.parentElement) {
+      colorsGroup.parentElement.insertBefore(group, colorsGroup.nextSibling);
+    }
+  }
+
+  // Cableado idempotente del toggle. Apagarlo o encenderlo NUNCA borra datos:
+  // el array del modo oculto se conserva y reaparece al volver.
+  const colorToggle = document.getElementById("prodHasColors");
+  if (colorToggle) colorToggle.onchange = () => {
+    editingProdHasColors = colorToggle.checked;
+    // Red de seguridad: apagar el color no puede dejar el producto sin fotos.
+    // Si la galeria esta vacia, se COPIAN (no se mueven) las de las variaciones.
+    if (!editingProdHasColors && !editingProdImages.length) {
+      editingProdColors.forEach(v => (v.images || []).forEach(u => {
+        if (!editingProdImages.includes(u)) editingProdImages.push(u);
+      }));
+    }
+    syncColorModeUI();
+    renderColorSwatches();
+    renderProductGallery();
+  };
+
   // Cableado idempotente del boton Generar QR.
   const genBtn = document.getElementById("genQrBtn");
   if (genBtn) genBtn.onclick = () => renderQrPreview();
+}
+
+// Muestra el bloque que corresponde al modo elegido. Solo cambia visibilidad —
+// no toca los datos, para poder ir y volver sin perder trabajo.
+function syncColorModeUI() {
+  const colors = document.getElementById("prodColors");
+  const colorsGroup = document.getElementById("prodColorsGroup")
+    || (colors && colors.closest(".form-group"));
+  const galleryGroup = document.getElementById("prodGalleryGroup");
+  if (colorsGroup) colorsGroup.style.display = editingProdHasColors ? "" : "none";
+  if (galleryGroup) galleryGroup.style.display = editingProdHasColors ? "none" : "";
 }
 
 function renderPaletteChips() {
@@ -3388,57 +3567,71 @@ function renderPaletteChips() {
     chip.disabled = used;
     chip.addEventListener("click", () => {
       if (editingProdColors.some(v => v.hex === pc.hex)) return;
-      editingProdColors.push({ hex: pc.hex, image: null });
+      editingProdColors.push({ hex: pc.hex, images: [] });
       renderColorSwatches();
     });
     chips.appendChild(chip);
   });
 }
 
-// Dibuja las variaciones elegidas: cuadrito (solo lectura) + botón subir foto +
-// miniatura + quitar. La 1ª variación con foto será la foto principal.
+// Dibuja las variaciones elegidas: cuadrito (solo lectura) + tira de fotos de
+// ese color + quitar. La 1ª variación con fotos aporta la foto principal.
 function renderColorSwatches() {
   renderPaletteChips();
   const container = document.getElementById("prodColors");
+  if (!container) return;
   container.replaceChildren();
-  const primaryHex = (editingProdColors.find(c => c.image) || {}).hex;
   const palette = (settings.colorPalette || []);
-  editingProdColors.forEach((v, i) => {
-    const name = (palette.find(pc => pc.hex === v.hex) || {}).name || v.hex;
+  const primaryHex = (editingProdColors.find(c => (c.images || []).length) || {}).hex;
 
-    const wrap = document.createElement("div");
-    wrap.className = "color-input-wrap";
-    wrap.style.cssText = "display:flex;align-items:center;gap:10px;margin-top:8px";
+  editingProdColors.forEach((v, i) => {
+    if (!Array.isArray(v.images)) v.images = [];
+    const hex = v.hex;
+    const name = (palette.find(pc => pc.hex === hex) || {}).name || hex;
+
+    const row = document.createElement("div");
+    row.className = "color-input-wrap";
+    row.style.cssText = "border:1px solid var(--rule);border-radius:8px;padding:10px;margin-top:10px";
+
+    const head = document.createElement("div");
+    head.style.cssText = "display:flex;align-items:center;gap:10px;margin-bottom:8px";
 
     const dot = document.createElement("span");
-    dot.style.cssText = "width:24px;height:24px;border-radius:4px;border:1px solid var(--rule);flex-shrink:0;background:" + v.hex;
+    dot.style.cssText = "width:24px;height:24px;border-radius:4px;border:1px solid var(--rule);flex-shrink:0;background:" + hex;
 
     const label = document.createElement("span");
-    label.textContent = name + (v.hex && v.hex === primaryHex ? " (principal)" : "");
-    label.style.cssText = "font-size:12px;min-width:90px";
+    label.textContent = name + (hex && hex === primaryHex ? " (principal)" : "");
+    label.style.cssText = "font-size:12px";
 
-    const thumb = document.createElement("img");
-    thumb.style.cssText = "width:40px;height:40px;object-fit:cover;border-radius:4px;border:1px solid var(--rule);background:var(--charcoal-deep);" + (v.image ? "" : "display:none");
-    if (v.image) thumb.src = v.image;
-
-    const fileBtn = document.createElement("button");
-    fileBtn.type = "button";
-    fileBtn.className = "btn btn-ghost btn-sm";
-    fileBtn.textContent = v.image ? "Cambiar foto" : "Subir foto";
-    fileBtn.addEventListener("click", () => pickVariationPhoto(v.hex));
+    const count = document.createElement("span");
+    count.textContent = v.images.length
+      ? v.images.length + (v.images.length === 1 ? " foto" : " fotos")
+      : "sin fotos";
+    count.style.cssText = "font-size:11px;color:" + (v.images.length ? "var(--gray)" : "var(--red-lt)");
 
     const status = document.createElement("span");
-    status.dataset.varStatus = v.hex;
+    status.dataset.varStatus = hex;
     status.style.cssText = "font-size:11px;color:var(--gray)";
 
     const remove = document.createElement("button");
     remove.type = "button";
     remove.textContent = "×";
+    remove.title = "Quitar este color";
     remove.style.cssText = "background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;margin-left:auto";
     remove.addEventListener("click", () => { editingProdColors.splice(i, 1); renderColorSwatches(); });
 
-    wrap.append(dot, label, thumb, fileBtn, status, remove);
-    container.appendChild(wrap);
+    head.append(dot, label, count, status, remove);
+
+    const strip = document.createElement("div");
+    const addBtn = renderPhotoStrip(strip, v.images, renderColorSwatches, "+ Agregar foto");
+    addBtn.addEventListener("click", () => pickPhotosInto(
+      () => { const t = editingProdColors.find(x => x.hex === hex); return t ? t.images : null; },
+      renderColorSwatches,
+      '[data-var-status="' + hex + '"]'
+    ));
+
+    row.append(head, strip);
+    container.appendChild(row);
   });
 }
 
@@ -3512,7 +3705,12 @@ document.getElementById("productForm").addEventListener("submit", async e => {
   e.preventDefault();
   const name = document.getElementById("prodName").value.trim();
   const origPrice = document.getElementById("prodOriginalPrice").value;
-  var imageUrl = (editingProdColors.find(c => c.image) || {}).image || "";
+  // La foto principal sale del modo activo: 1ª foto de la 1ª variación con
+  // fotos, o 1ª foto de la galería si el producto no se vende por color.
+  const activeGallery = editingProdHasColors
+    ? ((editingProdColors.find(c => (c.images || []).length) || {}).images || [])
+    : editingProdImages;
+  var imageUrl = activeGallery[0] || "";
   // Retrocompat: producto viejo sin foto por variación pero que ya tenía imagen
   // principal — conservarla para no bloquear la edición.
   if (!imageUrl && editingProdId) {
@@ -3535,8 +3733,11 @@ document.getElementById("productForm").addEventListener("submit", async e => {
       msg: "Ingresa un precio mayor a 0." },
     { id: "prodOriginalPrice", valid: !originalPrice || originalPrice > price,
       msg: "El precio original debe ser mayor que el precio actual (o dejalo vacio si no esta en oferta)." },
-    { id: "prodColors", valid: imageUrl.length > 0,
-      msg: "Agrega al menos un color y sube su foto. No puede ir vacio." },
+    { id: editingProdHasColors ? "prodColors" : "prodGallery",
+      valid: imageUrl.length > 0,
+      msg: editingProdHasColors
+        ? "Agrega al menos un color y sube su foto. No puede ir vacio."
+        : "Sube al menos una foto del producto. No puede ir vacio." },
   ]);
   if (!okValid) return;
 
@@ -3557,7 +3758,15 @@ document.getElementById("productForm").addEventListener("submit", async e => {
       : null,
     featured: document.getElementById("prodFeatured").checked,
     isNew: document.getElementById("prodNew").checked,
-    colors: [...editingProdColors],
+    hasColorVariants: editingProdHasColors,
+    // `image` se sigue escribiendo (= 1ª foto) para no romper a ningun lector
+    // viejo que aun lea color.image en vez de color.images.
+    colors: editingProdColors.map(v => ({
+      hex: v.hex,
+      images: [...(v.images || [])],
+      image: (v.images || [])[0] || null,
+    })),
+    images: [...editingProdImages],
     materials: [...editingProdMaterials],
     qrUrl: (document.getElementById("prodQrUrl")?.value || "").trim(),
     specsText: (document.getElementById("prodSpecsText")?.value || "").trim(),

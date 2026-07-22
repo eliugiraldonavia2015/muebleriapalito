@@ -4,7 +4,9 @@ import {
   collection, getDocs, query, orderBy, doc, getDoc, where, limit
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
-import { normalizeColor, normalizeMaterials } from "./product-normalizers.js";
+import {
+  normalizeColor, normalizeMaterials, hasColorSelection, colorImages, productGallery,
+} from "./product-normalizers.js?v=20260722";
 
 const app = initializeApp(firebaseConfig);
 // IndexedDB cache — second visit serves docs from local cache (sub-50ms) before network confirms.
@@ -61,6 +63,135 @@ function initLoupe(imageUrl) {
       ((px / rect.width) * 100).toFixed(2) + "% " +
       ((py / rect.height) * 100).toFixed(2) + "%";
   });
+}
+
+// ─── GALERIA ───
+// La foto ocupa todo el panel (decision de mayo: sin tira de miniaturas). Con 2
+// o mas fotos se habilitan swipe, flechas y puntitos; con una sola no se dibuja
+// ningun control, asi que un producto viejo se ve exactamente igual que antes.
+// setGallery() es idempotente y puede llamarse de nuevo (cambio de color, dato
+// fresco tras un cache-hit): los listeners se montan una sola vez en
+// initGallery(), por eso no se duplican.
+let galImages = [];
+let galIndex = 0;
+let galWired = false;
+
+function galShow(i, animate) {
+  const mainImg = $("#main-img");
+  if (!galImages.length || !mainImg) return;
+  const n = galImages.length;
+  galIndex = ((i % n) + n) % n; // envuelve en ambos sentidos
+  const src = galImages[galIndex];
+
+  const apply = () => {
+    mainImg.src = src;
+    // La lupa espeja la foto visible. No se re-inicializa initLoupe() porque
+    // registra listeners en cada llamada.
+    const loupe = $("#loupe");
+    if (loupe) loupe.style.backgroundImage = "url(" + src + ")";
+    if (!mainImg.classList.contains("loaded")) {
+      mainImg.addEventListener("load", () => mainImg.classList.add("loaded"), { once: true });
+    }
+  };
+
+  if (animate === false || mainImg.getAttribute("src") === src) apply();
+  else {
+    gsap.to(mainImg, { opacity: 0, duration: 0.18, onComplete: () => {
+      apply();
+      gsap.to(mainImg, { opacity: 1, duration: 0.25 });
+    }});
+  }
+  galRenderDots();
+}
+
+function galRenderDots() {
+  const dots = $("#gal-dots");
+  if (!dots) return;
+  clear(dots);
+  if (galImages.length < 2) return;
+  galImages.forEach((_, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "gal-dot" + (i === galIndex ? " active" : "");
+    b.setAttribute("aria-label", "Foto " + (i + 1));
+    b.addEventListener("click", () => galShow(i));
+    dots.appendChild(b);
+  });
+}
+
+function initGallery() {
+  if (galWired) return;
+  const wrap = $("#img-wrap");
+  if (!wrap) return;
+  galWired = true;
+
+  const prev = $("#gal-prev"), next = $("#gal-next");
+  if (prev) prev.addEventListener("click", e => { e.stopPropagation(); galShow(galIndex - 1); });
+  if (next) next.addEventListener("click", e => { e.stopPropagation(); galShow(galIndex + 1); });
+
+  const mainImg = $("#main-img");
+  if (mainImg) mainImg.addEventListener("dragstart", e => e.preventDefault());
+
+  // Swipe con Pointer Events: un solo camino para dedo y para mouse.
+  const THRESHOLD = 45;
+  let startX = 0, startY = 0, down = false, dragging = false;
+
+  wrap.addEventListener("pointerdown", e => {
+    if (galImages.length < 2 || e.button > 0) return;
+    down = true; dragging = false;
+    startX = e.clientX; startY = e.clientY;
+  });
+
+  wrap.addEventListener("pointermove", e => {
+    if (!down || dragging) return;
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    // Solo cuenta como swipe si el gesto es mas horizontal que vertical, para no
+    // secuestrar el scroll de la pagina en movil. El umbral tambien evita que el
+    // movimiento normal del cursor (que usa la lupa) dispare un cambio de foto.
+    if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
+      dragging = true;
+      wrap.classList.add("gal-dragging");
+      const loupe = $("#loupe");
+      if (loupe) loupe.style.opacity = "0"; // la lupa estorba mientras se arrastra
+    }
+  });
+
+  const endDrag = e => {
+    if (!down) return;
+    down = false;
+    if (!dragging) return;
+    dragging = false;
+    wrap.classList.remove("gal-dragging");
+    const dx = e.clientX - startX;
+    if (Math.abs(dx) >= THRESHOLD) galShow(galIndex + (dx < 0 ? 1 : -1));
+  };
+  wrap.addEventListener("pointerup", endDrag);
+  wrap.addEventListener("pointercancel", endDrag);
+  wrap.addEventListener("pointerleave", endDrag);
+
+  document.addEventListener("keydown", e => {
+    if (galImages.length < 2) return;
+    // No secuestrar las flechas mientras se escribe en un campo del pedido.
+    const tag = ((document.activeElement || {}).tagName || "").toUpperCase();
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    if (e.key === "ArrowLeft") galShow(galIndex - 1);
+    else if (e.key === "ArrowRight") galShow(galIndex + 1);
+  });
+}
+
+// Cambia el juego de fotos. animate=false para el primer pintado.
+function setGallery(images, animate) {
+  const next = (images || []).filter(Boolean);
+  // Mismo juego de fotos -> no repintar. Evita el parpadeo cuando llega el dato
+  // fresco de Firestore y resulta identico al que ya estaba en cache.
+  if (next.length === galImages.length && next.every((u, i) => u === galImages[i])) return;
+  galImages = next;
+  galIndex = 0;
+  const wrap = $("#img-wrap");
+  if (wrap) wrap.classList.toggle("gal-on", galImages.length > 1);
+  initGallery();
+  if (galImages.length) galShow(0, animate);
+  else galRenderDots();
 }
 
 // ─── QR (opcional, debajo de las miniaturas) ───
@@ -133,15 +264,19 @@ function buildThumbs(images) {
 // ─── COLOR SWATCHES (variaciones) ───
 // Cada color es una variación {hex, image}. Clic en un cuadrito cambia la foto
 // principal (mismo fade que las miniaturas) a la foto de esa variación.
-function buildColors(colors) {
+function buildColors(product) {
   const wrap = $("#prod-colors-wrap");
   const container = $("#prod-colors");
-  if (!colors || !colors.length) { if (wrap) wrap.style.display = "none"; return; }
+  // Producto que no se vende por color: la eleccion no existe para el cliente.
+  // No es "un solo color" — no se muestra el bloque.
+  if (!hasColorSelection(product)) { if (wrap) wrap.style.display = "none"; return; }
   if (!container) return;
 
-  const norm = colors.map(normalizeColor).filter(c => c.hex);
+  const norm = (product.colors || []).map(normalizeColor).filter(c => c.hex);
   if (!norm.length) { if (wrap) wrap.style.display = "none"; return; }
+  if (wrap) wrap.style.display = ""; // idempotente: reaparece si se oculto antes
 
+  clear(container); // permite re-render (refresco tras cache-hit) sin duplicar
   selectedColor = norm[0].hex;
   norm.forEach((c, i) => {
     const div = document.createElement("div");
@@ -152,15 +287,9 @@ function buildColors(colors) {
       container.querySelectorAll(".cswatch").forEach(s => s.classList.remove("active"));
       div.classList.add("active");
       selectedColor = c.hex;
-      if (!c.image) return;
-      const mainImg = $("#main-img");
-      if (!mainImg) return;
-      gsap.to(mainImg, { opacity: 0, duration: 0.18, onComplete: () => {
-        mainImg.src = c.image;
-        const loupe = $("#loupe");
-        if (loupe) loupe.style.backgroundImage = "url(" + c.image + ")";
-        gsap.to(mainImg, { opacity: 1, duration: 0.25 });
-      }});
+      // Si esa variacion no tiene fotos, la galeria no cambia (igual que antes).
+      const imgs = colorImages(product, c.hex);
+      if (imgs.length) setGallery(imgs);
     });
     container.appendChild(div);
   });
@@ -818,14 +947,10 @@ function populateFromProduct(product) {
 
   setText("#prod-desc", product.description || "");
 
-  // Collect images: fotos de las variaciones de color primero, luego las
-  // imágenes sueltas legacy. Dedupe por URL.
-  const images = [];
-  const pushImg = (u) => { if (u && !images.includes(u)) images.push(u); };
-  (product.colors || []).forEach(c => pushImg(normalizeColor(c).image));
-  pushImg(product.imageUrl);
-  pushImg(product.primaryImage);
-  if (Array.isArray(product.images)) product.images.forEach(pushImg);
+  // La galeria la decide el modo del producto: fotos de la 1a variacion con
+  // fotos, o la galeria propia si no se vende por color. productGallery() ya
+  // dedupea y cae a primaryImage/imageUrl si hiciera falta.
+  const images = productGallery(product);
   if (!images.length) images.push("https://via.placeholder.com/800x900");
 
   const mainImg = $("#main-img");
@@ -840,7 +965,8 @@ function populateFromProduct(product) {
   }
 
   buildThumbs(images);
-  buildColors(product.colors);
+  setGallery(images, false);
+  buildColors(product);
   buildQr(product.qrUrl);
   initQty(product.price);
   initPayment();
@@ -926,11 +1052,15 @@ async function init() {
       populateFromProduct(product);
       playEntrance();
     } else {
-      // En cache-hit no re-poblamos todo (evita duplicar listeners), pero el QR
-      // y las especificaciones pueden haberse agregado/cambiado: refrescarlos
-      // con el dato fresco de Firestore. Ambos son idempotentes.
+      // En cache-hit no re-poblamos todo (evita duplicar listeners), pero el QR,
+      // las especificaciones y las fotos pueden haberse agregado/cambiado:
+      // refrescarlos con el dato fresco de Firestore. Los cuatro son
+      // idempotentes. Sin esto, un visitante que ya estuvo en el sitio seguiria
+      // viendo el producto viejo (una sola foto) hasta limpiar la cache.
       buildQr(product.qrUrl);
       buildSpecs(product);
+      setGallery(productGallery(product));
+      buildColors(product);
     }
 
     await renderNav();
