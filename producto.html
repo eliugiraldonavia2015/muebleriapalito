@@ -110,7 +110,10 @@
     .nav-icon:hover{stroke:var(--cream)}
 
     /* BACK BUTTON */
-    .back-bar{margin-top:72px;padding:16px clamp(24px,5vw,80px);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--rule)}
+    /* Sticky bajo el nav (72px). Sin esto la barra se va al scrollear y deja un
+       hueco de 48px sobre la imagen, porque .img-panel esta clavado en top:120px
+       (72 del nav + 48 de esta barra). Ademas mantiene "Volver" siempre visible. */
+    .back-bar{position:sticky;top:72px;z-index:850;background:var(--bg);margin-top:72px;padding:16px clamp(24px,5vw,80px);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--rule)}
     .back-btn{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream-dim);transition:color .3s}
     .back-btn:hover{color:var(--cream)}
     .back-btn svg{width:14px;height:14px;stroke:currentColor}
@@ -121,9 +124,15 @@
     /* PRODUCT DETAIL */
     .product-detail{display:grid;grid-template-columns:58fr 42fr;min-height:calc(100vh - 120px);border-bottom:1px solid var(--rule)}
 
-    /* IMAGE PANEL — flex column so image fills all remaining space above thumb strip */
-    .img-panel{position:sticky;top:120px;height:calc(100vh - 120px);border-right:1px solid var(--rule);display:flex;flex-direction:column}
-    .main-img-wrap{position:relative;flex:1;min-height:0;overflow:hidden;cursor:crosshair;background:#1a3a2a}
+    /* IMAGE PANEL — la altura la marca la foto, no la pantalla. Antes era
+       calc(100vh - 120px), asi que la proporcion mostrada cambiaba con cada
+       monitor y nunca coincidia con el recorte del admin. Ahora es 1:1 fijo y
+       calza exacto con CROP_RATIO.product. */
+    .img-panel{position:sticky;top:120px;border-right:1px solid var(--rule);display:flex;flex-direction:column}
+    /* max-width en alto de pantalla: al ser cuadrada, topar el ancho con el alto
+       disponible evita que en monitores anchos la foto sobresalga del viewport.
+       Sigue siendo 1:1 exacto en todos los casos. */
+    .main-img-wrap{position:relative;width:100%;max-width:calc(100vh - 120px);aspect-ratio:1/1;margin:0 auto;overflow:hidden;cursor:crosshair;background:#1a3a2a}
     .main-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s cubic-bezier(.22,.61,.36,1)}
     .main-img-wrap img.loaded{opacity:1}
     .main-img-wrap:hover img{transform:scale(1.04)}
@@ -585,7 +594,9 @@
     /* RESPONSIVE */
     @media(max-width:900px){
       .product-detail{grid-template-columns:1fr;min-height:auto}
-      .img-panel{position:relative;top:0;height:50vw;min-height:320px}
+      /* Sin height fijo: manda el 1:1 de .main-img-wrap, para que en movil se
+         vea la misma proporcion que se recorto en el admin. */
+      .img-panel{position:relative;top:0}
       .info-panel{max-height:none;overflow-y:visible}
       .order-grid{grid-template-columns:1fr}
       .related-grid{grid-template-columns:repeat(2,1fr)}

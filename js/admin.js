@@ -43,7 +43,9 @@ const CROP_RATIO = {
   banner:    21 / 9,  // full-banner is extra wide
   lifestyle: 4 / 5,   // lifestyle-img on the left column
   category:  3 / 4,   // .cat-card aspect-ratio:3/4
-  product:   3 / 4,   // .product-img-wrap aspect-ratio:3/4
+  // Cuadrado = exactamente lo que se ve en la pagina de producto
+  // (.main-img-wrap aspect-ratio:1/1). Lo que se recorta es lo que se muestra.
+  product:   1,
 };
 
 let categories = [];
