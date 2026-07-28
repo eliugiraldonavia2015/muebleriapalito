@@ -201,7 +201,9 @@
     .product-info{padding:18px 18px 22px;flex:1;display:flex;flex-direction:column;gap:6px;background:#ffffff}
     .product-cat{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--copper)}
     .product-name{font-family:var(--f-display);font-size:20px;font-weight:300;line-height:1.15;color:#1a1a18}
-    .product-desc{font-size:12px;color:#6b6b60;line-height:1.5;margin-top:2px}
+    /* line-clamp = red de seguridad: aunque un dato viejo traiga texto largo, la card
+       nunca crece mas de 2 lineas y el grid mantiene sus 3 columnas alineadas. */
+    .product-desc{font-size:12px;color:#6b6b60;line-height:1.5;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
     .product-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:10px;border-top:1px solid rgba(0,0,0,.08)}
     .product-price{display:flex;align-items:baseline;gap:8px}
     .price-current{font-family:var(--f-display);font-size:22px;color:#1a1a18}

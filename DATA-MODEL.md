@@ -24,7 +24,8 @@
 | Field | Type | Description |
 |---|---|---|
 | `name` | string | Product name (e.g., "Sala Modular Chester") |
-| `description` | string | Short description |
+| `shortDescription` | string | Descripción corta para el mosaico del catálogo, máx. ~140 caracteres / 2 líneas |
+| `description` | string | Descripción larga y completa, sin límite, mostrada en la página de detalle del producto |
 | `categoryId` | string (ref) | Category slug this product belongs to |
 | `subcategory` | string (optional) | e.g., "Grandes", "2 Plazas" |
 | `primaryImage` | string | Main product image URL |

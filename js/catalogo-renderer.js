@@ -67,6 +67,15 @@ function slugify(t) {
 function priceFmt(n) {
   return "$" + Number(n).toLocaleString("en-US");
 }
+// Corta en el ultimo espacio antes del limite (no parte palabras) y marca el
+// recorte con "…". Solo se usa como fallback para productos sin shortDescription.
+function truncateShort(text, maxLen) {
+  const t = (text || "").trim();
+  if (t.length <= maxLen) return t;
+  const cut = t.slice(0, maxLen);
+  const lastSpace = cut.lastIndexOf(" ");
+  return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trim() + "…";
+}
 function badgeHTML(product) {
   if (product.badgeText) {
     const cls = product.badgeText.toLowerCase().includes("nuevo") ? "product-badge new" : "product-badge";
@@ -247,6 +256,9 @@ function buildCardsBatch(grid) {
     if (p.imageUrl) {
       try { localStorage.setItem('img:' + p.id, p.imageUrl); } catch (_) {}
     }
+    // El mosaico usa la descripcion corta; la larga (p.description) queda solo
+    // para producto.html. Productos viejos sin shortDescription caen al recorte.
+    const shortDesc = p.shortDescription || (p.description ? truncateShort(p.description, 140) : "");
     const card = document.createElement("div");
     card.className = "product-card";
     card.innerHTML = `
@@ -261,7 +273,7 @@ function buildCardsBatch(grid) {
       <div class="product-info">
         <div class="product-cat">${p.category || ""}</div>
         <div class="product-name">${p.name}</div>
-        <div class="product-desc">${p.description || ""}</div>
+        <div class="product-desc">${shortDesc}</div>
         <div class="product-foot">
           <div class="product-price">
             <span class="price-current">${priceFmt(p.price)}</span>

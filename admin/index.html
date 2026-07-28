@@ -1477,9 +1477,17 @@
           <label for="prodName">Nombre</label>
           <input type="text" id="prodName" placeholder="Sofa Seccional Lineal" required/>
         </div>
+        <!-- Descripcion corta: la que se ve en el mosaico del catalogo. Tiene tope
+             real (maxlength) para que ninguna card crezca mas que sus vecinas. -->
         <div class="form-group full">
-          <label for="prodDesc">Descripcion</label>
-          <textarea id="prodDesc" placeholder="Descripcion corta del producto..." rows="2" style="min-height:64px"></textarea>
+          <label for="prodShortDesc">Descripcion corta (mosaico del catalogo)</label>
+          <textarea id="prodShortDesc" maxlength="140" rows="2" style="min-height:64px" placeholder="Ej: Sofa modular en L, tela antimanchas, 7 piezas incluidas"></textarea>
+          <span id="prodShortDescCount" style="font-size:11px;color:var(--cream-dim,#888)">0/140</span>
+        </div>
+        <!-- Descripcion larga: solo para la pagina de detalle del producto. Sin limite. -->
+        <div class="form-group full">
+          <label for="prodDesc">Descripcion larga (pagina del producto, sin limite)</label>
+          <textarea id="prodDesc" placeholder="Descripcion completa y detallada del producto..." rows="5" style="min-height:120px"></textarea>
         </div>
         <div class="form-group">
           <label for="prodCategory">Categoria</label>

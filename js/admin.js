@@ -3122,6 +3122,33 @@ document.getElementById("prodCategory").addEventListener("change", e => {
   populateSubcategorySelect(e.target.value, "");
 });
 
+const SHORT_DESC_MAX = 140;
+
+// Recorta en el ultimo espacio antes del limite para no partir una palabra.
+// Sin "..." : es el valor que el admin edita, no un texto de vitrina.
+function shortDescFallback(text, maxLen = SHORT_DESC_MAX) {
+  const t = (text || "").trim();
+  if (t.length <= maxLen) return t;
+  const cut = t.slice(0, maxLen);
+  const lastSpace = cut.lastIndexOf(" ");
+  return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trim();
+}
+
+// Contador en vivo del campo corto. Se pinta en rojo al tocar el tope para que
+// el admin note que el navegador ya esta bloqueando el tecleo (maxlength).
+function updateShortDescCount() {
+  const input = document.getElementById("prodShortDesc");
+  const counter = document.getElementById("prodShortDescCount");
+  if (!input || !counter) return;
+  const len = input.value.length;
+  counter.textContent = `${len}/${SHORT_DESC_MAX}`;
+  counter.style.color = len >= SHORT_DESC_MAX
+    ? "var(--red-lt, #e74c3c)"
+    : "var(--cream-dim, #888)";
+}
+
+document.getElementById("prodShortDesc").addEventListener("input", updateShortDescCount);
+
 function openProductDrawer(id = null, preCatId = null) {
   console.group("[DRAWER] openProductDrawer");
   console.log("[DRAWER] id:", id, "| typeof:", typeof id, "| preCatId:", preCatId);
@@ -3157,6 +3184,9 @@ function openProductDrawer(id = null, preCatId = null) {
     document.getElementById("prodModalTitle").textContent = "Editar producto";
     document.getElementById("prodEditId").value = id;
     document.getElementById("prodName").value = p.name || "";
+    // Productos migrados no traen shortDescription: se siembra desde la larga.
+    document.getElementById("prodShortDesc").value =
+      p.shortDescription || shortDescFallback(p.description);
     document.getElementById("prodDesc").value = p.description || "";
     document.getElementById("prodDisplayOrder").value = p.displayOrder ?? "";
     document.getElementById("prodPrice").value = p.price || "";
@@ -3194,6 +3224,7 @@ function openProductDrawer(id = null, preCatId = null) {
     populateCatSelect(preCatId || "");
     populateSubcategorySelect(preCatId || "", "");
   }
+  updateShortDescCount(); // sincroniza el contador tras poblar o tras reset()
   ensureProductVariationUI();
   const hasColorsToggle = document.getElementById("prodHasColors");
   if (hasColorsToggle) hasColorsToggle.checked = editingProdHasColors;
@@ -3747,7 +3778,8 @@ document.getElementById("productForm").addEventListener("submit", async e => {
 
   const data = {
     name,
-    description: document.getElementById("prodDesc").value.trim(),
+    shortDescription: document.getElementById("prodShortDesc").value.trim(), // mosaico
+    description: document.getElementById("prodDesc").value.trim(),           // detalle
     categoryId: catId.toLowerCase(), // normalizado lowercase para consistencia con seed-data
     category: catName,
     subcategory: document.getElementById("prodSubcategory").value.trim(),
