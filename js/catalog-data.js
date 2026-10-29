@@ -63,9 +63,6 @@ async function getProducts(filters = {}) {
   if (filters.categoryId) {
     q = query(q, where("categoryId", "==", filters.categoryId));
   }
-  if (filters.subcategory) {
-    q = query(q, where("subcategory", "==", filters.subcategory));
-  }
   if (filters.featured) {
     q = query(q, where("featured", "==", true));
   }

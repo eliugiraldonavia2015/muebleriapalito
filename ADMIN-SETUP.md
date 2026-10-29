@@ -3,7 +3,7 @@
 ## What You Get
 
 A complete admin panel at `/admin/index.html` that lets you manage:
-- **16 furniture categories** — name, image, subcategories, homepage visibility
+- **16 furniture categories** — name, image, homepage visibility (sin subcategorías desde oct 2026)
 - **14 products** — name, price, images, featured/sale status, colors
 - **Site settings** — contact info, social links, hero section, promo banner, store locations
 
@@ -165,7 +165,7 @@ muebleriapalito/
 
 | Action | What Happens |
 |--------|-------------|
-| **Add Category** | Opens modal → fill name, imageUrl, subcategories, homepage toggle → saves to Firestore |
+| **Add Category** | Opens modal → fill name, imageUrl, homepage toggle → saves to Firestore |
 | **Edit Category** | Pre-fills modal with existing → on save, updates Firestore document |
 | **Delete Category** | Shows confirmation → permanently removes from Firestore |
 | **Homepage Toggle** | One-click toggle in table → immediately updates Firestore |

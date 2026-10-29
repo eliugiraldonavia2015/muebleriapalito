@@ -32,10 +32,6 @@ function slugify(t) {
   return (t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-function getSubList(cat) {
-  return (cat.subcategoryList || []).map(s => typeof s === "string" ? s : s.name);
-}
-
 // ─── RENDER NAV ───
 function renderNav(categories) {
   const navList = $(".nav-links");
@@ -87,50 +83,14 @@ function renderHero(categories) {
   if (stats[1]) stats[1].querySelector(".cats-stat-num").textContent = totalProducts + "+";
 }
 
-// ─── RENDER FEATURED CATEGORIES (with subcategories) ───
-function renderFeaturedCategories(categories) {
-  const grid = $("#featuredGrid");
-  if (!grid) return;
-
-  const featured = categories.filter(c => c.subcategoryList && c.subcategoryList.length > 0);
-
-  if (!featured.length) {
-    grid.innerHTML = "";
-    return;
-  }
-
-  grid.innerHTML = featured.map(c => {
-    const subs = getSubList(c);
-    return `
-    <a href="catalogo.html?cat=${slugify(c.name)}" class="feat-card">
-      <div class="feat-card-img">
-        <img src="${c.imageUrl || c.coverImage || 'https://via.placeholder.com/800'}" alt="${c.name}"/>
-      </div>
-      <div class="feat-card-overlay"></div>
-      <div class="feat-card-info">
-        <div class="feat-card-name">${c.name}</div>
-        <div class="sub-pills">
-          ${subs.map(s => `<span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=${slugify(c.name)}&sub=${slugify(s)}'">${s}</span>`).join("")}
-        </div>
-        <div class="feat-card-foot">
-          <span class="feat-card-count">${c.productCount || 0} productos</span>
-          <div class="feat-card-arrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round">
-              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-    </a>`;
-  }).join("");
-}
-
-// ─── RENDER ALL CATEGORIES (no subcategories) ───
+// ─── RENDER ALL CATEGORIES ───
+// Ya no hay subcategorías: todas las categorías van en una sola cuadrícula,
+// aunque algún doc viejo de Firestore todavía traiga subcategoryList.
 function renderRegularCategories(categories) {
   const grid = $("#regularGrid");
   if (!grid) return;
 
-  const regular = categories.filter(c => !c.subcategoryList || c.subcategoryList.length === 0);
+  const regular = categories;
 
   if (!regular.length) {
     $("#cats-all")?.remove();
@@ -169,7 +129,6 @@ async function init() {
     renderNav(categories);
     addUbicacionesBtnCats();
     renderHero(categories);
-    renderFeaturedCategories(categories);
     renderRegularCategories(categories);
 
     // Refresh ScrollTrigger if GSAP is loaded

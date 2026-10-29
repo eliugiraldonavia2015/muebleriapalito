@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://muebleria-palito-cdn.b-cdn.net" crossorigin/>
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin/>
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin/>
-  <link rel="modulepreload" href="js/catalogo-renderer.js?v=20260722"/>
+  <link rel="modulepreload" href="js/catalogo-renderer.js?v=20261027"/>
   <link rel="modulepreload" href="js/firebase-config.js"/>
   <script>
     // Fire the hero image request as early as possible — before HTML parsing reaches the
@@ -79,12 +79,7 @@
 
     /* TOOLBAR */
     .toolbar{position:sticky;top:72px;z-index:80;background:rgba(12,31,20,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--rule);padding:0 clamp(24px,5vw,80px);height:56px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-    .filter-chips{display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
-    .filter-chips::-webkit-scrollbar{display:none}
-    .chip{display:flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--rule);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--cream-dim);transition:border-color .25s,color .25s;white-space:nowrap}
-    .chip.active{border-color:var(--copper);color:var(--cream)}
-    .chip-x{width:14px;height:14px;stroke:currentColor;opacity:.6}
-    .sort-wrap{display:flex;align-items:center;gap:12px;flex-shrink:0}
+    .sort-wrap{display:flex;align-items:center;gap:12px;flex-shrink:0;margin-left:auto}
     .sort-label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream-dim)}
     .sort-select{background:transparent;border:1px solid var(--rule);color:var(--cream);font-family:var(--f-body);font-size:11px;padding:6px 28px 6px 12px;letter-spacing:.1em;appearance:none;-webkit-appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239dc4aa' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
     .sort-select:focus{outline:none;border-color:var(--copper)}
@@ -108,41 +103,15 @@
     .cat-link:hover,.cat-link.active{color:var(--cream);background:rgba(160,220,180,.05)}
     .cat-link.active::before{transform:scaleY(1)}
     .cat-link-count{font-size:10px;color:var(--cream-dim);opacity:.6}
-    .cat-has-sub{cursor:pointer;user-select:none}
-    .cat-chevron{width:11px;height:11px;stroke:var(--cream-dim);transition:transform .35s var(--ease-silk);flex-shrink:0}
-    .cat-has-sub.open .cat-chevron{transform:rotate(90deg)}
-    .cat-has-sub.open,.cat-has-sub.active{color:var(--cream);background:rgba(160,220,180,.05)}
-    .cat-has-sub.active::before,.cat-has-sub.open::before{transform:scaleY(1)}
-    .cat-sub-links{height:0;overflow:hidden}
-    .cat-sub-link{display:flex;align-items:center;padding:6px 12px 6px 22px;font-size:11.5px;color:var(--cream-dim);transition:color .2s,background .2s;border-left:1px solid rgba(160,220,180,.1);margin-left:12px;position:relative}
-    .cat-sub-link:hover{color:var(--cream);background:rgba(160,220,180,.04)}
-    .cat-sub-link.active{color:var(--copper-lt);border-left-color:var(--copper)}
 
     /* Price range */
-    .price-row{display:flex;justify-content:space-between;margin-bottom:12px}
-    .price-val{font-family:var(--f-display);font-size:18px;color:var(--cream)}
-    .price-sep{font-size:12px;color:var(--cream-dim);align-self:center}
-    .range-wrap{position:relative;height:24px;display:flex;align-items:center}
-    .range-track{position:absolute;left:0;right:0;height:2px;background:var(--rule)}
-    .range-fill{position:absolute;left:10%;right:25%;height:2px;background:var(--copper)}
     input[type=range]{-webkit-appearance:none;width:100%;background:transparent;position:relative;z-index:1}
     input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--copper);border:2px solid var(--bg);cursor:pointer}
     input[type=range]::-webkit-slider-runnable-track{height:0;background:transparent}
 
     /* Checkboxes */
-    .check-list{display:flex;flex-direction:column;gap:10px}
-    .check-item{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--cream-dim);cursor:pointer;transition:color .2s}
-    .check-item:hover{color:var(--cream)}
-    .check-box{width:16px;height:16px;border:1px solid var(--rule);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:border-color .25s,background .25s}
-    .check-item.checked .check-box{border-color:var(--copper);background:var(--copper)}
-    .check-tick{width:10px;height:10px;stroke:var(--bg);stroke-width:2.5;display:none}
-    .check-item.checked .check-tick{display:block}
 
     /* Color swatches */
-    .color-grid{display:flex;flex-wrap:wrap;gap:8px}
-    .swatch{width:24px;height:24px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:border-color .2s,transform .2s}
-    .swatch:hover{transform:scale(1.15)}
-    .swatch.active{border-color:var(--cream)}
 
     /* NAV LOCATION BUTTON */
     .nav-link-btn{display:inline-flex!important;align-items:center;gap:5px;padding:0;border:none;background:none}
@@ -156,18 +125,7 @@
     .sidebar .sidebar-title{color:var(--copper)}
     .sidebar .cat-link{color:#9dc4aa}
     .sidebar .cat-link:hover,.sidebar .cat-link.active{color:#e8f5ec;background:rgba(160,220,180,.05)}
-    .sidebar .cat-sub-link{color:#9dc4aa;border-left-color:rgba(160,220,180,.1)}
-    .sidebar .cat-sub-link:hover{color:#e8f5ec}
-    .sidebar .cat-sub-link.active{color:var(--copper-lt)}
-    .sidebar .check-item{color:#9dc4aa}
-    .sidebar .check-item:hover{color:#e8f5ec}
-    .sidebar .check-box{border-color:rgba(160,220,180,.12)}
-    .sidebar .check-item.checked .check-box{border-color:var(--copper);background:var(--copper)}
-    .sidebar .price-val{color:#e8f5ec}
-    .sidebar .price-sep{color:#9dc4aa}
-    .sidebar .range-track{background:rgba(160,220,180,.12)}
     .sidebar input[type=range]::-webkit-slider-thumb{background:var(--copper);border-color:#0c1f14}
-    .sidebar .swatch.active{border-color:#e8f5ec}
 
     /* PRODUCT GRID */
     .product-area{padding:32px clamp(24px,4vw,56px);background:#f9f8f5}
@@ -238,7 +196,7 @@
 
     /* FOOTER */
     footer{border-top:1px solid var(--rule);padding:clamp(60px,8vw,100px) clamp(24px,5vw,80px) 40px;margin-top:0}
-    .footer-top{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:60px;margin-bottom:80px}
+    .footer-top{display:grid;grid-template-columns:1.8fr 1fr 1fr;gap:60px;margin-bottom:80px}
     .footer-brand{display:flex;flex-direction:column;gap:20px}
     .footer-tagline{font-size:14px;color:var(--cream-dim);line-height:1.6;max-width:280px}
     .footer-socials{display:flex;gap:12px;margin-top:8px}
@@ -300,11 +258,8 @@
       </a></li>
     </ul>
     <div class="nav-actions">
-      <a href="#" aria-label="Buscar">
+      <a href="categorias.html" aria-label="Buscar">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
-      </a>
-      <a href="nosotros.html" aria-label="Cuenta">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       </a>
       <a href="carrito.html" style="display:flex;align-items:flex-start" aria-label="Carrito">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
@@ -347,21 +302,12 @@
   </script>
 
   <div class="toolbar">
-    <div class="filter-chips">
-      <div class="chip active">Todo <svg class="chip-x" viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
-      <div class="chip">Madera</div>
-      <div class="chip">Tapizado</div>
-      <div class="chip active">En oferta <svg class="chip-x" viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
-      <div class="chip">Nuevo</div>
-    </div>
     <div class="sort-wrap">
       <span class="sort-label">Ordenar</span>
-      <select class="sort-select" aria-label="Ordenar">
-        <option>Destacados</option>
-        <option>Menor precio</option>
-        <option>Mayor precio</option>
-        <option>Nuevo</option>
-        <option>Oferta</option>
+      <select class="sort-select" id="sort-select" aria-label="Ordenar">
+        <option value="destacados">Destacados</option>
+        <option value="precio-asc">Menor precio</option>
+        <option value="precio-desc">Mayor precio</option>
       </select>
     </div>
   </div>
@@ -371,37 +317,10 @@
       <div class="sidebar-section">
         <div class="sidebar-title">Categorias</div>
         <div class="cat-links">
-          <!-- Salas -->
-          <div class="cat-link cat-has-sub" data-cat="Salas">Salas <svg class="cat-chevron" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
-          <div class="cat-sub-links" id="sub-Salas">
-            <a href="catalogo.html?cat=Salas&sub=Grandes" class="cat-sub-link">Grandes</a>
-            <a href="catalogo.html?cat=Salas&sub=Medianas" class="cat-sub-link">Medianas</a>
-            <a href="catalogo.html?cat=Salas&sub=Pequeñas" class="cat-sub-link">Pequeñas</a>
-          </div>
-          <!-- Comedores -->
-          <div class="cat-link cat-has-sub" data-cat="Comedores">Comedores <svg class="cat-chevron" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
-          <div class="cat-sub-links" id="sub-Comedores">
-            <a href="catalogo.html?cat=Comedores&sub=4Ptos" class="cat-sub-link">4 Puestos</a>
-            <a href="catalogo.html?cat=Comedores&sub=6Ptos" class="cat-sub-link">6 Puestos</a>
-            <a href="catalogo.html?cat=Comedores&sub=8Ptos" class="cat-sub-link">8 Puestos</a>
-          </div>
-          <!-- Dormitorios -->
-          <div class="cat-link cat-has-sub" data-cat="Dormitorios">Dormitorios <svg class="cat-chevron" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
-          <div class="cat-sub-links" id="sub-Dormitorios">
-            <a href="catalogo.html?cat=Dormitorios&sub=1.5Plz" class="cat-sub-link">1.5 Plaza</a>
-            <a href="catalogo.html?cat=Dormitorios&sub=2Plz" class="cat-sub-link">2 Plazas</a>
-            <a href="catalogo.html?cat=Dormitorios&sub=2.5Plz" class="cat-sub-link">2.5 Plazas</a>
-            <a href="catalogo.html?cat=Dormitorios&sub=3Plz" class="cat-sub-link">3 Plazas</a>
-          </div>
-          <!-- Camas -->
-          <div class="cat-link cat-has-sub" data-cat="Camas">Camas <svg class="cat-chevron" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
-          <div class="cat-sub-links" id="sub-Camas">
-            <a href="catalogo.html?cat=Camas&sub=1.5Plz" class="cat-sub-link">1.5 Plaza</a>
-            <a href="catalogo.html?cat=Camas&sub=2Plz" class="cat-sub-link">2 Plazas</a>
-            <a href="catalogo.html?cat=Camas&sub=2.5Plz" class="cat-sub-link">2.5 Plazas</a>
-            <a href="catalogo.html?cat=Camas&sub=3Plz" class="cat-sub-link">3 Plazas</a>
-          </div>
-          <!-- Simple -->
+          <a href="catalogo.html?cat=Salas" class="cat-link">Salas</a>
+          <a href="catalogo.html?cat=Comedores" class="cat-link">Comedores</a>
+          <a href="catalogo.html?cat=Dormitorios" class="cat-link">Dormitorios</a>
+          <a href="catalogo.html?cat=Camas" class="cat-link">Camas</a>
           <a href="catalogo.html?cat=Comodas" class="cat-link">Cómodas</a>
           <a href="catalogo.html?cat=Coquetas" class="cat-link">Coquetas / Peinadoras</a>
           <a href="catalogo.html?cat=CamaCuna" class="cat-link">Cama Cuna</a>
@@ -417,64 +336,6 @@
         </div>
       </div>
 
-      <div class="sidebar-section">
-        <div class="sidebar-title">Precio</div>
-        <div class="price-row">
-          <span class="price-val">$200</span>
-          <span class="price-sep">—</span>
-          <span class="price-val">$2,500</span>
-        </div>
-        <div class="range-wrap">
-          <div class="range-track"></div>
-          <div class="range-fill"></div>
-          <input type="range" min="0" max="5000" value="200" aria-label="Precio minimo"/>
-        </div>
-      </div>
-
-      <div class="sidebar-section">
-        <div class="sidebar-title">Material</div>
-        <div class="check-list">
-          <label class="check-item checked">
-            <div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none"/></svg></div>
-            Madera natural
-          </label>
-          <label class="check-item">
-            <div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none"/></svg></div>
-            Tapizado tela
-          </label>
-          <label class="check-item checked">
-            <div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none"/></svg></div>
-            Tapizado cuero
-          </label>
-          <label class="check-item">
-            <div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none"/></svg></div>
-            Metal y vidrio
-          </label>
-          <label class="check-item">
-            <div class="check-box"><svg class="check-tick" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none"/></svg></div>
-            Rattan natural
-          </label>
-        </div>
-      </div>
-
-      <div class="sidebar-section">
-        <div class="sidebar-title">Color</div>
-        <div class="color-grid">
-          <div class="swatch active" style="background:#2c2c2c" title="Negro"></div>
-          <div class="swatch" style="background:#8b7355" title="Nogal"></div>
-          <div class="swatch" style="background:#c8bfa8" title="Crema"></div>
-          <div class="swatch active" style="background:#5c3d1e" title="Cafe"></div>
-          <div class="swatch" style="background:#4a6741" title="Verde"></div>
-          <div class="swatch" style="background:#8b4513" title="Cuero"></div>
-          <div class="swatch" style="background:#d4c5b0" title="Arena"></div>
-          <div class="swatch" style="background:#1a1a2e" title="Azul noche"></div>
-        </div>
-      </div>
-
-      <a href="#" class="btn-primary" style="width:100%;justify-content:center;margin-top:8px">
-        Aplicar filtros
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-      </a>
     </aside>
 
     <main class="product-area">
@@ -552,50 +413,32 @@
   </div>
 
   <footer>
+    <!-- Footer sencillo: solo enlaces que llevan a algo real. Se quitaron promesas
+         y datos que la tienda no ofrece (garantia 60 noches, devoluciones, envios,
+         Visa/PayPal, 1800, Panama/Peru, info@palito.com) y enlaces muertos (#). -->
     <div class="footer-top">
       <div class="footer-brand">
-        <img src="logo.png" alt="Mueblerias Palito" style="height:52px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 6px rgba(0,0,0,.4))"/>
-        <p class="footer-tagline">Muebleria de autor para quienes entienden que el diseno es una forma de vida.</p>
-        <div class="footer-socials">
-          <a href="#" class="social-link" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
-          <a href="#" class="social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor"/></svg></a>
-          <a target="_blank" href="https://wa.me/593959667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="social-link" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
-        </div>
+        <img src="logo.png" alt="Muebleria Palito Outlet" style="height:52px;width:auto;align-self:flex-start;object-fit:contain;filter:drop-shadow(0 1px 6px rgba(0,0,0,.4))"/>
+        <p class="footer-tagline">Muebleria de autor para quienes entienden que el diseño es una forma de vida.</p>
       </div>
       <div>
-        <div class="footer-col-title">Empresa</div>
+        <div class="footer-col-title">Tienda</div>
         <ul class="footer-links">
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="categorias.html">Categorías</a></li>
           <li><a href="nosotros.html">Nosotros</a></li>
-          <li><a href="#">Politica de privacidad</a></li>
-          <li><a href="#">Terminos y condiciones</a></li>
-          <li><a href="#">Devoluciones</a></li>
-        </ul>
-      </div>
-      <div>
-        <div class="footer-col-title">Servicios</div>
-        <ul class="footer-links">
-          <li><a href="#">Programa disenadores</a></li>
-          <li><a href="#">Proyectos hoteleros</a></li>
-          <li><a href="#">Garantia 60 noches</a></li>
         </ul>
       </div>
       <div>
         <div class="footer-col-title">Contacto</div>
         <ul class="footer-links">
-          <li><a href="contacto.html">Tiendas fisicas</a></li>
-          <li><a href="#">WhatsApp: 098 966 7093</a></li>
-          <li><a href="#">info@palito.com</a></li>
+          <li><a target="_blank" rel="noopener" href="https://wa.me/593959667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA">WhatsApp: 095 966 7093</a></li>
+          <li><a href="contacto.html">Ubicaciones en Guayaquil</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <span class="footer-copy">2025 Muebleria Palito Outlet. Todos los derechos reservados.</span>
-      <div class="footer-payments">
-        <span class="payment-badge">Visa</span>
-        <span class="payment-badge">Mastercard</span>
-        <span class="payment-badge">PayPal</span>
-        <span class="payment-badge">Amex</span>
-      </div>
+      <span class="footer-copy">© 2026 Muebleria Palito Outlet. Todos los derechos reservados.</span>
     </div>
   </footer>
 
@@ -644,17 +487,8 @@
       });
     }
 
-    // Chip toggle
-    document.querySelectorAll('.chip').forEach(c => {
-      c.addEventListener('click', () => c.classList.toggle('active'));
-    });
-
-    // Check toggle
-    document.querySelectorAll('.check-item').forEach(c => {
-      c.addEventListener('click', () => c.classList.toggle('checked'));
-    });
   </script>
-  <script type="module" src="js/catalogo-renderer.js?v=20260722"></script>
+  <script type="module" src="js/catalogo-renderer.js?v=20261027"></script>
 
 <script src="js/cart-system.js"></script>
 </body>

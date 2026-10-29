@@ -430,6 +430,27 @@ function initCopyBtn() {
 }
 
 // ─── PAGAR BUTTON ───
+// ─── ADD TO CART ───
+// populateFromProduct lo llamaba pero nunca existió: el ReferenceError cortaba el
+// resto del init (nav, relacionados, refresco de cache) y el botón no hacía nada.
+// Se lee currentProduct al hacer clic para usar el dato fresco de Firestore.
+function initAddToCart(product) {
+  const btn = document.getElementById("btn-add-cart");
+  if (!btn || btn.dataset.bound) return;
+  btn.dataset.bound = "1";
+  btn.addEventListener("click", () => {
+    const p = currentProduct || product;
+    if (typeof window.addToCart !== "function") return;
+    window.addToCart({
+      id: p.id,
+      name: p.name,
+      price: Number(p.price) || 0,
+      qty,
+      image: $("#main-img")?.getAttribute("src") || productGallery(p)[0] || p.imageUrl || "",
+    });
+  });
+}
+
 function initPayButton(product) {
   const btn = document.getElementById("btn-pagar");
   if (!btn) return;
@@ -619,7 +640,6 @@ function buildSpecs(product) {
   const materials = normalizeMaterials(product);
   const fields = [
     ["Categoria", product.category],
-    ["Subcategoria", product.subcategory],
     ["Material", materials.join(", ")],
     ["Disponibilidad", "Verificar disponibilidad con asesor"],
   ].filter(([, v]) => v);
@@ -826,7 +846,7 @@ async function loadRelated(product) {
 // ─── ENTRANCE ANIMATION ───
 // Elements are visible in CSS; GSAP sets initial invisible state then animates in.
 function playEntrance() {
-  const infoEls = ["#prod-category","#prod-name","#prod-subcategory","#prod-price-row",
+  const infoEls = ["#prod-category","#prod-name","#prod-price-row",
     "#prod-desc","#prod-colors-wrap","#prod-qty-wrap","#prod-cta","#specs-section"];
 
   gsap.set(infoEls, { autoAlpha: 0, y: 24 });
@@ -837,7 +857,6 @@ function playEntrance() {
   const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
   tl.to("#prod-category",    { autoAlpha: 1, y: 0, duration: 0.5 }, 0.28)
     .to("#prod-name",        { autoAlpha: 1, y: 0, duration: 0.6 }, 0.38)
-    .to("#prod-subcategory", { autoAlpha: 1, y: 0, duration: 0.5 }, 0.48)
     .to("#prod-price-row",   { autoAlpha: 1, y: 0, duration: 0.5 }, 0.56)
     .to("#prod-desc",        { autoAlpha: 1, y: 0, duration: 0.5 }, 0.64)
     .to("#prod-colors-wrap", { autoAlpha: 1, y: 0, duration: 0.45 }, 0.72)
@@ -933,7 +952,6 @@ function populateFromProduct(product) {
 
   setText("#prod-category", product.category || "");
   setText("#prod-name", product.name);
-  setText("#prod-subcategory", product.subcategory || "");
   setText("#prod-price", priceFmt(product.price));
 
   if (product.originalPrice) {
@@ -984,7 +1002,7 @@ function populateFromProduct(product) {
 // Override CSS pre-hide instantly (no animation). Used by the cache fast-path so
 // the page feels instant when product data is already in localStorage.
 function revealInfoInstantly() {
-  const sels = ['#prod-category','#prod-name','#prod-subcategory','#prod-price-row',
+  const sels = ['#prod-category','#prod-name','#prod-price-row',
     '#prod-desc','#prod-colors-wrap','#prod-qty-wrap','#prod-cta','#specs-section'];
   sels.forEach(sel => {
     const el = document.querySelector(sel);

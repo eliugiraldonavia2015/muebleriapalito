@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://muebleria-palito-cdn.b-cdn.net" crossorigin/>
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin/>
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin/>
-  <link rel="modulepreload" href="js/producto-renderer.js?v=20260722"/>
+  <link rel="modulepreload" href="js/producto-renderer.js?v=20261027"/>
   <link rel="modulepreload" href="js/firebase-config.js"/>
   <script>
     // Resolve the product image URL as early as possible and fire its download immediately.
@@ -179,7 +179,6 @@
     .info-panel{padding:clamp(24px,3vw,40px) clamp(24px,4vw,48px);display:flex;flex-direction:column;gap:0}
     .prod-category{font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--copper);margin-bottom:6px;}
     .prod-name{font-family:var(--f-display);font-size:clamp(28px,4vw,48px);font-weight:300;line-height:1.05;color:var(--cream);margin-bottom:4px;}
-    .prod-subcategory{font-size:13px;letter-spacing:.14em;color:var(--cream-dim);margin-bottom:16px;}
     .prod-price-row{display:flex;align-items:baseline;gap:14px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--rule);}
     .prod-price{font-family:var(--f-display);font-size:clamp(26px,3.5vw,40px);font-weight:600;color:var(--cream)}
     .prod-price-orig{font-family:var(--f-display);font-size:20px;color:var(--cream-dim);text-decoration:line-through;opacity:.5}
@@ -433,7 +432,6 @@
     .info-panel{background:#ffffff}
     .prod-category{color:#3a8c5c}
     .prod-name{color:#1a1a18}
-    .prod-subcategory{color:#8a8a88}
     .prod-price{color:#1a1a18}
     .prod-price-orig{color:#8a8a88}
     .prod-price-row{border-bottom-color:rgba(0,0,0,.08)}
@@ -610,7 +608,7 @@
        NOTE: #img-panel is intentionally NOT pre-hidden — we want the image to appear
        as soon as the preloaded bytes arrive (~50-200ms), without waiting for Firestore
        or the entrance animation. */
-    #prod-category,#prod-name,#prod-subcategory,#prod-price-row,
+    #prod-category,#prod-name,#prod-price-row,
     #prod-desc,#prod-colors-wrap,#prod-qty-wrap,#prod-cta,#specs-section{
       opacity:0;visibility:hidden;
     }
@@ -684,7 +682,6 @@
     <div class="info-panel" id="info-panel">
       <div class="prod-category" id="prod-category"></div>
       <h1 class="prod-name" id="prod-name"></h1>
-      <div class="prod-subcategory" id="prod-subcategory"></div>
       <div class="prod-price-row" id="prod-price-row">
         <span class="prod-price" id="prod-price"></span>
         <span class="prod-price-orig" id="prod-price-orig" style="display:none"></span>
@@ -1140,7 +1137,6 @@
     if (bcCat) bcCat.href = 'catalogo.html?cat=' + slug(p.category);
     setText('prod-category', p.category || '');
     setText('prod-name', p.name);
-    setText('prod-subcategory', p.subcategory || '');
     if (p.price != null) setText('prod-price', fmt(p.price));
     setText('prod-desc', p.description || '');
 
@@ -1159,14 +1155,14 @@
       if (imgUrl) mainImg.src = imgUrl;
     }
 
-    ['prod-category','prod-name','prod-subcategory','prod-price-row','prod-desc',
+    ['prod-category','prod-name','prod-price-row','prod-desc',
      'prod-colors-wrap','prod-qty-wrap','prod-cta','specs-section'].forEach(reveal);
 
     window.__cacheHitProduct = p;
   })();
   </script>
 
-  <script type="module" src="js/producto-renderer.js?v=20260722"></script>
+  <script type="module" src="js/producto-renderer.js?v=20261027"></script>
 
 <script src="js/cart-system.js"></script>
 </body>

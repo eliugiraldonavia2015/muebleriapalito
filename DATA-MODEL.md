@@ -8,11 +8,11 @@
 | `name` | string | Display name (e.g., "Salas") |
 | `slug` | string | URL-safe identifier (e.g., "Salas") |
 | `coverImage` | string | Hero image URL for the category |
-| `subcategoryList` | array | List of objects: `{ name: string, slug: string }` |
+| `subcategoryList` | array | **Obsoleto (oct 2026): ya no hay subcategorías.** El admin lo guarda vacío y el sitio lo ignora |
 | `showOnHomepage` | boolean | Whether this category appears on the home screen |
 | `displayOrder` | number | Sort order on homepage (lower = first) |
 | `productCount` | number | Displayed count of products |
-| `hasSubcategories` | boolean | If true, renders with sub-pills on categories page |
+| `hasSubcategories` | boolean | **Obsoleto (oct 2026).** Siempre `false` al guardar; el sitio lo ignora |
 | `createdAt` | timestamp | — |
 | `updatedAt` | timestamp | — |
 
@@ -27,7 +27,7 @@
 | `shortDescription` | string | Descripción corta para el mosaico del catálogo, máx. ~140 caracteres / 2 líneas |
 | `description` | string | Descripción larga y completa, sin límite, mostrada en la página de detalle del producto |
 | `categoryId` | string (ref) | Category slug this product belongs to |
-| `subcategory` | string (optional) | e.g., "Grandes", "2 Plazas" |
+| `subcategory` | string | **Obsoleto (oct 2026): ya no hay subcategorías.** El admin lo guarda vacío y el sitio no lo muestra |
 | `primaryImage` | string | Main product image URL |
 | `gallery` | array | Additional image URLs |
 | `price` | number | Current price |

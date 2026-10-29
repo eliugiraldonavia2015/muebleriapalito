@@ -54,7 +54,6 @@ let categories = [];
 let products = [];
 let settings = {};
 let dashFeaturedCatFilter = "all";
-let editingCatSubs = [];
 let editingProdColors = [];      // [{ hex, images:[url] }] — variaciones del item
 let editingProdMaterials = [];
 let editingProdImages = [];      // galeria del producto cuando NO se vende por color
@@ -65,7 +64,6 @@ let editingCatId = null;
 let editingProdId = null;
 let storeCount = 0;
 let currentDetailCatId = null;
-let currentDetailSubcategory = "all";
 let catProductsAll = [];
 let catProductsFiltered = [];
 let catProductsShown = 0;
@@ -299,7 +297,6 @@ function renderCatCards() {
   }
   const gsap = window.gsap;
   categories.forEach(cat => {
-    const subs = cat.subcategoryList || cat.subcategories || [];
     const imgSrc = cat.imageUrl || cat.coverImage || "";
     const card = document.createElement("div");
     card.className = "cat-card";
@@ -349,26 +346,11 @@ function renderCatCards() {
     nameEl.className = "cat-card-name";
     nameEl.textContent = cat.name;
 
-    const pillsEl = document.createElement("div");
-    pillsEl.className = "cat-card-subs";
-    subs.slice(0, 3).forEach(s => {
-      const pill = document.createElement("span");
-      pill.className = "cat-sub-pill";
-      pill.textContent = s;
-      pillsEl.appendChild(pill);
-    });
-    if (subs.length > 3) {
-      const more = document.createElement("span");
-      more.className = "cat-sub-pill";
-      more.textContent = "+" + (subs.length - 3);
-      pillsEl.appendChild(more);
-    }
-
     const metaEl = document.createElement("div");
     metaEl.className = "cat-card-meta";
     metaEl.textContent = (cat.productCount || 0) + " productos";
 
-    body.append(nameEl, pillsEl, metaEl);
+    body.append(nameEl, metaEl);
     card.append(imgEl, overlay, homeWrap, actions, body);
     grid.appendChild(card);
   });
@@ -398,7 +380,6 @@ async function openCategoryDetail(catId) {
   const cat = categories.find(c => c.id === catId);
   if (!cat) return;
   currentDetailCatId = catId;
-  currentDetailSubcategory = "all";
   catProductsAll = [];
   catProductsFiltered = [];
   catProductsShown = 0;
@@ -408,10 +389,8 @@ async function openCategoryDetail(catId) {
   detailImg.src = img || PLACEHOLDER_IMG;
   detailImg.onerror = () => { detailImg.src = PLACEHOLDER_IMG; detailImg.onerror = null; };
   document.getElementById("detailCatName").textContent = cat.name;
-  const subs = cat.subcategoryList || cat.subcategories || [];
-  document.getElementById("detailCatMeta").textContent = subs.length + " subcategorias";
+  document.getElementById("detailCatMeta").textContent = "Cargando productos…";
   document.getElementById("detailEditCatBtn").dataset.catId = catId;
-  renderSubTabs(subs);
   showSkeletonGrid(Math.min(CAT_PAGE_SIZE, 8));
 
   const listView = document.getElementById("catListView");
@@ -448,14 +427,12 @@ async function loadCategoryProducts(catId) {
   filterCatProducts();
   catProductsShown = 0;
   renderCatDetailProducts();
-  const subCount = Math.max(0, document.getElementById("subTabsContainer").children.length - 1);
-  document.getElementById("detailCatMeta").textContent = subCount + " subcategorias · " + catProductsAll.length + " productos";
+  document.getElementById("detailCatMeta").textContent = catProductsAll.length + " productos";
 }
 
 function filterCatProducts() {
-  catProductsFiltered = currentDetailSubcategory === "all"
-    ? [...catProductsAll]
-    : catProductsAll.filter(p => p.subcategory === currentDetailSubcategory);
+  // Ya no hay subcategorías: la vista de detalle muestra todos los productos de la categoría.
+  catProductsFiltered = [...catProductsAll];
 }
 
 function showSkeletonGrid(count) {
@@ -486,42 +463,6 @@ function closeCategoryDetail() {
   });
 }
 
-function renderSubTabs(subs) {
-  const container = document.getElementById("subTabsContainer");
-  container.replaceChildren();
-
-  const allBtn = document.createElement("button");
-  allBtn.className = "sub-tab-btn active";
-  allBtn.textContent = "Todos";
-  allBtn.dataset.sub = "all";
-  allBtn.addEventListener("click", () => switchSubTab("all", allBtn));
-  container.appendChild(allBtn);
-
-  subs.forEach(s => {
-    const btn = document.createElement("button");
-    btn.className = "sub-tab-btn";
-    btn.textContent = s;
-    btn.dataset.sub = s;
-    btn.addEventListener("click", () => switchSubTab(s, btn));
-    container.appendChild(btn);
-  });
-}
-
-function switchSubTab(sub, clickedBtn) {
-  currentDetailSubcategory = sub;
-  document.querySelectorAll(".sub-tab-btn").forEach(b => b.classList.remove("active"));
-  if (clickedBtn) clickedBtn.classList.add("active");
-  filterCatProducts();
-  catProductsShown = 0;
-  const grid = document.getElementById("catProdGrid");
-  window.gsap.to(grid, {
-    opacity: 0, duration: 0.12, onComplete: () => {
-      renderCatDetailProducts();
-      window.gsap.to(grid, { opacity: 1, duration: 0.2 });
-    }
-  });
-}
-
 function buildProdMiniCard(p) {
   console.log("[CARD] Built: " + p.name + " | id=" + p.id + " type:" + typeof p.id);
   const card = document.createElement("div");
@@ -548,13 +489,6 @@ function buildProdMiniCard(p) {
   // overlay — info on top of image
   const overlay = document.createElement("div");
   overlay.className = "prod-mini-overlay";
-
-  if (p.subcategory) {
-    const sub = document.createElement("div");
-    sub.className = "prod-mini-sub";
-    sub.textContent = p.subcategory;
-    overlay.appendChild(sub);
-  }
 
   const name = document.createElement("div");
   name.className = "prod-mini-name";
@@ -1216,7 +1150,7 @@ function renderDashFeatured() {
       nameEl.textContent = p.name;
       const catEl = document.createElement("div");
       catEl.style.cssText = "font-size:10px;color:var(--gray);margin-top:1px";
-      catEl.textContent = p.category + (p.subcategory ? " · " + p.subcategory : "");
+      catEl.textContent = p.category;
       info.append(nameEl, catEl);
 
       const arrows = document.createElement("div");
@@ -1296,7 +1230,7 @@ function renderDashFeatured() {
     nameEl.textContent = p.name;
     const catEl = document.createElement("div");
     catEl.style.cssText = "font-size:10px;color:var(--gray);margin-top:1px";
-    catEl.textContent = p.category + (p.subcategory ? " · " + p.subcategory : "");
+    catEl.textContent = p.category;
     info.append(nameEl, catEl);
 
     const addBtn = document.createElement("button");
@@ -2583,8 +2517,6 @@ async function runSeed() {
       slug: cat.name.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, ""),
       imageUrl: cat.imageUrl,
       coverImage: cat.imageUrl,
-      subcategoryList: cat.subcategories || [],
-      hasSubcategories: (cat.subcategories || []).length > 0,
       showOnHomepage: cat.featured === true,
       productCount: cat.productCount || 0,
       displayOrder: cat.displayOrder ?? 0,
@@ -2937,45 +2869,13 @@ function mountCategoryImageUploader() {
 
 document.getElementById("addCategoryBtn").addEventListener("click", () => {
   editingCatId = null;
-  editingCatSubs = [];
   document.getElementById("catModalTitle").textContent = "Nueva categoria";
   document.getElementById("categoryForm").reset();
   document.getElementById("catEditId").value = "";
-  document.getElementById("catSubTags").replaceChildren();
   setCategoryImagePreview("");
   clearFieldErrors(document.getElementById("categoryForm"));
   openModal("categoryModal");
 });
-
-document.getElementById("addSubBtn").addEventListener("click", addSubTag);
-document.getElementById("catSubInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") { e.preventDefault(); addSubTag(); }
-});
-
-function addSubTag() {
-  const input = document.getElementById("catSubInput");
-  const val = input.value.trim();
-  if (!val || editingCatSubs.includes(val)) return;
-  editingCatSubs.push(val);
-  renderSubTags();
-  input.value = "";
-}
-
-function renderSubTags() {
-  const container = document.getElementById("catSubTags");
-  container.replaceChildren();
-  editingCatSubs.forEach((s, i) => {
-    const span = document.createElement("span");
-    span.className = "sub-tag";
-    span.textContent = s;
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.textContent = "×";
-    btn.addEventListener("click", () => { editingCatSubs.splice(i, 1); renderSubTags(); });
-    span.appendChild(btn);
-    container.appendChild(span);
-  });
-}
 
 document.getElementById("categoryForm").addEventListener("submit", async e => {
   e.preventDefault();
@@ -2999,8 +2899,9 @@ document.getElementById("categoryForm").addEventListener("submit", async e => {
     productCount: Number(document.getElementById("catProductCount").value) || 0,
     displayOrder: Number(document.getElementById("catDisplayOrder").value) || 0,
     showOnHomepage: document.getElementById("catShowOnHomepage").checked,
-    subcategoryList: [...editingCatSubs], // renderers read subcategoryList
-    hasSubcategories: editingCatSubs.length > 0,
+    // Ya no hay subcategorías: al guardar se vacían las que traiga un doc viejo.
+    subcategoryList: [],
+    hasSubcategories: false,
     updatedAt: serverTimestamp(),
   };
 
@@ -3026,8 +2927,6 @@ function editCategory(id) {
   const cat = categories.find(c => c.id === id);
   if (!cat) return;
   editingCatId = id;
-  // support both subcategoryList and subcategories
-  editingCatSubs = [...(cat.subcategoryList || cat.subcategories || [])];
   document.getElementById("catModalTitle").textContent = "Editar categoria";
   document.getElementById("catEditId").value = id;
   document.getElementById("catName").value = cat.name || "";
@@ -3037,7 +2936,6 @@ function editCategory(id) {
   document.getElementById("catProductCount").value = cat.productCount || "";
   document.getElementById("catDisplayOrder").value = cat.displayOrder ?? "";
   document.getElementById("catShowOnHomepage").checked = cat.showOnHomepage !== false;
-  renderSubTags();
   openModal("categoryModal");
 }
 
@@ -3094,33 +2992,6 @@ function populateCatSelect(currentVal = "") {
   }
   return sel.value;
 }
-
-function populateSubcategorySelect(catId, currentVal = "") {
-  const sel = document.getElementById("prodSubcategory");
-  sel.replaceChildren();
-  const none = document.createElement("option");
-  none.value = "";
-  none.textContent = "Sin subcategoria";
-  sel.appendChild(none);
-  if (catId) {
-    const cat = categories.find(c => c.id === catId);
-    const subs = cat?.subcategoryList || cat?.subcategories || [];
-    subs.forEach(s => {
-      const opt = document.createElement("option");
-      opt.value = s;
-      opt.textContent = s;
-      sel.appendChild(opt);
-    });
-  }
-  if (currentVal) {
-    const m = [...sel.options].find(o => o.value.toLowerCase() === String(currentVal).toLowerCase());
-    sel.value = m ? m.value : currentVal;
-  }
-}
-
-document.getElementById("prodCategory").addEventListener("change", e => {
-  populateSubcategorySelect(e.target.value, "");
-});
 
 const SHORT_DESC_MAX = 140;
 
@@ -3206,10 +3077,7 @@ function openProductDrawer(id = null, preCatId = null) {
     editingProdHasColors = hasColorSelection(p);
     editingProdQrUrl = p.qrUrl || "";
     editingProdSpecsText = p.specsText || "";
-    // populateCatSelect devuelve el id real resuelto (case-insensitive); se usa
-    // para poblar y seleccionar la subcategoria correctamente.
-    const realCatId = populateCatSelect(p.categoryId || "");
-    populateSubcategorySelect(realCatId, p.subcategory || "");
+    populateCatSelect(p.categoryId || "");
   } else {
     console.log("[DRAWER] New product, preCatId:", preCatId);
     document.getElementById("prodModalTitle").textContent = "Nuevo producto";
@@ -3222,7 +3090,6 @@ function openProductDrawer(id = null, preCatId = null) {
     editingProdQrUrl = "";
     editingProdSpecsText = "";
     populateCatSelect(preCatId || "");
-    populateSubcategorySelect(preCatId || "", "");
   }
   updateShortDescCount(); // sincroniza el contador tras poblar o tras reset()
   ensureProductVariationUI();
@@ -3782,7 +3649,7 @@ document.getElementById("productForm").addEventListener("submit", async e => {
     description: document.getElementById("prodDesc").value.trim(),           // detalle
     categoryId: catId.toLowerCase(), // normalizado lowercase para consistencia con seed-data
     category: catName,
-    subcategory: document.getElementById("prodSubcategory").value.trim(),
+    subcategory: "", // ya no hay subcategorías; se vacía la de productos viejos al guardar
     imageUrl,
     primaryImage: imageUrl, // index-renderer reads primaryImage
     displayOrder: Number(document.getElementById("prodDisplayOrder").value) || 0,
@@ -3901,5 +3768,3 @@ document.querySelectorAll(".modal-overlay").forEach(overlay => {
   });
 });
 
-// Product form subcategory sync when category changes (already handled by populateSubcategorySelect)
-// but also sync from the form's own change event set up above

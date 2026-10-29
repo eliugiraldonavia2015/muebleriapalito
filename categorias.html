@@ -106,45 +106,8 @@
     .cats-section-label::before{content:'';width:28px;height:1px;background:var(--copper)}
     .cats-section-label::after{content:'';flex:1;height:1px;background:var(--rule)}
 
-    /* FEATURED (con subcategorías) */
-    #cats-featured{padding:56px clamp(24px,5vw,80px) 0}
-    .featured-grid{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:12px;
-    }
-    .feat-card{
-      position:relative;overflow:hidden;background:var(--bg2);
-      height:340px;
-      display:block;
-    }
-    .feat-card-img{position:absolute;inset:0;transition:transform 1.3s var(--ease-silk)}
-    .feat-card:hover .feat-card-img{transform:scale(1.07)}
-    .feat-card-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(12,31,20,.92) 0%,rgba(12,31,20,.08) 65%);transition:background .5s}
-    .feat-card:hover .feat-card-overlay{background:linear-gradient(0deg,rgba(12,31,20,.96) 0%,rgba(12,31,20,.2) 70%)}
-    .feat-card-info{position:absolute;bottom:0;left:0;right:0;padding:22px 22px 20px}
-    .feat-card-name{font-family:var(--f-display);font-size:clamp(22px,2.2vw,32px);font-weight:300;line-height:1;color:var(--cream);margin-bottom:10px}
-    .sub-pills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
-    .sub-pill{
-      font-size:9px;letter-spacing:.12em;text-transform:uppercase;
-      color:var(--cream-dim);border:1px solid rgba(160,220,180,.18);
-      padding:3px 8px;transition:border-color .3s,color .3s,background .3s;
-      cursor:pointer;
-    }
-    .feat-card:hover .sub-pill{border-color:rgba(58,140,92,.4);color:var(--cream-dim)}
-    .sub-pill:hover{background:rgba(58,140,92,.15);color:var(--cream)!important;border-color:var(--copper)!important}
-    .feat-card-foot{display:flex;align-items:center;justify-content:space-between}
-    .feat-card-count{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream-dim)}
-    .feat-card-arrow{
-      width:32px;height:32px;border:1px solid rgba(232,245,236,.2);
-      display:flex;align-items:center;justify-content:center;
-      transition:background .3s,border-color .3s,transform .45s var(--ease-silk);flex-shrink:0;
-    }
-    .feat-card:hover .feat-card-arrow{background:var(--copper);border-color:var(--copper);transform:rotate(-45deg)}
-    .feat-card-arrow svg{width:13px;stroke:var(--cream)}
-
-    /* REGULAR (sin subcategorías) */
-    #cats-all{padding:40px clamp(24px,5vw,80px) clamp(80px,10vw,140px)}
+    /* TODAS LAS CATEGORÍAS: ya no hay subcategorías, así que es la única cuadrícula */
+    #cats-all{padding:56px clamp(24px,5vw,80px) clamp(80px,10vw,140px)}
     .regular-grid{
       display:grid;
       grid-template-columns:repeat(4,1fr);
@@ -182,7 +145,7 @@
 
     /* FOOTER */
     footer{border-top:1px solid var(--rule);padding:clamp(60px,8vw,100px) clamp(24px,5vw,80px) 40px}
-    .footer-top{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:60px;margin-bottom:80px}
+    .footer-top{display:grid;grid-template-columns:1.8fr 1fr 1fr;gap:60px;margin-bottom:80px}
     .footer-brand{display:flex;flex-direction:column;gap:20px}
     .footer-tagline{font-size:14px;color:var(--cream-dim);line-height:1.6;max-width:280px}
     .footer-socials{display:flex;gap:12px;margin-top:8px}
@@ -202,16 +165,13 @@
     .wa-float svg{width:26px;stroke:white}
 
     @media(max-width:1024px){
-      .featured-grid{grid-template-columns:repeat(2,1fr)}
       .regular-grid{grid-template-columns:repeat(3,1fr)}
       .cats-hero-inner{grid-template-columns:1fr}
       .cats-hero-right{display:none}
       .footer-top{grid-template-columns:1fr 1fr;gap:32px}
     }
     @media(max-width:640px){
-      .featured-grid{grid-template-columns:1fr 1fr}
       .regular-grid{grid-template-columns:1fr 1fr}
-      .feat-card{height:260px}
       .reg-card{height:180px}
       .nav-links{display:none}
       .footer-top{grid-template-columns:1fr}
@@ -234,11 +194,8 @@
       </a></li>
     </ul>
     <div class="nav-actions">
-      <a href="#" aria-label="Buscar">
+      <a href="categorias.html" aria-label="Buscar">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
-      </a>
-      <a href="#" aria-label="Cuenta">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       </a>
       <a href="carrito.html" style="display:flex;align-items:flex-start" aria-label="Carrito">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
@@ -277,84 +234,6 @@
         </a>
         <div class="cats-num-badge">16</div>
       </div>
-    </div>
-  </section>
-
-  <!-- ── FEATURED (con subcategorías) ── -->
-  <section id="cats-featured">
-    <div class="cats-section-label">Colecciones con tallas</div>
-    <div class="featured-grid" id="featuredGrid">
-
-      <a href="catalogo.html?cat=Salas" class="feat-card">
-        <div class="feat-card-img"><img src="https://muebleria-palito-cdn.b-cdn.net/products/mesa-noche-flux.jpg" alt="Salas"/></div>
-        <div class="feat-card-overlay"></div>
-        <div class="feat-card-info">
-          <div class="feat-card-name">Salas</div>
-          <div class="sub-pills">
-            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Salas&sub=Grandes'">Grandes</span>
-            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Salas&sub=Medianas'">Medianas</span>
-            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Salas&sub=Pequeñas'">Pequeñas</span>
-          </div>
-          <div class="feat-card-foot">
-            <span class="feat-card-count">48 productos</span>
-            <div class="feat-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-          </div>
-        </div>
-      </a>
-
-      <a href="catalogo.html?cat=Comedores" class="feat-card">
-        <div class="feat-card-img"><img src="https://muebleria-palito-cdn.b-cdn.net/products/comoda-doble-lund.jpg" alt="Comedores"/></div>
-        <div class="feat-card-overlay"></div>
-        <div class="feat-card-info">
-          <div class="feat-card-name">Comedores</div>
-          <div class="sub-pills">
-            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Comedores&sub=4Ptos'">4 Puestos</span>
-            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Comedores&sub=6Ptos'">6 Puestos</span>
-            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Comedores&sub=8Ptos'">8 Puestos</span>
-          </div>
-          <div class="feat-card-foot">
-            <span class="feat-card-count">32 productos</span>
-            <div class="feat-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-          </div>
-        </div>
-      </a>
-
-      <a href="catalogo.html?cat=Dormitorios" class="feat-card">
-        <div class="feat-card-img"><img src="https://muebleria-palito-cdn.b-cdn.net/products/cama-platform-oslo.jpg" alt="Dormitorios"/></div>
-        <div class="feat-card-overlay"></div>
-        <div class="feat-card-info">
-          <div class="feat-card-name">Dormitorios</div>
-          <div class="sub-pills">
-            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Dormitorios&sub=1.5Plz'">1.5 Plz</span>
-            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Dormitorios&sub=2Plz'">2 Plz</span>
-            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Dormitorios&sub=2.5Plz'">2.5 Plz</span>
-            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Dormitorios&sub=3Plz'">3 Plz</span>
-          </div>
-          <div class="feat-card-foot">
-            <span class="feat-card-count">56 productos</span>
-            <div class="feat-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-          </div>
-        </div>
-      </a>
-
-      <a href="catalogo.html?cat=Camas" class="feat-card">
-        <div class="feat-card-img"><img src="https://muebleria-palito-cdn.b-cdn.net/products/cama-king-monarch.jpg" alt="Camas"/></div>
-        <div class="feat-card-overlay"></div>
-        <div class="feat-card-info">
-          <div class="feat-card-name">Camas</div>
-          <div class="sub-pills">
-            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Camas&sub=1.5Plz'">1.5 Plz</span>
-            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Camas&sub=2Plz'">2 Plz</span>
-            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Camas&sub=2.5Plz'">2.5 Plz</span>
-            <span class="sub-pill" onclick="event.preventDefault();location.href='catalogo.html?cat=Camas&sub=3Plz'">3 Plz</span>
-          </div>
-          <div class="feat-card-foot">
-            <span class="feat-card-count">44 productos</span>
-            <div class="feat-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-          </div>
-        </div>
-      </a>
-
     </div>
   </section>
 
@@ -475,50 +354,32 @@
   </section>
 
   <footer>
+    <!-- Footer sencillo: solo enlaces que llevan a algo real. Se quitaron promesas
+         y datos que la tienda no ofrece (garantia 60 noches, devoluciones, envios,
+         Visa/PayPal, 1800, Panama/Peru, info@palito.com) y enlaces muertos (#). -->
     <div class="footer-top">
       <div class="footer-brand">
-        <img src="logo.png" alt="Mueblerias Palito" style="height:52px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 6px rgba(0,0,0,.4))"/>
+        <img src="logo.png" alt="Muebleria Palito Outlet" style="height:52px;width:auto;align-self:flex-start;object-fit:contain;filter:drop-shadow(0 1px 6px rgba(0,0,0,.4))"/>
         <p class="footer-tagline">Muebleria de autor para quienes entienden que el diseño es una forma de vida.</p>
-        <div class="footer-socials">
-          <a href="#" class="social-link" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
-          <a href="#" class="social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor"/></svg></a>
-          <a target="_blank" href="https://wa.me/593959667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="social-link" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
-        </div>
       </div>
       <div>
-        <div class="footer-col-title">Empresa</div>
+        <div class="footer-col-title">Tienda</div>
         <ul class="footer-links">
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="categorias.html">Categorías</a></li>
           <li><a href="nosotros.html">Nosotros</a></li>
-          <li><a href="#">Política de privacidad</a></li>
-          <li><a href="#">Términos y condiciones</a></li>
-          <li><a href="#">Devoluciones</a></li>
-        </ul>
-      </div>
-      <div>
-        <div class="footer-col-title">Servicios</div>
-        <ul class="footer-links">
-          <li><a href="#">Programa diseñadores</a></li>
-          <li><a href="#">Proyectos hoteleros</a></li>
-          <li><a href="#">Garantía 60 noches</a></li>
         </ul>
       </div>
       <div>
         <div class="footer-col-title">Contacto</div>
         <ul class="footer-links">
-          <li><a href="contacto.html">Tiendas físicas</a></li>
-          <li><a href="#">WhatsApp: 098 966 7093</a></li>
-          <li><a href="#">info@palito.com</a></li>
+          <li><a target="_blank" rel="noopener" href="https://wa.me/593959667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA">WhatsApp: 095 966 7093</a></li>
+          <li><a href="contacto.html">Ubicaciones en Guayaquil</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <span class="footer-copy">2025 Muebleria Palito Outlet. Todos los derechos reservados.</span>
-      <div class="footer-payments">
-        <span class="payment-badge">Visa</span>
-        <span class="payment-badge">Mastercard</span>
-        <span class="payment-badge">PayPal</span>
-        <span class="payment-badge">Amex</span>
-      </div>
+      <span class="footer-copy">© 2026 Muebleria Palito Outlet. Todos los derechos reservados.</span>
     </div>
   </footer>
 
@@ -537,13 +398,6 @@
       .from('.back-btn',        { x: 20,  autoAlpha: 0, duration: .55 }, '-=.6')
       .from('.cats-num-badge',  { autoAlpha: 0, duration: 1.2 }, '-=.8');
 
-    // Featured cards entrance
-    gsap.set('.feat-card', { autoAlpha: 0, y: 44 });
-    ScrollTrigger.batch('.feat-card', {
-      onEnter: els => gsap.to(els, { autoAlpha: 1, y: 0, duration: .75, stagger: .1, ease: 'power3.out', clearProps: 'transform' }),
-      start: 'top 86%'
-    });
-
     // Regular cards entrance
     gsap.set('.reg-card', { autoAlpha: 0, y: 32 });
     ScrollTrigger.batch('.reg-card', {
@@ -558,7 +412,7 @@
       start: 'top 90%'
     });
   </script>
-  <script type="module" src="js/categorias-renderer.js"></script>
+  <script type="module" src="js/categorias-renderer.js?v=20261027"></script>
 
 <script src="js/cart-system.js"></script>
 </body>

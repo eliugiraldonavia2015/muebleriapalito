@@ -138,7 +138,7 @@
 
     /* FOOTER */
     footer{border-top:1px solid var(--rule);padding:clamp(60px,8vw,100px) clamp(24px,5vw,80px) 40px}
-    .footer-top{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:60px;margin-bottom:80px}
+    .footer-top{display:grid;grid-template-columns:1.8fr 1fr 1fr;gap:60px;margin-bottom:80px}
     .footer-brand{display:flex;flex-direction:column;gap:20px}
     .footer-tagline{font-size:14px;color:var(--cream-dim);line-height:1.6;max-width:280px}
     .footer-socials{display:flex;gap:12px;margin-top:8px}
@@ -320,7 +320,7 @@
       </a></li>
     </ul>
     <div class="nav-actions">
-      <a href="#" aria-label="Buscar"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg></a>
+      <a href="categorias.html" aria-label="Buscar"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg></a>
       <a href="carrito.html" aria-label="Carrito"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></a>
     </div>
   </nav>
@@ -475,23 +475,32 @@
   </section>
 
   <footer>
+    <!-- Footer sencillo: solo enlaces que llevan a algo real. Se quitaron promesas
+         y datos que la tienda no ofrece (garantia 60 noches, devoluciones, envios,
+         Visa/PayPal, 1800, Panama/Peru, info@palito.com) y enlaces muertos (#). -->
     <div class="footer-top">
       <div class="footer-brand">
-        <img src="logo.png" alt="Mueblerias Palito" style="height:52px;width:auto;filter:drop-shadow(0 1px 6px rgba(0,0,0,.4))"/>
-        <p class="footer-tagline">Muebleria de autor para quienes entienden que el diseno es una forma de vida.</p>
-        <div class="footer-socials">
-          <a href="#" class="social-link" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
-          <a href="#" class="social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/></svg></a>
-          <a target="_blank" href="https://wa.me/593959667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" class="social-link" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
-        </div>
+        <img src="logo.png" alt="Muebleria Palito Outlet" style="height:52px;width:auto;align-self:flex-start;object-fit:contain;filter:drop-shadow(0 1px 6px rgba(0,0,0,.4))"/>
+        <p class="footer-tagline">Muebleria de autor para quienes entienden que el diseño es una forma de vida.</p>
       </div>
-      <div><div class="footer-col-title">Empresa</div><ul class="footer-links"><li><a href="nosotros.html">Nosotros</a></li><li><a href="#">Privacidad</a></li><li><a href="#">Terminos</a></li></ul></div>
-      <div><div class="footer-col-title">Catalogo</div><ul class="footer-links"><li><a href="catalogo.html?cat=Salas">Salas</a></li><li><a href="catalogo.html?cat=Dormitorios">Dormitorios</a></li><li><a href="catalogo.html?cat=Decor">Decor</a></li></ul></div>
-      <div><div class="footer-col-title">Contacto</div><ul class="footer-links"><li><a href="contacto.html">Tiendas</a></li><li><a href="https://wa.me/593959667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA" target="_blank">WhatsApp</a></li><li><a href="#">info@palito.com</a></li></ul></div>
+      <div>
+        <div class="footer-col-title">Tienda</div>
+        <ul class="footer-links">
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="categorias.html">Categorías</a></li>
+          <li><a href="nosotros.html">Nosotros</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Contacto</div>
+        <ul class="footer-links">
+          <li><a target="_blank" rel="noopener" href="https://wa.me/593959667093?text=ESTOY%20INTERESADO%20EN%20MUEBLERIA%20PALITO%20PARA%20COMPRAR%20UN%20MUEBLE%2C%20ME%20PODRIAN%20ASESORAR%3F%20VENGO%20DE%20LA%20PAGINA">WhatsApp: 095 966 7093</a></li>
+          <li><a href="contacto.html">Ubicaciones en Guayaquil</a></li>
+        </ul>
+      </div>
     </div>
     <div class="footer-bottom">
-      <span class="footer-copy">2025 Muebleria Palito Outlet. Todos los derechos reservados.</span>
-      <div class="footer-payments"><span class="payment-badge">Visa</span><span class="payment-badge">Mastercard</span><span class="payment-badge">PayPal</span></div>
+      <span class="footer-copy">© 2026 Muebleria Palito Outlet. Todos los derechos reservados.</span>
     </div>
   </footer>
 

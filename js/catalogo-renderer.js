@@ -25,7 +25,6 @@ const PAGE_SIZE = 9;
 // ─── URL PARAMS ─── normalize to lowercase
 const params = new URLSearchParams(window.location.search);
 const activeCat = (params.get('cat') || '').toLowerCase();
-const activeSub = (params.get('sub') || '').toLowerCase();
 
 // ─── STATE ───
 let allProducts = [];
@@ -161,32 +160,14 @@ function renderSidebar(categories) {
   const container = $(".cat-links");
   if (!container) return;
 
-  let html = "";
-  categories.forEach(cat => {
+  // Ya no hay subcategorías: cada categoría es un enlace directo, sin acordeón.
+  // Un ?sub= viejo (enlaces guardados) se ignora y muestra la categoría completa.
+  const html = categories.map(cat => {
     const slug = slugify(cat.name);
-    const subs = (cat.subcategoryList || []).map(s => typeof s === "string" ? s : s.name);
-    const hasSubs = subs.length > 0;
-    const isActive = slug === activeCat;
-    const isOpen = hasSubs && isActive;
-
-    if (hasSubs) {
-      html += `
-      <div class="cat-link cat-has-sub${isOpen ? " open active" : ""}" data-cat="${cat.name}">${cat.name}
-        <svg class="cat-chevron" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
-      <div class="cat-sub-links" id="sub-${slugify(cat.name)}">`;
-      subs.forEach(sub => {
-        const subSlug = slugify(sub);
-        html += `<a href="catalogo.html?cat=${slug}&sub=${subSlug}" class="cat-sub-link${sub === activeSub ? " active" : ""}">${sub}</a>`;
-      });
-      html += `</div>`;
-    } else {
-      html += `<a href="catalogo.html?cat=${slug}" class="cat-link${isActive ? " active" : ""}">${cat.name}</a>`;
-    }
-  });
+    return `<a href="catalogo.html?cat=${slug}" class="cat-link${slug === activeCat ? " active" : ""}">${cat.name}</a>`;
+  }).join("");
 
   container.innerHTML = html;
-  reinitAccordion();
 }
 
 // ─── RENDER PRODUCT GRID ───
@@ -205,10 +186,12 @@ function applyFilters() {
       const byCatId   = slugify(p.categoryId || "");
       return byCatName === activeCat || byCatId === activeCat;
     });
-    if (activeSub && result.length) {
-      result = result.filter(p => slugify(p.subcategory || "") === activeSub);
-    }
   }
+  // Orden del selector "Ordenar". "Destacados" respeta el displayOrder del admin
+  // (así vienen de Firestore); los de precio ordenan sobre el precio actual.
+  const sort = $("#sort-select")?.value || "destacados";
+  if (sort === "precio-asc")  result.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+  if (sort === "precio-desc") result.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
   filteredProducts = result;
   shownCount = 0;
 
@@ -368,36 +351,22 @@ function buildCardsBatch(grid) {
   }
 }
 
-// ─── ACCORDION REINIT ───
-function reinitAccordion() {
-  document.querySelectorAll('.cat-has-sub').forEach(parent => {
-    const catName = parent.dataset.cat;
-    const subEl = document.getElementById('sub-' + slugify(catName));
-    if (!subEl) return;
-
-    parent.addEventListener('click', () => {
-      const isOpen = parent.classList.contains('open');
-      document.querySelectorAll('.cat-has-sub.open').forEach(p => {
-        if (p !== parent) {
-          p.classList.remove('open');
-          gsap.to(document.getElementById('sub-' + slugify(p.dataset.cat)), { height: 0, duration: .3, ease: 'power2.inOut' });
-        }
-      });
-      if (isOpen) {
-        parent.classList.remove('open');
-        gsap.to(subEl, { height: 0, duration: .3, ease: 'power2.inOut' });
-      } else {
-        parent.classList.add('open');
-        gsap.set(subEl, { height: 'auto' });
-        const h = subEl.offsetHeight;
-        gsap.fromTo(subEl, { height: 0 }, { height: h, duration: .38, ease: 'power3.out' });
-      }
-    });
+// ─── ORDENAR ───
+// Re-ordena y repinta desde la primera tanda; el scroll infinito sigue igual.
+function initSort() {
+  const sel = $("#sort-select");
+  if (!sel) return;
+  sel.addEventListener("change", () => {
+    applyFilters();
+    const grid = $("#product-grid");
+    if (grid) grid.replaceChildren();
+    loadNextBatch();
   });
 }
 
 // ─── MAIN INIT ───
 async function init() {
+  initSort();
   try {
     // Fire both Firestore queries in parallel — whichever lands first renders independently.
     // No artificial sequencing: products often arrive before categories and that's fine.
