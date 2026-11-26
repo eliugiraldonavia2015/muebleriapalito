@@ -963,7 +963,13 @@ function populateFromProduct(product) {
     if (disc) { disc.textContent = "-" + Math.abs(product.discountPct) + "%"; disc.style.display = ""; }
   }
 
-  setText("#prod-desc", product.description || "");
+  const descEl = $("#prod-desc");
+  if (descEl) {
+    descEl.innerHTML = window.formatProductDesc
+      ? window.formatProductDesc(product.description || "")
+      : "";
+    if (!window.formatProductDesc) descEl.textContent = product.description || "";
+  }
 
   // La galeria la decide el modo del producto: fotos de la 1a variacion con
   // fotos, o la galeria propia si no se vende por color. productGallery() ya

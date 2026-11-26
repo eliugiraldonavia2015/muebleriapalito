@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://muebleria-palito-cdn.b-cdn.net" crossorigin/>
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin/>
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin/>
-  <link rel="modulepreload" href="js/producto-renderer.js?v=20261027"/>
+  <link rel="modulepreload" href="js/producto-renderer.js?v=20261126"/>
   <link rel="modulepreload" href="js/firebase-config.js"/>
   <script>
     // Resolve the product image URL as early as possible and fire its download immediately.
@@ -122,12 +122,18 @@
     .breadcrumb-name{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--cream);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}
 
     /* PRODUCT DETAIL */
-    .product-detail{display:grid;grid-template-columns:58fr 42fr;min-height:calc(100vh - 120px);border-bottom:1px solid var(--rule)}
+    .product-detail{display:grid;grid-template-columns:58fr 42fr;align-items:stretch;border-bottom:1px solid var(--rule)}
+    /* La fila la marca SOLO la foto (100:118). contain:size hace que el panel
+       derecho no aporte altura: se estira al alto de la foto y si su contenido
+       es mas largo se desliza dentro de su propio espacio. Antes el panel
+       crecia mas que la foto y debajo quedaba un bloque vacio. */
+    .info-panel{contain:size;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.18) transparent}
+    .info-panel > *{flex-shrink:0}
 
     /* IMAGE PANEL — la altura la marca la foto, no la pantalla. Antes era
        calc(100vh - 120px), asi que la proporcion mostrada cambiaba con cada
        monitor y nunca coincidia con el recorte del admin. */
-    .img-panel{position:sticky;top:120px;border-right:1px solid var(--rule);display:flex;flex-direction:column}
+    .img-panel{position:relative;border-right:1px solid var(--rule);display:flex;flex-direction:column}
     /* 100:118 = la misma proporcion del mosaico del catalogo
        (.product-img-wrap padding-top:118% en catalogo.html) y la misma que
        fuerza CROP_RATIO.product en el admin. La foto se recorta UNA vez y se
@@ -185,6 +191,15 @@
     .prod-discount{font-size:11px;letter-spacing:.12em;background:var(--copper);color:var(--bg);padding:3px 8px;font-weight:500}
 
     .prod-desc{font-size:15px;line-height:1.6;color:var(--cream-dim);margin-bottom:20px;}
+    .prod-desc .pd-collection{font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--cream);margin:0 0 6px}
+    .prod-desc .pd-lead{font-size:16px;font-style:italic;color:var(--cream);margin:0 0 4px}
+    .prod-desc .pd-heading{font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin:22px 0 6px}
+    .prod-desc .pd-p{margin:0 0 8px}
+    .prod-desc .pd-best{margin:6px 0 0;padding:8px 12px;border-left:2px solid var(--copper);background:rgba(90,184,124,.07);font-size:14px}
+    .prod-desc .pd-best strong{color:var(--cream);font-weight:600}
+    .prod-desc .pd-list{margin:0 0 8px;padding-left:18px}
+    .prod-desc .pd-list li{margin-bottom:4px}
+    .prod-desc > :last-child{margin-bottom:0}
 
     /* COLORS */
     .prod-colors{margin-bottom:20px;}
@@ -436,6 +451,9 @@
     .prod-price-orig{color:#8a8a88}
     .prod-price-row{border-bottom-color:rgba(0,0,0,.08)}
     .prod-desc{color:#5a5a58}
+    .prod-desc .pd-collection,.prod-desc .pd-lead,.prod-desc .pd-best strong{color:#1a1a18}
+    .prod-desc .pd-heading{color:#3a8c5c}
+    .prod-desc .pd-best{background:#f4f8f5;border-left-color:#3a8c5c}
     .prod-colors-label,.prod-qty-label{color:#8a8a88}
     .qty-control{border-color:rgba(0,0,0,.1)}
     .qty-btn{color:#5a5a58}
@@ -595,7 +613,7 @@
       /* Sin height fijo: manda el 100:118 de .main-img-wrap, para que en movil
          se vea la misma proporcion que se recorto en el admin. */
       .img-panel{position:relative;top:0}
-      .info-panel{max-height:none;overflow-y:visible}
+      .info-panel{contain:none;max-height:none;overflow-y:visible}
       .order-grid{grid-template-columns:1fr}
       .related-grid{grid-template-columns:repeat(2,1fr)}
     }
@@ -613,6 +631,44 @@
       opacity:0;visibility:hidden;
     }
   </style>
+  <!-- Formatea la descripcion larga del producto: titulos en MAYUSCULAS,
+       "COLECCION X" + frase de entrada, parrafos y "Lo mejor:" destacados.
+       Lo usan el pintado desde cache (abajo) y js/producto-renderer.js. -->
+  <script>
+  window.formatProductDesc = function (raw) {
+    var esc = function (t) { return String(t).replace(/[&<>"']/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); };
+    var isHeading = function (l) {
+      var letters = l.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g, '');
+      return letters.length >= 3 && l.length <= 70 && letters === letters.toUpperCase() && !/[.:]$/.test(l);
+    };
+    var lines = String(raw || '').replace(/\r/g, '').split('\n');
+    var out = [], list = null, afterCollection = false;
+    var closeList = function () { if (list) { out.push('<ul class="pd-list">' + list.join('') + '</ul>'); list = null; } };
+    lines.forEach(function (line) {
+      var l = line.trim();
+      if (!l) { closeList(); afterCollection = false; return; }
+      var bullet = /^[-•·*]\s+/.test(l);
+      var body = l.replace(/^[-•·*]\s+/, '');
+      var best = body.match(/^lo (mejor|m[aá]s destacado)\s*:\s*(.*)$/i);
+      if (best) {
+        closeList(); afterCollection = false;
+        out.push('<p class="pd-best"><strong>' + esc(body.slice(0, body.indexOf(':'))) + ':</strong> ' + esc(best[2]) + '</p>');
+        return;
+      }
+      if (bullet) { (list = list || []).push('<li>' + esc(body) + '</li>'); return; }
+      closeList();
+      if (isHeading(l)) {
+        if (/^COLECCI[OÓ]N\b/i.test(l)) { out.push('<h2 class="pd-collection">' + esc(l) + '</h2>'); afterCollection = true; }
+        else { out.push('<h3 class="pd-heading">' + esc(l) + '</h3>'); afterCollection = false; }
+        return;
+      }
+      out.push('<p class="' + (afterCollection ? 'pd-lead' : 'pd-p') + '">' + esc(l) + '</p>');
+      afterCollection = false;
+    });
+    closeList();
+    return out.join('');
+  };
+  </script>
 </head>
 <body>
 
@@ -687,7 +743,7 @@
         <span class="prod-price-orig" id="prod-price-orig" style="display:none"></span>
         <span class="prod-discount" id="prod-discount" style="display:none"></span>
       </div>
-      <p class="prod-desc" id="prod-desc"></p>
+      <div class="prod-desc" id="prod-desc"></div>
       <div class="prod-colors" id="prod-colors-wrap">
         <div class="prod-colors-label">Color</div>
         <div class="color-swatches" id="prod-colors"></div>
@@ -1138,7 +1194,8 @@
     setText('prod-category', p.category || '');
     setText('prod-name', p.name);
     if (p.price != null) setText('prod-price', fmt(p.price));
-    setText('prod-desc', p.description || '');
+    var descEl = $id('prod-desc');
+    if (descEl) descEl.innerHTML = window.formatProductDesc(p.description || '');
 
     if (p.originalPrice) {
       var orig = $id('prod-price-orig');
@@ -1162,7 +1219,7 @@
   })();
   </script>
 
-  <script type="module" src="js/producto-renderer.js?v=20261027"></script>
+  <script type="module" src="js/producto-renderer.js?v=20261126"></script>
 
 <script src="js/cart-system.js"></script>
 </body>
