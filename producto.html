@@ -195,7 +195,7 @@
     .prod-desc .pd-lead{font-size:16px;font-style:italic;color:var(--cream);margin:0 0 4px}
     .prod-desc .pd-heading{font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin:22px 0 6px}
     .prod-desc .pd-p{margin:0 0 8px}
-    .prod-desc .pd-best{margin:6px 0 0;padding:8px 12px;border-left:2px solid var(--copper);background:rgba(90,184,124,.07);font-size:14px}
+    .prod-desc .pd-best{margin:2px 0 0}
     .prod-desc .pd-best strong{color:var(--cream);font-weight:600}
     .prod-desc .pd-list{margin:0 0 8px;padding-left:18px}
     .prod-desc .pd-list li{margin-bottom:4px}
@@ -453,7 +453,6 @@
     .prod-desc{color:#5a5a58}
     .prod-desc .pd-collection,.prod-desc .pd-lead,.prod-desc .pd-best strong{color:#1a1a18}
     .prod-desc .pd-heading{color:#3a8c5c}
-    .prod-desc .pd-best{background:#f4f8f5;border-left-color:#3a8c5c}
     .prod-colors-label,.prod-qty-label{color:#8a8a88}
     .qty-control{border-color:rgba(0,0,0,.1)}
     .qty-btn{color:#5a5a58}
@@ -517,19 +516,16 @@
     .order-summary .summary-val.big{font-family:var(--f-body);font-weight:700;font-size:22px}
 
     /* CREDITO BAR */
-    .credito-bar{background:linear-gradient(108deg,#071a0e 0%,#163d22 45%,#0d2818 100%);padding:clamp(48px,6vw,76px) clamp(24px,5vw,80px);border-top:2px solid rgba(90,184,124,.15);border-bottom:2px solid rgba(90,184,124,.15);position:relative;overflow:hidden}
-    .credito-bar::before{content:'';position:absolute;right:-80px;top:50%;transform:translateY(-50%);width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(58,140,92,.12) 0%,transparent 70%);pointer-events:none}
+    .credito-bar{background:#0c1f14;padding:clamp(48px,6vw,76px) clamp(24px,5vw,80px);position:relative}
     .credito-bar-inner{display:flex;align-items:center;justify-content:space-between;gap:48px;flex-wrap:wrap;position:relative;z-index:1}
-    .credito-bar-eyebrow{font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:#5ab87c;margin-bottom:12px;display:flex;align-items:center;gap:10px}
-    .credito-bar-eyebrow::before{content:'';width:22px;height:1px;background:#5ab87c;flex-shrink:0}
+    .credito-bar-eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#9dc4aa;margin-bottom:12px}
     .credito-bar-title{font-family:var(--f-display);font-size:clamp(32px,4.5vw,56px);font-weight:300;color:#e8f5ec;line-height:1.05;margin-bottom:12px}
     .credito-bar-title em{font-style:italic;color:#9dc4aa}
     .credito-bar-sub{font-size:16px;color:rgba(157,196,170,.85);line-height:1.65;max-width:520px}
     .credito-bar-actions{display:flex;flex-direction:column;align-items:flex-end;gap:18px;flex-shrink:0}
-    .credito-bar-btn{display:inline-flex;align-items:center;gap:12px;padding:17px 36px;background:#3a8c5c;color:#e8f5ec;font-family:var(--f-body);font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:500;white-space:nowrap;position:relative;overflow:hidden;transition:background .3s,gap .35s,transform .2s}
-    .credito-bar-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);transform:translateX(-110%);transition:transform .55s}
-    .credito-bar-btn:hover{background:#5ab87c;gap:22px;transform:translateY(-2px)}
-    .credito-bar-btn:hover::before{transform:translateX(110%)}
+    .credito-bar-btn{display:inline-flex;align-items:center;gap:12px;padding:17px 36px;background:#3a8c5c;color:#e8f5ec;font-family:var(--f-body);font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:500;white-space:nowrap;transition:background .2s,transform .12s}
+    .credito-bar-btn:hover{background:#2f7a4e}
+    .credito-bar-btn:active{transform:scale(.97)}
     .credito-bar-btn svg{width:14px;height:14px;stroke:currentColor;flex-shrink:0}
     .credito-bar-perks{display:flex;gap:22px;flex-wrap:wrap;justify-content:flex-end}
     .credito-bar-perk{font-size:13px;color:rgba(157,196,170,.7);display:flex;align-items:center;gap:6px}
@@ -864,13 +860,12 @@
     <div class="credito-bar-inner">
       <div>
         <div class="credito-bar-eyebrow">Financiamiento sin banco</div>
-        <div class="credito-bar-title">Llevalo hoy con tu<br><em>Credito Directo</em></div>
-        <p class="credito-bar-sub">Sin historial crediticio requerido. Aprobacion rapida y cuotas accesibles que se adaptan a tu presupuesto. Lleva tu mueble ahora y paga comodo.</p>
+        <div class="credito-bar-title">Llévalo hoy con tu<br><em>Crédito Directo</em></div>
+        <p class="credito-bar-sub">No necesitas historial crediticio. Aprobación rápida y cuotas que se ajustan a tu presupuesto: te llevas el mueble ahora y lo pagas a plazos.</p>
       </div>
       <div class="credito-bar-actions">
         <a href="contacto.html" class="credito-bar-btn" id="btn-credito-abrir">
-          Solicitar credito
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          Solicitar crédito
         </a>
       </div>
     </div>
@@ -879,7 +874,7 @@
   <!-- RELATED -->
   <section class="related-section" id="related-section" style="display:none">
     <div class="section-header">
-      <h2 class="section-title">Tambien te puede gustar</h2>
+      <h2 class="section-title">También te puede gustar</h2>
       <div class="section-line"></div>
     </div>
     <div class="related-grid" id="related-grid"></div>
