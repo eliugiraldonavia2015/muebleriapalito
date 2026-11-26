@@ -375,8 +375,19 @@ async function init() {
 
     categoriesPromise.then(categories => {
       renderHero(categories);
-      renderSidebar(categories);
     });
+
+    // La lista lateral solo muestra categorias que tienen productos: las
+    // vacias (Bar, Escritorios, etc.) llevaban a una pagina sin nada.
+    Promise.all([categoriesPromise, productsPromise]).then(([categories, products]) => {
+      renderSidebar(categories.filter(c => {
+        const id = (c.id || "").toLowerCase();
+        const slug = slugify(c.name);
+        return products.some(p =>
+          (p.categoryId || "").toLowerCase() === id || slugify(p.category) === slug
+        );
+      }));
+    }).catch(() => {});
 
     productsPromise.then(products => {
       renderProductsGrid(products);

@@ -158,18 +158,20 @@
   <nav>
     <a href="index.html" class="nav-logo"><img src="logo.png" alt="Mueblerias Palito"/></a>
     <ul class="nav-links">
-      <li><a href="catalogo.html?cat=Salas">Salas</a></li>
-      <li><a href="catalogo.html?cat=Comedores">Comedores</a></li>
-      <li><a href="catalogo.html?cat=Dormitorios">Dormitorios</a></li>
-      <li><a href="catalogo.html?cat=Outdoors">Outdoors</a></li>
-      <li><a href="catalogo.html?cat=Decor">Decor</a></li>
+      <li data-cat><a href="catalogo.html?cat=vitrinas">Vitrinas</a></li>
+      <li data-cat><a href="catalogo.html?cat=salas">Salas</a></li>
+      <li data-cat><a href="catalogo.html?cat=comedores">Comedores</a></li>
+      <li data-cat><a href="catalogo.html?cat=dormitorios">Dormitorios</a></li>
+      <li data-cat><a href="catalogo.html?cat=camas">Camas</a></li>
       <li><a href="contacto.html" class="nav-link-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
         Ubicaciones
       </a></li>
     </ul>
     <div class="nav-actions">
-      <a href="categorias.html" aria-label="Buscar"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg></a>
+      <a href="catalogo.html" aria-label="Catálogo">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </a>
       <a href="carrito.html" aria-label="Carrito"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></a>
     </div>
   </nav>
@@ -362,5 +364,6 @@
   </script>
 
 <script src="js/cart-system.js"></script>
+  <script type="module" src="js/site-nav.js?v=20261126"></script>
 </body>
 </html>

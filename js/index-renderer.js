@@ -314,6 +314,24 @@ function renderMarquee(categories) {
   track.innerHTML = html;
 }
 
+// Conteo REAL de productos por categoria. El campo productCount guardado en
+// cada categoria estaba desactualizado (todas decian 20) y mostraba como
+// llenas categorias que no tienen ningun producto.
+async function withRealCounts(categories) {
+  const snap = await getDocs(collection(db, "products"));
+  const prods = snap.docs.map(d => d.data());
+  return categories
+    .map(c => {
+      const id = (c.id || "").toLowerCase();
+      const slug = slugify(c.name);
+      const n = prods.filter(p =>
+        (p.categoryId || "").toLowerCase() === id || slugify(p.category) === slug
+      ).length;
+      return { ...c, productCount: n };
+    })
+    .filter(c => c.productCount > 0);
+}
+
 // Categories grid
 function renderCategories(categories) {
   const section = $("#categories");
@@ -338,7 +356,7 @@ function renderCategories(categories) {
       <div class="cat-info">
         <div>
           <div class="cat-name">${c.name}</div>
-          <div class="cat-count">${c.productCount || 0} productos</div>
+          <div class="cat-count">${c.productCount || 0} ${c.productCount === 1 ? "producto" : "productos"}</div>
         </div>
         <div class="cat-arrow">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round">
@@ -591,8 +609,9 @@ async function init() {
     // renderNav(categories);
     preloadHeroImage(settings?.heroSection?.bgImage);
     renderHero(settings);
-    renderMarquee(categories);
-    renderCategories(categories);
+    const withProducts = await withRealCounts(categories).catch(() => categories);
+    renderMarquee(withProducts);
+    renderCategories(withProducts);
     renderFeaturedProducts(products);
     renderBanner(settings);
     renderLifestyle(settings);

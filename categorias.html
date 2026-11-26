@@ -183,19 +183,19 @@
   <nav>
     <a href="index.html" class="nav-logo"><img src="logo.png" alt="Mueblerias Palito"/></a>
     <ul class="nav-links">
-      <li><a href="catalogo.html?cat=Salas">Salas</a></li>
-      <li><a href="catalogo.html?cat=Comedores">Comedores</a></li>
-      <li><a href="catalogo.html?cat=Dormitorios">Dormitorios</a></li>
-      <li><a href="catalogo.html?cat=Entretenimiento">Entretenimiento</a></li>
-      <li><a href="catalogo.html?cat=Bar">Bar</a></li>
+      <li data-cat><a href="catalogo.html?cat=vitrinas">Vitrinas</a></li>
+      <li data-cat><a href="catalogo.html?cat=salas">Salas</a></li>
+      <li data-cat><a href="catalogo.html?cat=comedores">Comedores</a></li>
+      <li data-cat><a href="catalogo.html?cat=dormitorios">Dormitorios</a></li>
+      <li data-cat><a href="catalogo.html?cat=camas">Camas</a></li>
       <li><a href="contacto.html" class="nav-link-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
         Ubicaciones
       </a></li>
     </ul>
     <div class="nav-actions">
-      <a href="categorias.html" aria-label="Buscar">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+      <a href="catalogo.html" aria-label="Catálogo">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
       </a>
       <a href="carrito.html" style="display:flex;align-items:flex-start" aria-label="Carrito">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
@@ -211,19 +211,15 @@
       <div class="cats-hero-left">
         <div class="cats-eyebrow">Muebleria Palito Outlet</div>
         <h1 class="cats-hero-title">Todas las<br><em>Categorías</em></h1>
-        <p class="cats-hero-sub">Encuentra exactamente lo que buscas. Desde salas hasta bares, cada pieza diseñada para durar.</p>
+        <p class="cats-hero-sub">Encuentra exactamente lo que buscas. Salas, comedores, dormitorios y camas, cada pieza hecha para durar.</p>
         <div class="cats-stats">
           <div class="cats-stat">
-            <span class="cats-stat-num">16</span>
+            <span class="cats-stat-num">8</span>
             <span class="cats-stat-label">Categorías</span>
           </div>
           <div class="cats-stat">
-            <span class="cats-stat-num">425+</span>
+            <span class="cats-stat-num">51</span>
             <span class="cats-stat-label">Productos</span>
-          </div>
-          <div class="cats-stat">
-            <span class="cats-stat-num">3</span>
-            <span class="cats-stat-label">Países</span>
           </div>
         </div>
       </div>
@@ -240,117 +236,8 @@
   <!-- ── TODAS LAS CATEGORÍAS ── -->
   <section id="cats-all">
     <div class="cats-section-label">Todas las categorías</div>
-    <div class="regular-grid" id="regularGrid">
-
-      <a href="catalogo.html?cat=Comodas" class="reg-card">
-        <div class="reg-card-img"><img src="https://muebleria-palito-cdn.b-cdn.net/products/set-dormitorio-milano.jpg" alt="Cómodas"/></div>
-        <div class="reg-card-overlay"></div>
-        <div class="reg-card-info">
-          <div><div class="reg-card-name">Cómodas</div><div class="reg-card-count">18 productos</div></div>
-          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-        </div>
-      </a>
-
-      <a href="catalogo.html?cat=Coquetas" class="reg-card">
-        <div class="reg-card-img"><img src="https://muebleria-palito-cdn.b-cdn.net/products/cabecera-terciopelo-vienna.jpg" alt="Coquetas"/></div>
-        <div class="reg-card-overlay"></div>
-        <div class="reg-card-info">
-          <div><div class="reg-card-name">Coquetas /<br>Peinadoras</div><div class="reg-card-count">12 productos</div></div>
-          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-        </div>
-      </a>
-
-      <a href="catalogo.html?cat=CamaCuna" class="reg-card">
-        <div class="reg-card-img"><img src="https://muebleria-palito-cdn.b-cdn.net/products/cama-platform-oslo.jpg" alt="Cama Cuna"/></div>
-        <div class="reg-card-overlay"></div>
-        <div class="reg-card-info">
-          <div><div class="reg-card-name">Cama Cuna</div><div class="reg-card-count">8 productos</div></div>
-          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-        </div>
-      </a>
-
-      <a href="catalogo.html?cat=Roperos" class="reg-card">
-        <div class="reg-card-img"><img src="https://muebleria-palito-cdn.b-cdn.net/products/armario-3-puertas.jpg" alt="Roperos"/></div>
-        <div class="reg-card-overlay"></div>
-        <div class="reg-card-info">
-          <div><div class="reg-card-name">Roperos</div><div class="reg-card-count">24 productos</div></div>
-          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-        </div>
-      </a>
-
-      <a href="catalogo.html?cat=Entretenimiento" class="reg-card">
-        <div class="reg-card-img"><img src="https://muebleria-palito-cdn.b-cdn.net/categorias/entretenimiento.jpg" alt="Centro de Entretenimiento"/></div>
-        <div class="reg-card-overlay"></div>
-        <div class="reg-card-info">
-          <div><div class="reg-card-name">Centro de<br>Entretenimiento</div><div class="reg-card-count">28 productos</div></div>
-          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-        </div>
-      </a>
-
-      <a href="catalogo.html?cat=BasesTv" class="reg-card">
-        <div class="reg-card-img"><img src="https://muebleria-palito-cdn.b-cdn.net/categorias/entretenimiento.jpg" alt="Bases de TV"/></div>
-        <div class="reg-card-overlay"></div>
-        <div class="reg-card-info">
-          <div><div class="reg-card-name">Bases de TV</div><div class="reg-card-count">15 productos</div></div>
-          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-        </div>
-      </a>
-
-      <a href="catalogo.html?cat=Consolas" class="reg-card">
-        <div class="reg-card-img"><img src="https://muebleria-palito-cdn.b-cdn.net/products/colchon-memory-plus.jpg" alt="Consolas"/></div>
-        <div class="reg-card-overlay"></div>
-        <div class="reg-card-info">
-          <div><div class="reg-card-name">Consolas /<br>Recibidor</div><div class="reg-card-count">11 productos</div></div>
-          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-        </div>
-      </a>
-
-      <a href="catalogo.html?cat=Bar" class="reg-card">
-        <div class="reg-card-img"><img src="https://muebleria-palito-cdn.b-cdn.net/categorias/bar.jpg" alt="Bar"/></div>
-        <div class="reg-card-overlay"></div>
-        <div class="reg-card-info">
-          <div><div class="reg-card-name">Bar</div><div class="reg-card-count">19 productos</div></div>
-          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-        </div>
-      </a>
-
-      <a href="catalogo.html?cat=Bufetera" class="reg-card">
-        <div class="reg-card-img"><img src="https://muebleria-palito-cdn.b-cdn.net/products/comoda-doble-lund.jpg" alt="Bufetera"/></div>
-        <div class="reg-card-overlay"></div>
-        <div class="reg-card-info">
-          <div><div class="reg-card-name">Bufetera</div><div class="reg-card-count">9 productos</div></div>
-          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-        </div>
-      </a>
-
-      <a href="catalogo.html?cat=Aparador" class="reg-card">
-        <div class="reg-card-img"><img src="https://muebleria-palito-cdn.b-cdn.net/products/mesa-noche-flux.jpg" alt="Aparador"/></div>
-        <div class="reg-card-overlay"></div>
-        <div class="reg-card-info">
-          <div><div class="reg-card-name">Aparador</div><div class="reg-card-count">14 productos</div></div>
-          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-        </div>
-      </a>
-
-      <a href="catalogo.html?cat=Escritorios" class="reg-card">
-        <div class="reg-card-img"><img src="https://muebleria-palito-cdn.b-cdn.net/categorias/entretenimiento.jpg" alt="Escritorios"/></div>
-        <div class="reg-card-overlay"></div>
-        <div class="reg-card-info">
-          <div><div class="reg-card-name">Escritorios</div><div class="reg-card-count">22 productos</div></div>
-          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-        </div>
-      </a>
-
-      <a href="catalogo.html?cat=SofaCama" class="reg-card">
-        <div class="reg-card-img"><img src="https://muebleria-palito-cdn.b-cdn.net/products/colchon-memory-plus.jpg" alt="Sofá Cama"/></div>
-        <div class="reg-card-overlay"></div>
-        <div class="reg-card-info">
-          <div><div class="reg-card-name">Sofá Cama</div><div class="reg-card-count">16 productos</div></div>
-          <div class="reg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-        </div>
-      </a>
-
-    </div>
+    <div class="regular-grid" id="regularGrid"></div>
+  
   </section>
 
   <footer>
@@ -412,7 +299,7 @@
       start: 'top 90%'
     });
   </script>
-  <script type="module" src="js/categorias-renderer.js?v=20261027"></script>
+  <script type="module" src="js/categorias-renderer.js?v=20261126"></script>
 
 <script src="js/cart-system.js"></script>
 </body>

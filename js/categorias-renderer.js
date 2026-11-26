@@ -27,6 +27,24 @@ async function getSettings() {
   return snap.exists() ? snap.data() : {};
 }
 
+// Conteo REAL de productos por categoria. El campo productCount guardado en
+// cada categoria estaba desactualizado (todas decian 20) y mostraba como
+// llenas categorias que no tienen ningun producto.
+async function withRealCounts(categories) {
+  const snap = await getDocs(collection(db, "products"));
+  const prods = snap.docs.map(d => d.data());
+  return categories
+    .map(c => {
+      const id = (c.id || "").toLowerCase();
+      const slug = slugify(c.name);
+      const n = prods.filter(p =>
+        (p.categoryId || "").toLowerCase() === id || slugify(p.category) === slug
+      ).length;
+      return { ...c, productCount: n };
+    })
+    .filter(c => c.productCount > 0);
+}
+
 // ─── HELPERS ───
 function slugify(t) {
   return (t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -80,7 +98,7 @@ function renderHero(categories) {
   // Update stats
   const stats = document.querySelectorAll(".cats-stat");
   if (stats[0]) stats[0].querySelector(".cats-stat-num").textContent = total;
-  if (stats[1]) stats[1].querySelector(".cats-stat-num").textContent = totalProducts + "+";
+  if (stats[1]) stats[1].querySelector(".cats-stat-num").textContent = totalProducts;
 }
 
 // ─── RENDER ALL CATEGORIES ───
@@ -106,7 +124,7 @@ function renderRegularCategories(categories) {
       <div class="reg-card-info">
         <div>
           <div class="reg-card-name">${c.name}</div>
-          <div class="reg-card-count">${c.productCount || 0} productos</div>
+          <div class="reg-card-count">${c.productCount} ${c.productCount === 1 ? "producto" : "productos"}</div>
         </div>
         <div class="reg-card-arrow">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round">
@@ -121,10 +139,11 @@ function renderRegularCategories(categories) {
 // ─── MAIN INIT ───
 async function init() {
   try {
-    const [categories, settings] = await Promise.all([
+    const [allCategories, settings] = await Promise.all([
       getCategories(),
       getSettings()
     ]);
+    const categories = await withRealCounts(allCategories);
 
     renderNav(categories);
     addUbicacionesBtnCats();
